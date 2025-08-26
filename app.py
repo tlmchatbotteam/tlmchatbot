@@ -215,7 +215,7 @@ def load_vncorenlp_model():
 
 
 vncorenlp_model = load_vncorenlp_model()
-a
+
 # Cập nhật quy trình mã hóa dữ liệu
 if model and tfidf_vectorizer and 'question_embeddings' not in st.session_state:
     st.session_state.question_texts = []
