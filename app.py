@@ -108,6 +108,30 @@ def split_subquestions(text):
 
 def get_answer(question):
     norm_question = normalize_text(question)
+
+    # Check for specific matches in admissions_data.json first
+    for item in admissions_data.get('questions', []):
+        questions = item.get('question', [])
+        if isinstance(questions, str):
+            questions = [questions]
+        for q in questions:
+            if normalize_text(q) in norm_question:
+                ans = item.get('answer', "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.")
+                media_type = "text"
+                media_content = None
+                if 'images' in item and item['images']:
+                    media_type = "image"
+                    media_content = (item['images'], item.get('captions'))
+                if 'video_url' in item and item['video_url']:
+                    media_type = "video"
+                    media_content = item['video_url']
+                return [{"text": ans, "media_type": media_type, "media_content": media_content}]
+
+    # Fallback for "hiệu trưởng" keyword
+    if "hiệu trưởng" in norm_question:
+        hardcoded_response = "Bạn muốn biết về hiệu trưởng hiện tại hay hiệu trưởng qua từng thời kỳ?"
+        return [{"text": hardcoded_response, "media_type": "text", "media_content": None}]
+
     SCHOOL_NAME_VARIANTS = [
         "trường thpt", "thpt", "trường trung học phổ thông", "trung học phổ thông",
         "ten lơ men", "ten lơ man", "ten-lơ-man", "ten-lơ-men", "trường cấp 3", "cấp 3", "cấp ba", "trường cấp ba",
@@ -123,10 +147,12 @@ def get_answer(question):
     if re.fullmatch(rf"(\s*{school_pattern}\s*)+", norm_question, flags=re.IGNORECASE):
         ans, media_type, media_content = find_answer_and_media(norm_question)
         return [{"text": ans, "media_type": media_type, "media_content": media_content}]
+
     core_question = re.sub(school_pattern, "", norm_question, flags=re.IGNORECASE).strip()
     if not core_question or core_question in ["", "về", "của"]:
         ans, media_type, media_content = find_answer_and_media(norm_question)
         return [{"text": ans, "media_type": media_type, "media_content": media_content}]
+
     # TÁCH Ý NHỎ
     sub_questions = split_subquestions(core_question)
     if len(sub_questions) <= 1:
@@ -257,7 +283,7 @@ def find_answer_and_media(question):
 # Cleanup unused imports
 # Removed 'SentenceTransformer' and 'numpy' imports
 
-# T���i và cache TF-IDF vectorizer
+# T�������i và cache TF-IDF vectorizer
 try:
     @st.cache_resource
     def load_tfidf_vectorizer():
@@ -287,7 +313,7 @@ for item in admissions_data.get('questions', []):
     for q in questions:
         norm_q = normalize_text(q)
         unaccented_q = remove_vietnamese_accents(norm_q)
-        # Chỉ thêm dạng có dấu và không dấu
+        # Chỉ thêm dạng có dấu và không d��u
         KEYWORD_ANSWER_MAP[norm_q] = item
         KEYWORD_ANSWER_MAP[unaccented_q] = item
 
@@ -310,22 +336,30 @@ for item in admissions_data.get('questions', []):
 def find_answer_and_media(question):
     if not xlm_roberta_model or st.session_state.question_embeddings is None:
         return "Chatbot đang gặp sự cố, vui lòng thử lại sau.", "text", None
+    # Ensure the input question is normalized and unaccented for matching
     norm_question = normalize_and_unaccent(question)
-    # Tra cứu từ khóa trực tiếp (ưu tiên khớp chính xác)
-    direct_item = KEYWORD_ANSWER_MAP.get(norm_question)
-    if direct_item:
-        answer = direct_item.get('answer', "Không có câu trả lời.")
-        images = direct_item.get('images')
-        captions = direct_item.get('captions')
-        video_url = direct_item.get('video_url')
-        if images and isinstance(images, str):
-            images = [images]
-        if video_url:
-            return answer, "video", video_url
-        if images:
-            return answer, "image", (images, captions)
-        return answer, "text", None
 
+    # Check for direct matches in the admissions_data.json file
+    for item in admissions_data.get('questions', []):
+        questions = item.get('question', [])
+        if isinstance(questions, str):
+            questions = [questions]
+        for q in questions:
+            if normalize_and_unaccent(q) == norm_question:
+                answer = item.get('answer', "Không có câu trả lời.")
+                images = item.get('images')
+                captions = item.get('captions')
+                video_url = item.get('video_url')
+
+                if images and isinstance(images, str):
+                    images = [images]
+                if video_url:
+                    return answer, "video", video_url
+                if images:
+                    return answer, "image", (images, captions)
+                return answer, "text", None
+
+    # If no direct match is found, proceed with existing logic
     tokens = norm_question.split()
     num_tokens = len(tokens)
 
@@ -369,7 +403,7 @@ def find_answer_and_media(question):
             return answer, "image", (images, captions)
         return answer, "text", None
 
-    # 3. Nếu truy vấn có 2 từ, thử khớp cụm từ 2 từ
+    # 3. Nếu truy v���n có 2 từ, thử khớp cụm từ 2 từ
     if num_tokens == 2:
         phrase = ' '.join(tokens)
         item = KEYWORD_TO_ITEM_MAP.get(phrase)
@@ -522,6 +556,18 @@ def main():
     if 'messages' not in st.session_state:
         st.session_state.messages = []
 
+    if 'question_embeddings' not in st.session_state or st.session_state.question_embeddings is None:
+        st.session_state.question_embeddings = []
+
+    if 'question_texts' not in st.session_state or not st.session_state.question_texts:
+        st.session_state.question_texts = []
+
+    if 'question_data_map' not in st.session_state or not st.session_state.question_data_map:
+        st.session_state.question_data_map = {}
+
+    if xlm_roberta_model is None:
+        st.error("Mô hình XLM-RoBERTa chưa được tải. Vui lòng kiểm tra lại cấu hình.")
+
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             if "text" in message:
@@ -562,21 +608,22 @@ def main():
                     if images:
                         valid_images_paths = []
                         for img_path in images:
-                            if isinstance(img_path, str) and img_path.strip() != "":
+                            if isinstance(img_path, str) and img_path.strip():
                                 abs_img_path = os.path.join(os.path.dirname(__file__), img_path)
-                                if os.path.exists(abs_img_path):
+                                if os.path.isfile(abs_img_path):  # Ensure it's a valid file
                                     valid_images_paths.append(abs_img_path)
                                 else:
-                                    st.warning(f"Không tìm thấy hình ảnh: {img_path}")
+                                    st.warning(f"Image not found or invalid: {img_path}")
+
                         if valid_images_paths:
                             num_cols = min(len(valid_images_paths), 3)
                             cols = st.columns(num_cols)
                             if not isinstance(captions, list):
-                                captions = [captions] if captions else [f"Ảnh {i + 1}" for i in range(len(valid_images_paths))]
+                                captions = [captions] if captions else [f"Image {i + 1}" for i in range(len(valid_images_paths))]
                             captions = captions[:len(valid_images_paths)]
                             for i, abs_img_path in enumerate(valid_images_paths):
                                 with cols[i % num_cols]:
-                                    st.image(abs_img_path, caption=captions[i] if i < len(captions) else f"Ảnh {i + 1}")
+                                    st.image(abs_img_path, caption=captions[i] if i < len(captions) else f"Image {i + 1}")
             st.session_state.messages.append({"role": "assistant", "text": '\n'.join([r["text"] for r in responses])})
 
     col1, col2 = st.columns(2)
@@ -595,6 +642,17 @@ def main():
     with col2:
         if st.button("Xóa lịch sử trò chuyện", key="clear_history_button"):
             st.session_state.messages = []
+            st.rerun()
+
+    # Add a new button for "Hiệu trưởng"
+    col3, col4 = st.columns(2)
+    with col3:
+        if st.button("Hiệu trưởng", key="principal_question_button"):
+            hardcoded_response = "Bạn muốn biết về hiệu trưởng hiện tại hay hiệu trưởng qua từng thời kỳ?"
+            st.session_state.messages.append({"role": "user", "text": "Hiệu trưởng"})
+            with st.chat_message("assistant"):
+                st.markdown(hardcoded_response)
+            st.session_state.messages.append({"role": "assistant", "text": hardcoded_response})
             st.rerun()
 
 

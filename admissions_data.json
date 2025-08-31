@@ -86,7 +86,7 @@
       "captions": null
     },
     {
-      "question": ["các thầy cô hiệu trưởng qua từng thời kỳ", "hình ảnh các hiệu trưởng qua từng thời kỳ", "thầy cô"],
+      "question": ["các thầy cô hiệu trưởng qua từng thời kỳ", "hình ảnh các hiệu trưởng qua từng thời kỳ"],
       "answer": "đây là các thầy cô hiệu trưởng qua từng thời kỳ từ năm 1975 đến nay",
       "images": ["images/thayhuy.jpg", "images/comai.jpg", "images/thayto.jpg", "images/coloan.jpg", "images/cochau.jpg", "images/cosa.jpg", "images/thayson.jpg", "images/thaythanh.jpg", "images/thayphuoc.jpg", "images/hinhthaykhuong2.jpg"],
       "captions": ["1.\tThầy Phạm Đức Huy – Nguyên Hiệu trưởng (1975 – 1976)\nHuân chương Kháng chiến chống Mỹ Hạng Ba\n", "2.\tCô Đặng Thị Tuyết Mai - Nguyên Hiệu trưởng  (1976 – 1977)", "3.\tThầy Lê Ngọc Tố - Nguyên Hiệu trưởng (1977 – 1979)\nHuân chương Kháng chiến chống Mỹ Hạng Ba\n", "4.\tCô Lê Thị Loan - Nguyên Hiệu trưởng (1979 – 1990)", "5.\tCô Phan Thị Châu - Nguyên Hiệu trưởng (1990 – 1998)\nHuân chương Kháng chiến chống Mỹ Hạng Ba\n", "6.\tCô Cao Ngọc Sa - Nguyên Hiệu trưởng (1998 – 2008)", "7.\tThầy Nguyễn Ngọc Sơn - Nguyên Hiệu trưởng (2008 – 2012)", "8.\tThầy Nguyễn Văn Thành - Nguyên Hiệu trưởng (2012 – 2021)", "9.\tThầy Lê Văn Phước - Nguyên Hiệu trưởng (2022 – 2023)", "Thầy Nguyễn Hùng Khương - Hiệu trưởng từ 2023 "]
@@ -537,19 +537,19 @@
       "captions": ["Đây là tập thể văn phòng đoàn"]
     },
     {
-      "question": ["Thầy Hùng Khương","Thầy Nguyễn Hùng Khương","Thầy Hiệu Trưởng Nguyễn Hùng Khương","Hiệu trưởng nhà trường","Nguyễn Hùng Khương"],
+      "question": ["Thầy Hùng Khương","Thầy Nguyễn Hùng Khương","Thầy Hiệu Trưởng Nguyễn Hùng Khương","Hiệu trưởng hiện tại","Nguyễn Hùng Khương","Khương","Thầy Khương"],
       "answer": "Thầy Nguyễn Hùng Khương - Người thắp sáng tầm nhìn chiến lược\nVới vai trò là Bí thư chi bộ và Hiệu trưởng nhà trường, thầy Nguyễn Hùng Khương đã góp phần quan trọng trong việc định hình phong cách giáo dục hiện đại, gắn kết truyền thống với sự đổi mới. Thầy luôn là một người lãnh đạo vui vẻ, thân thiện nhưng quyết đoán, tận tâm và sáng tạo trong việc xây dựng những chính sách giáo dục toàn diện. Nhờ có sự dẫn dắt của thầy, trường THPT Ten Lơ Man không chỉ là nơi đào tạo những thế hệ học sinh tài năng, mà còn là một ngôi nhà chung đầy yêu thương và khích lệ sáng tạo.\n",
       "images": ["images/tht.jpg","images/tht1.jpg"],
       "captions": ["Thầy Nguyễn Hùng Khương – Hiệu trưởng phát biểu trong Lễ Khai giảng năm học 2024 - 2025","Thầy Nguyễn Hùng Khương – Hiệu trưởng"]
     },
     {
-      "question": ["Thầy Bình","Thầy Trần Hải Bình","Trần Hải Bình","Thầy hiệu phó Trần Hải Bình"],
+      "question": ["Trần Hải Bình","Hiệu phó","Hải Bình","Bình"],
       "answer": "Thầy Trần Hải Bình - Trái tim của chân chính nghiêm minh và kỷ luật\nVới vai trò Phó Hiệu trưởng phụ trách chuyên môn và kỷ luật học sinh, thầy đã mang đến những đóng góp thiết thực trong việc duy trì nề nếp kỷ cương và kỷ luật nghiêm minh của nhà trường. Thầy luôn đặt lợi ích của học sinh lên hàng đầu, đề cao tinh thần giáo dục nhân cách song hành cùng việc rèn luyện tri thức. Nhờ vào những nguyên tắc quản lý kỷ luật hiệu quả của thầy, nhà trường luôn đảm bảo môi trường học tập an toàn, kỷ cương và lành mạnh.\n",
       "images": "images/thp.jpg",
       "captions": ["Thầy Trần Hải Bình – Phó Hiệu trưởng"]
     },
     {
-      "question": ["Cô Trang","Cô Phan Thị Phương Trang","Phan Thị Phương Trang","Cô hiệu phó Phan Thị Phương Trang"],
+      "question": ["Trang","Phan Thị Phương Trang","Phương Trang","Hiệu phó"],
       "answer": "Cô Phan Thị Phương Trang - Hiện thân của sự dẫn dắt và tận tâm\nGiữ vai trò Phó Bí thư chi bộ và Phó Hiệu trưởng nhà trường, cô Phan Thị Phương Trang là một nhân tố lãnh đạo tận tâm và luôn sát cánh cùng thầy trò trong nhiều hoạt động, chăm lo, bảo quản các trang thiết bị, cơ sở vật chất phục vụ các hoạt động dạy học. Cô chú trọng việc kết nối giữa các thành viên trong nhà trường, góp phần tạo nên sự gắn kết chặt chẽ giữa giáo viên và học sinh. Bên cạnh đó cô còn phụ công tác tổ chức bán trú, quan tâm các hoạt động ngoại khóa, các phong trào thi đua đã mang lại những kỷ niệm đẹp và ấn tượng cho nhiều thế hệ học sinh. \n",
       "images": "images/chp.jpg",
       "captions": ["Cô Phan Thị Phương Trang – Phó Hiệu trưởng"]
@@ -562,9 +562,9 @@
       "captions": null
     },
     {
-      "question": ["đội ngũ giáo viên","đội ngũ giáo viên nhà trường","đội ngũ giáo viên của trường"],
+      "question": ["đội ngũ giáo viên","đội ngũ giáo viên nhà trường","đội ngũ giáo viên của trường","thầy cô"],
       "answer": "Đây là hình ảnh đội ngũ giáo viên của trường ",
-      "images": "images/dngv.jpg",
+      "images": ["images/dngv.jpg"],
       "captions": null
     }
   ]
