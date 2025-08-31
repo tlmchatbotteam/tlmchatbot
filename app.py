@@ -4,15 +4,13 @@ import json
 import streamlit as st
 import os
 import re
-from sentence_transformers import SentenceTransformer, util
 import torch
-from pyvi import ViTokenizer
 import unicodedata
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 import py_vncorenlp
-import difflib
+from transformers import AutoTokenizer, AutoModel
+from difflib import SequenceMatcher
+from sklearn.metrics.pairwise import cosine_similarity
 
 # --- CẤU HÌNH VÀ TẢI DỮ LIỆU ---
 try:
@@ -37,7 +35,7 @@ def remove_vietnamese_stopwords(tokenized_text):
         'là', 'và', 'có', 'của', 'trong', 'được', 'cho', 'với', 'tại', 'từ',
         'bởi', 'để', 'như', 'thì', 'mà', 'này', 'kia', 'đó', 'nào', 'cái',
         'những', 'một', 'các', 'đã', 'lại', 'còn', 'nếu', 'vì', 'do', 'bị',
-        'về'
+        'v���'
     ]
     tokens = tokenized_text.split() if isinstance(tokenized_text, str) else tokenized_text
     return [token for token in tokens if token not in stopwords]
@@ -51,7 +49,7 @@ def normalize_text(text):
 
 def add_li_ly_variants(keyword):
     # Thêm cả hai biến thể 'li' và 'ly' cho chính tả tiếng Việt
-    variants = set([keyword])
+    variants = {keyword}
     if ' li ' in f' {keyword} ':
         variants.add(keyword.replace(' li ', ' ly '))
     if ' ly ' in f' {keyword} ':
@@ -116,7 +114,7 @@ def get_answer(question):
         "ernst thälmann", "ernst thalmann", "trường công lập", "công lập", "tlm", "t.l.m", "t l m",
         "trường ten lơ man", "trường ten lơ men", "truong thpt", "truong trung hoc pho thong", "truong cap 3",
         "truong cap ba", "truong cong lap", "truong ten lo man", "truong ten lo men", "trường ernst",
-        "trường ernst thälmann", "trường ernst thalmann", "ernst", "trường tlm", "trường t.l.m", "trường t l m",
+        "trường ernst thälmann", "trường ernst thalmann", "ernst", "trư���ng tlm", "trường t.l.m", "trường t l m",
         "school", "high school", "secondary school", "tenlo man", "tenlo men", "tenloman", "tenlomen",
         "trường tenlo man", "trường tenlo men", "trường tenloman", "trường tenlomen"
     ]
@@ -185,18 +183,81 @@ except Exception as e:
 
 QUESTION_KEYWORDS = get_all_question_keywords()
 
+# Tải mô hình XLM-RoBERTa
+@st.cache_resource
+def load_xlm_roberta_model():
+    tokenizer = AutoTokenizer.from_pretrained("xlm-roberta-base")
+    model = AutoModel.from_pretrained("xlm-roberta-base")
+    return tokenizer, model
+
 try:
-    @st.cache_resource
-    def load_sentence_transformer_model():
-        return SentenceTransformer('bkai-foundation-models/vietnamese-bi-encoder', device=device)
-
-
-    model = load_sentence_transformer_model()
+    tokenizer, xlm_roberta_model = load_xlm_roberta_model()
 except Exception as e:
-    st.error(f"Lỗi khi tải mô hình SentenceTransformer: {e}")
-    model = None
+    st.error(f"Lỗi khi tải mô hình XLM-RoBERTa: {e}")
+    tokenizer, xlm_roberta_model = None, None
 
-# Tải và cache TF-IDF vectorizer
+# Hàm mã hóa câu hỏi bằng XLM-RoBERTa
+def encode_question_xlm_roberta(question):
+    inputs = tokenizer(question, return_tensors="pt", padding=True, truncation=True)
+    with torch.no_grad():
+        outputs = xlm_roberta_model(**inputs)
+    return outputs.last_hidden_state.mean(dim=1)  # Sử dụng trung bình các vector ẩn
+
+def find_best_match_with_embeddings(question_embedding, question_embeddings, threshold=0.6):
+    """
+    Tìm câu hỏi phù hợp nhất dựa trên cosine similarity giữa embeddings.
+
+    Args:
+        question_embedding (torch.Tensor): Embedding của câu hỏi đầu vào.
+        question_embeddings (torch.Tensor): Embeddings của tất cả câu hỏi trong dữ liệu.
+        threshold (float): Ngưỡng để xác định câu hỏi phù hợp.
+
+    Returns:
+        int: Chỉ số của câu hỏi phù hợp nhất hoặc None nếu không có câu hỏi nào vượt ngưỡng.
+    """
+    similarities = cosine_similarity(question_embedding.numpy(), question_embeddings.numpy())
+    best_index = similarities.argmax()
+    best_score = similarities[0, best_index]
+
+    if best_score >= threshold:
+        return best_index
+    return None
+
+def find_answer_and_media(question):
+    if not xlm_roberta_model or st.session_state.question_embeddings is None:
+        return "Chatbot đang gặp sự cố, vui lòng thử lại sau.", "text", None
+
+    # Mã hóa câu hỏi đầu vào
+    question_embedding = encode_question_xlm_roberta(question)
+
+    # Tìm câu hỏi phù hợp nhất dựa trên embeddings
+    best_index = find_best_match_with_embeddings(
+        question_embedding, st.session_state.question_embeddings
+    )
+
+    if best_index is not None:
+        matched_question = st.session_state.question_texts[best_index]
+        matched_item = st.session_state.question_data_map[matched_question]
+        answer = matched_item.get('answer', "Không có câu trả lời.")
+        images = matched_item.get('images')
+        captions = matched_item.get('captions')
+        video_url = matched_item.get('video_url')
+
+        if images and isinstance(images, str):
+            images = [images]
+        if video_url:
+            return answer, "video", video_url
+        if images:
+            return answer, "image", (images, captions)
+        return answer, "text", None
+
+    return "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "text", None
+
+
+# Cleanup unused imports
+# Removed 'SentenceTransformer' and 'numpy' imports
+
+# T���i và cache TF-IDF vectorizer
 try:
     @st.cache_resource
     def load_tfidf_vectorizer():
@@ -216,55 +277,6 @@ def load_vncorenlp_model():
 
 vncorenlp_model = load_vncorenlp_model()
 
-# Cập nhật quy trình mã hóa dữ liệu
-if model and tfidf_vectorizer and 'question_embeddings' not in st.session_state:
-    st.session_state.question_texts = []
-    unaccented_questions_for_encoding = []
-    st.session_state.question_data_map = {}
-
-    for item in admissions_data.get('questions', []):
-        questions = item.get('question', [])
-        if not isinstance(questions, list):
-            questions = [questions]
-        for q in questions:
-            if not isinstance(q, str) or not q.strip():
-                continue
-            norm_q = normalize_text(q)
-            split_q = split_sticky_words(norm_q)
-            tokenized_q = ViTokenizer.tokenize(split_q)
-            unaccented_q = remove_vietnamese_accents(tokenized_q)
-            unaccented_questions_for_encoding.append(unaccented_q)
-            st.session_state.question_texts.append(tokenized_q)
-            st.session_state.question_data_map[tokenized_q] = item
-
-    if unaccented_questions_for_encoding:
-        st.session_state.question_embeddings = model.encode(unaccented_questions_for_encoding, convert_to_tensor=True)
-        st.session_state.tfidf_matrix = tfidf_vectorizer.fit_transform(unaccented_questions_for_encoding)
-    else:
-        st.session_state.question_embeddings = None
-        st.session_state.tfidf_matrix = None
-
-
-# --- HÀM TÌM KIẾM CÂU TRẢ LỜI (HYBRID SEARCH) ---
-def fuzzy_match_question(user_question, admissions_data, min_ratio=0.7):
-    user_question_norm = normalize_and_unaccent(user_question)
-    best_ratio = 0
-    best_item = None
-    for item in admissions_data.get('questions', []):
-        questions = item.get('question', [])
-        if isinstance(questions, str):
-            questions = [questions]
-        for q in questions:
-            q_norm = normalize_and_unaccent(q)
-            ratio = difflib.SequenceMatcher(None, user_question_norm, q_norm).ratio()
-            if user_question_norm in q_norm or q_norm in user_question_norm:
-                ratio += 0.2
-            if ratio > best_ratio:
-                best_ratio = ratio
-                best_item = item
-    if best_item and best_ratio >= min_ratio:
-        return best_item.get('answer'), best_item.get('images'), best_item.get('captions')
-    return None
 
 # Tạo từ điển tra cứu cho so khớp từ khóa trực tiếp
 KEYWORD_ANSWER_MAP = {}
@@ -296,7 +308,7 @@ for item in admissions_data.get('questions', []):
 
 
 def find_answer_and_media(question):
-    if not model or st.session_state.question_embeddings is None or st.session_state.tfidf_matrix is None:
+    if not xlm_roberta_model or st.session_state.question_embeddings is None:
         return "Chatbot đang gặp sự cố, vui lòng thử lại sau.", "text", None
     norm_question = normalize_and_unaccent(question)
     # Tra cứu từ khóa trực tiếp (ưu tiên khớp chính xác)
@@ -466,6 +478,40 @@ def find_answer_and_media(question):
 
     # Không tìm thấy kết quả phù hợp
     return "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "text", None
+
+
+def fuzzy_match_question(question, admissions_data, min_ratio=0.6):
+    """
+    Perform fuzzy matching to find the best matching question in the admissions data.
+
+    Args:
+        question (str): The input question to match.
+        admissions_data (dict): The admissions data containing questions and answers.
+        min_ratio (float): The minimum similarity ratio to consider a match.
+
+    Returns:
+        tuple: A tuple containing the answer, images, and captions if a match is found; otherwise, None.
+    """
+    best_match = None
+    best_ratio = 0
+
+    for item in admissions_data.get('questions', []):
+        questions = item.get('question', [])
+        if isinstance(questions, str):
+            questions = [questions]
+        for q in questions:
+            ratio = SequenceMatcher(None, question, q).ratio()
+            if ratio > best_ratio and ratio >= min_ratio:
+                best_ratio = ratio
+                best_match = item
+
+    if best_match:
+        answer = best_match.get('answer', "Không có câu trả lời.")
+        images = best_match.get('images')
+        captions = best_match.get('captions')
+        return answer, images, captions
+
+    return None
 
 
 # --- GIAO DIỆN STREAMLIT ---
