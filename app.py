@@ -7,7 +7,6 @@ import re
 import torch
 import unicodedata
 import py_vncorenlp
-from transformers import AutoTokenizer, AutoModel
 from difflib import SequenceMatcher
 
 # --- CẤU HÌNH VÀ TẢI DỮ LIỆU ---
@@ -268,7 +267,7 @@ except Exception as e:
 
 QUESTION_KEYWORDS = get_all_question_keywords()
 
-# Tạo từ điển tra cứu cho so khớp từ khóa trực tiếp và n-gram
+# Tạo từ điển tra cứu cho so kh��p từ khóa trực tiếp và n-gram
 KEYWORD_ANSWER_MAP = {}
 ALL_KEYWORDS_SET = set()
 KEYWORD_TO_ITEM_MAP = {}
@@ -287,19 +286,6 @@ for item in admissions_data.get('questions', []):
         if item not in lst:
             lst.append(item)
 
-# Tải mô hình XLM-RoBERTa
-@st.cache_resource
-def load_xlm_roberta_model():
-    tokenizer = AutoTokenizer.from_pretrained("xlm-roberta-base")
-    model = AutoModel.from_pretrained("xlm-roberta-base")
-    return tokenizer, model
-
-try:
-    tokenizer, xlm_roberta_model = load_xlm_roberta_model()
-except Exception as e:
-    st.error(f"Lỗi khi tải mô hình XLM-RoBERTa: {e}")
-    tokenizer, xlm_roberta_model = None, None
-
 # Lazy-load cross-encoder cho rerank (đa ngôn ngữ dựa trên XLM-R)
 @st.cache_resource
 def load_cross_encoder_model():
@@ -311,12 +297,32 @@ def load_cross_encoder_model():
 
 cross_encoder_model = load_cross_encoder_model()
 
-# Hàm mã hóa câu hỏi bằng XLM-RoBERTa
-def encode_question_xlm_roberta(question):
-    inputs = tokenizer(question, return_tensors="pt", padding=True, truncation=True)
-    with torch.no_grad():
-        outputs = xlm_roberta_model(**inputs)
-    return outputs.last_hidden_state.mean(dim=1)  # Sử dụng trung bình các vector ẩn
+# Lazy-load SBERT/E5 bi-encoder (ưu tiên cho tiếng Việt)
+@st.cache_resource
+def load_sentence_transformer_model():
+    try:
+        from sentence_transformers import SentenceTransformer  # local import
+        # Multilingual model có hỗ trợ tiếng Việt; có thể thay bằng E5-vi/SBERT VN chuyên biệt nếu muốn
+        return SentenceTransformer("paraphrase-multilingual-mpnet-base-v2")
+    except Exception:
+        return None
+
+sbert_model = load_sentence_transformer_model()
+
+# Hàm mã hóa thống nhất: chỉ SBERT; trả torch.Tensor (N, d) hoặc (1, d)
+def encode_question_embedding(inputs):
+    try:
+        if sbert_model is not None:
+            if isinstance(inputs, list):
+                embs = sbert_model.encode(inputs, batch_size=32, normalize_embeddings=True, convert_to_tensor=True)
+                return embs  # (N, d)
+            else:
+                embs = sbert_model.encode([inputs], batch_size=32, normalize_embeddings=True, convert_to_tensor=True)
+                return embs  # (1, d)
+        else:
+            return None
+    except Exception:
+        return None
 
 # Xây dựng embeddings cho toàn bộ câu hỏi trong dữ liệu
 @st.cache_resource
@@ -328,7 +334,6 @@ def build_question_embeddings_and_maps(admissions_data_local):
         if isinstance(questions, str):
             questions = [questions]
         for q in questions:
-            # Dùng văn bản gốc (giữ dấu) nhưng đã lower/trim để mô hình ngữ nghĩa hiểu tốt hơn
             qn_embed = normalize_text(q)
             if len(qn_embed) < 2:
                 continue
@@ -336,8 +341,8 @@ def build_question_embeddings_and_maps(admissions_data_local):
             question_items.append(item)
     if not question_texts:
         return [], None, {}
-    # Mã hóa theo batch
-    embeddings = encode_question_xlm_roberta(question_texts)
+    # Mã hóa theo batch (ưu tiên SBERT)
+    embeddings = encode_question_embedding(question_texts)
     # Lưu map từ text -> item (ưu tiên danh sách nếu trùng)
     text_to_item = {}
     for t, it in zip(question_texts, question_items):
@@ -349,34 +354,42 @@ def build_question_embeddings_and_maps(admissions_data_local):
 
 
 def ensure_embeddings_ready():
-    if tokenizer is None or xlm_roberta_model is None:
+    # Chỉ cần SBERT cho embeddings; nếu không có thì bỏ qua im lặng
+    if sbert_model is None:
         return
     if 'question_embeddings' not in st.session_state or st.session_state.question_embeddings is None or len(st.session_state.question_texts) == 0:
         q_texts, q_embeds, q_map = build_question_embeddings_and_maps(admissions_data)
         st.session_state.question_texts = q_texts
         st.session_state.question_embeddings = q_embeds
         st.session_state.question_data_map = q_map
+    # Xây FAISS index nếu có thể
+    if st.session_state.get('question_embeddings') is not None and len(st.session_state.get('question_texts', [])) > 0:
+        build_faiss_index_if_possible()
 
 
-def find_best_match_with_embeddings(query_embedding, corpus_embeddings, min_similarity: float = 0.6):
-    """Trả về index có cosine similarity cao nhất nếu >= ngưỡng, ngược lại None."""
+def build_faiss_index_if_possible():
+    """Khởi tạo chỉ mục FAISS (IndexFlatIP) nếu có thể. Không lỗi nếu thiếu thư viện."""
     try:
-        if query_embedding is None or corpus_embeddings is None:
-            return None
-        if corpus_embeddings.ndim != 2:
-            return None
-        # Chuẩn hóa L2 rồi tính tích ma trận để ra cosine
-        q = torch.nn.functional.normalize(query_embedding, dim=1)  # (1, d)
-        c = torch.nn.functional.normalize(corpus_embeddings, dim=1)  # (N, d)
-        sims = torch.mm(q, c.t()).squeeze(0)  # (N,)
-        best_val, best_idx = torch.max(sims, dim=0)
-        if float(best_val.item()) >= min_similarity:
-            return int(best_idx.item())
-        return None
+        import faiss  # type: ignore
     except Exception:
-        return None
+        return
+    if st.session_state.get('faiss_index') is not None:
+        return
+    try:
+        embeds = st.session_state.question_embeddings
+        if embeds is None or getattr(embeds, 'ndim', 0) != 2 or embeds.shape[0] == 0:
+            return
+        # Chuẩn hóa L2 để dùng inner product ~ cosine
+        emb_norm = torch.nn.functional.normalize(embeds, dim=1)
+        emb_np = emb_norm.detach().cpu().numpy().astype('float32')
+        dim = emb_np.shape[1]
+        index = faiss.IndexFlatIP(dim)
+        index.add(emb_np)
+        st.session_state.faiss_index = index
+        st.session_state.faiss_dim = dim
+    except Exception:
+        st.session_state.faiss_index = None
 
-# Khớp và truy xuất câu trả lời (có lớp đồng nghĩa và ngữ nghĩa)
 
 # --- Adaptive routing helpers ---
 
@@ -398,19 +411,32 @@ def fuzzy_best_item(question_text: str):
 
 def retrieve_topk_embeddings(query_text: str, top_k: int = 10):
     """Trả về danh sách [(index, cosine)] giảm dần theo cosine, tối đa top_k. Nếu không sẵn sàng, trả []."""
-    if tokenizer is None or xlm_roberta_model is None:
+    if sbert_model is None:
         return []
     if 'question_embeddings' not in st.session_state or st.session_state.question_embeddings is None or len(st.session_state.question_texts) == 0:
         return []
+    # Ưu tiên FAISS nếu có
+    index = st.session_state.get('faiss_index')
+    if index is not None:
+        try:
+            # Chuẩn hóa truy vấn và tìm top-k bằng FAISS (inner product)
+            q_emb = encode_question_embedding(normalize_text(query_text))  # (1, d)
+            q_norm = torch.nn.functional.normalize(q_emb, dim=1)
+            q_np = q_norm.detach().cpu().numpy().astype('float32')
+            k = min(top_k, st.session_state.question_embeddings.shape[0])
+            D, I = index.search(q_np, k)
+            sims = D[0].tolist(); inds = I[0].tolist()
+            return [(int(i), float(s)) for i, s in zip(inds, sims) if i >= 0]
+        except Exception:
+            pass
     try:
-        # Dùng normalize_text (giữ dấu) để phù hợp tập embeddings đã build
-        q_emb = encode_question_xlm_roberta(normalize_text(query_text))  # (1, d)
+        # Fallback tính cosine bằng torch
+        q_emb = encode_question_embedding(normalize_text(query_text))  # (1, d)
         q = torch.nn.functional.normalize(q_emb, dim=1)
         c = torch.nn.functional.normalize(st.session_state.question_embeddings, dim=1)
         sims = torch.mm(q, c.t()).squeeze(0)  # (N,)
         values, indices = torch.topk(sims, k=min(top_k, sims.shape[0]))
-        result = [(int(idx.item()), float(val.item())) for val, idx in zip(values, indices)]
-        return result
+        return [(int(idx.item()), float(val.item())) for val, idx in zip(values, indices)]
     except Exception:
         return []
 
@@ -437,7 +463,7 @@ def rerank_with_cross_encoder(query_text: str, candidate_indices):
     except Exception:
         return None, 0.0
 
-# Khớp và truy xuất câu trả lời (có lớp đồng nghĩa và ngữ nghĩa)
+# Khớp và truy xuất câu tr�� lời (có lớp đồng nghĩa và ngữ nghĩa)
 
 def find_answer_and_media(question):
     # Chuẩn hóa (bỏ dấu) cho các bước đối sánh từ khóa/chuỗi
@@ -647,7 +673,7 @@ def find_answer_and_media(question):
     best_embed_index = None
     best_embed_sim = 0.0
     embed_candidates = []
-    if tokenizer is not None and xlm_roberta_model is not None and hasattr(st.session_state, 'question_embeddings') and st.session_state.question_embeddings is not None and len(st.session_state.question_texts) > 0:
+    if hasattr(st.session_state, 'question_embeddings') and st.session_state.question_embeddings is not None and len(st.session_state.question_texts) > 0:
         embed_candidates = retrieve_topk_embeddings(question, top_k=10)
         if embed_candidates:
             best_embed_index, best_embed_sim = embed_candidates[0]
@@ -728,11 +754,8 @@ def main():
     if 'question_data_map' not in st.session_state or not st.session_state.question_data_map:
         st.session_state.question_data_map = {}
 
-    if xlm_roberta_model is None:
-        st.error("Mô hình XLM-RoBERTa chưa được tải. Vui lòng kiểm tra lại cấu hình.")
-    else:
-        # Chuẩn bị embeddings để hỗ trợ tìm kiếm ngữ nghĩa (đồng nghĩa chưa thấy trong kho)
-        ensure_embeddings_ready()
+    # Luôn cố gắng chuẩn bị embeddings nếu SBERT sẵn sàng
+    ensure_embeddings_ready()
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
