@@ -246,13 +246,17 @@ def find_answer(core_question):
 def load_vncorenlp_model():
     return py_vncorenlp.VnCoreNLP(save_dir=os.path.join(os.path.dirname(__file__), 'vncorenlp'))
 
-vncorenlp_model = load_vncorenlp_model()
+# vncorenlp_model = load_vncorenlp_model()  # Lazy-load inside function instead
 
 
 def split_sticky_words(text):
-    # Sử dụng VnCoreNLP để tách từ
-    segments = vncorenlp_model.word_segment(text)
-    return ' '.join(segments)
+    # Sử dụng VnCoreNLP để tách từ nếu sẵn sàng, nếu lỗi thì trả nguyên văn
+    try:
+        model = load_vncorenlp_model()
+        segments = model.word_segment(text)
+        return ' '.join(segments)
+    except Exception:
+        return text
 
 
 # --- CẤU HÌNH VÀ TẢI DỮ LIỆU ---
@@ -790,8 +794,11 @@ def main():
         with st.chat_message("assistant"):
             for resp in responses:
                 st.markdown(resp["text"])
+                # Ghi lại thông điệp trợ lý kèm media để hiển thị lại sau khi rerun
+                assistant_msg = {"role": "assistant", "text": resp["text"]}
                 if resp["media_type"] == "video" and resp["media_content"]:
                     st.video(resp["media_content"])
+                    assistant_msg["video"] = resp["media_content"]
                 elif resp["media_type"] == "image" and resp["media_content"]:
                     images, captions = resp["media_content"]
                     if images:
@@ -799,11 +806,10 @@ def main():
                         for img_path in images:
                             if isinstance(img_path, str) and img_path.strip():
                                 abs_img_path = os.path.join(os.path.dirname(__file__), img_path)
-                                if os.path.isfile(abs_img_path):  # Ensure it's a valid file
+                                if os.path.isfile(abs_img_path):
                                     valid_images_paths.append(abs_img_path)
                                 else:
                                     st.warning(f"Image not found or invalid: {img_path}")
-
                         if valid_images_paths:
                             num_cols = min(len(valid_images_paths), 3)
                             cols = st.columns(num_cols)
@@ -813,7 +819,11 @@ def main():
                             for i, abs_img_path in enumerate(valid_images_paths):
                                 with cols[i % num_cols]:
                                     st.image(abs_img_path, caption=captions[i] if i < len(captions) else f"Image {i + 1}")
-            st.session_state.messages.append({"role": "assistant", "text": '\n'.join([r["text"] for r in responses])})
+                            # Lưu media để hiển thị lại trong lịch sử
+                            assistant_msg["images"] = valid_images_paths
+                            assistant_msg["captions"] = captions
+                # Lưu mỗi phản hồi dưới dạng một message riêng biệt
+                st.session_state.messages.append(assistant_msg)
 
     col1, col2 = st.columns(2)
     with col1:
