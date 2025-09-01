@@ -5,3 +5,4 @@ torch==2.2.0
 Pillow==10.3.0
 pyvi==0.1.1
 py_vncorenlp
+sentence-transformers==2.2.2

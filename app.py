@@ -300,6 +300,17 @@ except Exception as e:
     st.error(f"Lỗi khi tải mô hình XLM-RoBERTa: {e}")
     tokenizer, xlm_roberta_model = None, None
 
+# Lazy-load cross-encoder cho rerank (đa ngôn ngữ dựa trên XLM-R)
+@st.cache_resource
+def load_cross_encoder_model():
+    try:
+        from sentence_transformers import CrossEncoder  # local import to avoid hard dependency at import time
+        return CrossEncoder("cross-encoder/stsb-xlm-r-multilingual")
+    except Exception:
+        return None
+
+cross_encoder_model = load_cross_encoder_model()
+
 # Hàm mã hóa câu hỏi bằng XLM-RoBERTa
 def encode_question_xlm_roberta(question):
     inputs = tokenizer(question, return_tensors="pt", padding=True, truncation=True)
@@ -364,6 +375,67 @@ def find_best_match_with_embeddings(query_embedding, corpus_embeddings, min_simi
         return None
     except Exception:
         return None
+
+# Khớp và truy xuất câu trả lời (có lớp đồng nghĩa và ngữ nghĩa)
+
+# --- Adaptive routing helpers ---
+
+def fuzzy_best_item(question_text: str):
+    """Trả về (item_tốt_nhất, tỷ_lệ_fuzzy). Nếu không có, trả (None, 0)."""
+    best_item = None
+    best_ratio = 0.0
+    for item in admissions_data.get('questions', []):
+        questions = item.get('question', [])
+        if isinstance(questions, str):
+            questions = [questions]
+        for q in questions:
+            ratio = SequenceMatcher(None, question_text, q).ratio()
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_item = item
+    return best_item, best_ratio
+
+
+def retrieve_topk_embeddings(query_text: str, top_k: int = 10):
+    """Trả về danh sách [(index, cosine)] giảm dần theo cosine, tối đa top_k. Nếu không sẵn sàng, trả []."""
+    if tokenizer is None or xlm_roberta_model is None:
+        return []
+    if 'question_embeddings' not in st.session_state or st.session_state.question_embeddings is None or len(st.session_state.question_texts) == 0:
+        return []
+    try:
+        # Dùng normalize_text (giữ dấu) để phù hợp tập embeddings đã build
+        q_emb = encode_question_xlm_roberta(normalize_text(query_text))  # (1, d)
+        q = torch.nn.functional.normalize(q_emb, dim=1)
+        c = torch.nn.functional.normalize(st.session_state.question_embeddings, dim=1)
+        sims = torch.mm(q, c.t()).squeeze(0)  # (N,)
+        values, indices = torch.topk(sims, k=min(top_k, sims.shape[0]))
+        result = [(int(idx.item()), float(val.item())) for val, idx in zip(values, indices)]
+        return result
+    except Exception:
+        return []
+
+
+def rerank_with_cross_encoder(query_text: str, candidate_indices):
+    """Dùng cross-encoder để chấm điểm (query, candidate_text) và trả về (best_idx, best_score)."""
+    if cross_encoder_model is None or not candidate_indices:
+        return None, 0.0
+    try:
+        pairs = []
+        qt = normalize_text(query_text)
+        for idx in candidate_indices:
+            cand_text = st.session_state.question_texts[idx]
+            pairs.append((qt, normalize_text(cand_text)))
+        scores = cross_encoder_model.predict(pairs)
+        try:
+            scores = scores.tolist()
+        except Exception:
+            pass
+        if not scores:
+            return None, 0.0
+        best_pos = max(range(len(scores)), key=lambda i: scores[i])
+        return candidate_indices[best_pos], float(scores[best_pos])
+    except Exception:
+        return None, 0.0
 
 # Khớp và truy xuất câu trả lời (có lớp đồng nghĩa và ngữ nghĩa)
 
@@ -564,48 +636,57 @@ def find_answer_and_media(question):
                 return answer, "image", (images, captions)
             return answer, "text", None
 
-    # 5) Fuzzy cuối cùng
-    fuzzy_result = fuzzy_match_question(question, admissions_data, min_ratio=0.6)
-    if fuzzy_result:
-        answer, images, captions = fuzzy_result
-        if images and isinstance(images, str):
-            images = [images]
-        if images:
-            return answer, "image", (images, captions)
-        return answer, "text", None
-    fuzzy_result = fuzzy_match_question(norm_question, admissions_data, min_ratio=0.6)
-    if fuzzy_result:
-        answer, images, captions = fuzzy_result
-        if images and isinstance(images, str):
-            images = [images]
-        if images:
-            return answer, "image", (images, captions)
-        return answer, "text", None
+    # 5 & 6) Adaptive routing giữa fuzzy và embeddings (+ cross-encoder rerank nếu sẵn)
+    FUZZY_STRONG = 0.88
+    EMBED_STRONG = 0.72
+    FUZZY_MIN = 0.60
+    EMBED_MIN = 0.60
 
-    # 6) Ngữ nghĩa (embeddings) nếu sẵn sàng
+    best_fuzzy_item, best_fuzzy_ratio = fuzzy_best_item(question)
+
+    best_embed_index = None
+    best_embed_sim = 0.0
+    embed_candidates = []
     if tokenizer is not None and xlm_roberta_model is not None and hasattr(st.session_state, 'question_embeddings') and st.session_state.question_embeddings is not None and len(st.session_state.question_texts) > 0:
-        try:
-            question_embedding = encode_question_xlm_roberta(question)
-            best_index = find_best_match_with_embeddings(
-                question_embedding, st.session_state.question_embeddings
-            )
-            if best_index is not None:
-                matched_question = st.session_state.question_texts[best_index]
-                matched_item = st.session_state.question_data_map.get(matched_question)
-                if matched_item:
-                    answer = matched_item.get('answer', "Không có câu trả lời.")
-                    images = matched_item.get('images')
-                    captions = matched_item.get('captions')
-                    video_url = matched_item.get('video_url')
-                    if images and isinstance(images, str):
-                        images = [images]
-                    if video_url:
-                        return answer, "video", video_url
-                    if images:
-                        return answer, "image", (images, captions)
-                    return answer, "text", None
-        except Exception:
-            pass
+        embed_candidates = retrieve_topk_embeddings(question, top_k=10)
+        if embed_candidates:
+            best_embed_index, best_embed_sim = embed_candidates[0]
+            # Cross-encoder rerank trên cùng danh sách
+            candidate_indices = [idx for idx, _ in embed_candidates]
+            ce_idx, ce_score = rerank_with_cross_encoder(question, candidate_indices)
+            # Nếu cross-encoder hoạt động và điểm không kém, dùng nó
+            if ce_idx is not None and ce_score >= EMBED_MIN and ce_score >= best_embed_sim:
+                best_embed_index = ce_idx
+                best_embed_sim = ce_score
+
+    # Quyết định
+    chosen_item = None
+    if best_fuzzy_ratio >= FUZZY_STRONG and best_fuzzy_ratio >= (best_embed_sim + 0.10):
+        chosen_item = best_fuzzy_item
+    elif best_embed_index is not None and best_embed_sim >= EMBED_STRONG:
+        matched_question = st.session_state.question_texts[best_embed_index]
+        chosen_item = st.session_state.question_data_map.get(matched_question)
+    else:
+        # Nếu cả hai không mạnh, nhưng một trong hai vượt tối thiểu, chọn cái cao hơn
+        if best_fuzzy_ratio >= FUZZY_MIN or (best_embed_index is not None and best_embed_sim >= EMBED_MIN):
+            if (best_embed_index is not None and best_embed_sim >= EMBED_MIN) and (best_embed_sim >= best_fuzzy_ratio):
+                matched_question = st.session_state.question_texts[best_embed_index]
+                chosen_item = st.session_state.question_data_map.get(matched_question)
+            else:
+                chosen_item = best_fuzzy_item
+
+    if chosen_item:
+        answer = chosen_item.get('answer', "Không có câu trả lời.")
+        images = chosen_item.get('images')
+        captions = chosen_item.get('captions')
+        video_url = chosen_item.get('video_url')
+        if images and isinstance(images, str):
+            images = [images]
+        if video_url:
+            return answer, "video", video_url
+        if images:
+            return answer, "image", (images, captions)
+        return answer, "text", None
 
     return "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "text", None
 
