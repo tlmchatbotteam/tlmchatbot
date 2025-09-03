@@ -232,23 +232,21 @@ def get_answer(question):
                             media_type = "image"; media_content = (images, captions)
                         results.append({"text": ans, "media_type": media_type, "media_content": media_content})
                     return results
-        # Try direct answer using normalized text first
-        ans, media_type, media_content = find_answer_and_media(norm_core)
+        # Prefer original text for semantic/fuzzy, then fallback to normalized
+        ans, media_type, media_content = find_answer_and_media(core_question)
         if ans and ans.strip() and ans != "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.":
             return [{"text": ans, "media_type": media_type, "media_content": media_content}]
-        # Otherwise, return best single match from original
-        ans, media_type, media_content = find_answer_and_media(core_question)
+        ans, media_type, media_content = find_answer_and_media(norm_core)
         return [{"text": ans, "media_type": media_type, "media_content": media_content}]
 
     # Nếu có nhiều ý nhỏ, trả về từng câu trả lời
     results = []
     for subq in sub_questions:
-        sub_norm = normalize_and_unaccent(subq)
-        # Prefer normalized text
-        ans, media_type, media_content = find_answer_and_media(sub_norm)
+        # Prefer original sub-question first (retains dấu cho embedding/fuzzy)
+        ans, media_type, media_content = find_answer_and_media(subq)
         if (not ans or not ans.strip() or ans == "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp."):
-            # Fallback to original subq
-            ans, media_type, media_content = find_answer_and_media(subq)
+            sub_norm = normalize_and_unaccent(subq)
+            ans, media_type, media_content = find_answer_and_media(sub_norm)
         if ans and ans.strip():
             results.append({"text": ans, "media_type": media_type, "media_content": media_content})
     if results:
@@ -544,8 +542,19 @@ def find_answer_and_media(question):
     contains_candidates = []
     nq = norm_question
     if len(nq) >= 3:
+        # punctuation-stripped versions to improve partial matching
+        def _pun(s: str) -> str:
+            try:
+                return re.sub(r"\W+", " ", s).strip()
+            except Exception:
+                return s
+        np = _pun(nq)
         for key, it in KEYWORD_TO_ITEM_MAP.items():
             if key.startswith(nq) or nq.startswith(key) or (nq in key) or (key in nq):
+                contains_candidates.append((key, it))
+                continue
+            kp = _pun(key)
+            if kp and np and (kp.startswith(np) or np.startswith(kp) or (np in kp) or (kp in np)):
                 contains_candidates.append((key, it))
     if contains_candidates:
         best_key, best_item = max(contains_candidates, key=lambda x: len(x[0]))
