@@ -95,6 +95,8 @@ def strip_leadin_phrases(text: str) -> str:
     norm = normalize_and_unaccent(text)
     leadins = [
         r'^toi\s*muon\s*biet\s*ve\s*',
+        r'^toi\s*muon\s*biet\s*',  # new: handle sentences without "về"
+        r'^toi\s*muon\s*hoi\s*',   # new: handle "tôi muốn hỏi"
         r'^cho\s*t\s*oi\s*biet\s*ve\s*',
         r'^cho\s*toi\s*biet\s*ve\s*',
         r'^thong\s*tin\s*ve\s*',
@@ -103,7 +105,11 @@ def strip_leadin_phrases(text: str) -> str:
     ]
     for pat in leadins:
         norm = re.sub(pat, '', norm)
-    return norm.strip()
+    # Trim trailing filler words like "của"/"về"
+    norm = re.sub(r'\b(cua|ve)\s*$', '', norm).strip()
+    # Also trim trailing "cua truong ..." (generic school tail) to expose core keyword
+    norm = re.sub(r'\bcua\s*(truong|thpt|trg|truong\s*thpt|trung\s*hoc\s*pho\s*thong)\b.*$', '', norm).strip()
+    return norm
 
 # Tách ý nhỏ cho câu hỏi nhiều ý, không dấu
 
@@ -204,14 +210,45 @@ def get_answer(question):
                     media_type = "image"; media_content = (images, captions)
                 results.append({"text": ans, "media_type": media_type, "media_content": media_content})
             return results
-        # Otherwise, return best single match
+        # NEW: Search substrings for duplicate keyword mappings (e.g., "hieu pho")
+        tokens = norm_core.split()
+        for length in range(len(tokens), 1, -1):
+            for i in range(len(tokens) - length + 1):
+                phrase = ' '.join(tokens[i:i+length])
+                multi_sub = KEYWORD_TO_ITEMS_MAP.get(phrase, [])
+                if len(multi_sub) > 1:
+                    results = []
+                    for item in multi_sub:
+                        ans = item.get('answer', "Không có câu trả lời.")
+                        images = item.get('images')
+                        captions = item.get('captions')
+                        video_url = item.get('video_url')
+                        media_type = "text"; media_content = None
+                        if images and isinstance(images, str):
+                            images = [images]
+                        if video_url:
+                            media_type = "video"; media_content = video_url
+                        elif images:
+                            media_type = "image"; media_content = (images, captions)
+                        results.append({"text": ans, "media_type": media_type, "media_content": media_content})
+                    return results
+        # Try direct answer using normalized text first
+        ans, media_type, media_content = find_answer_and_media(norm_core)
+        if ans and ans.strip() and ans != "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.":
+            return [{"text": ans, "media_type": media_type, "media_content": media_content}]
+        # Otherwise, return best single match from original
         ans, media_type, media_content = find_answer_and_media(core_question)
         return [{"text": ans, "media_type": media_type, "media_content": media_content}]
 
     # Nếu có nhiều ý nhỏ, trả về từng câu trả lời
     results = []
     for subq in sub_questions:
-        ans, media_type, media_content = find_answer_and_media(subq)
+        sub_norm = normalize_and_unaccent(subq)
+        # Prefer normalized text
+        ans, media_type, media_content = find_answer_and_media(sub_norm)
+        if (not ans or not ans.strip() or ans == "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp."):
+            # Fallback to original subq
+            ans, media_type, media_content = find_answer_and_media(subq)
         if ans and ans.strip():
             results.append({"text": ans, "media_type": media_type, "media_content": media_content})
     if results:
@@ -495,6 +532,27 @@ def find_answer_and_media(question):
         images = direct_item.get('images')
         captions = direct_item.get('captions')
         video_url = direct_item.get('video_url')
+        if images and isinstance(images, str):
+            images = [images]
+        if video_url:
+            return answer, "video", video_url
+        if images:
+            return answer, "image", (images, captions)
+        return answer, "text", None
+
+    # 1b) Prefix/contains fallback to catch partial phrases (e.g., 'tien ich' -> 'tien ich xung quanh truong')
+    contains_candidates = []
+    nq = norm_question
+    if len(nq) >= 3:
+        for key, it in KEYWORD_TO_ITEM_MAP.items():
+            if key.startswith(nq) or nq.startswith(key) or (nq in key) or (key in nq):
+                contains_candidates.append((key, it))
+    if contains_candidates:
+        best_key, best_item = max(contains_candidates, key=lambda x: len(x[0]))
+        answer = best_item.get('answer', "Không có câu trả lời.")
+        images = best_item.get('images')
+        captions = best_item.get('captions')
+        video_url = best_item.get('video_url')
         if images and isinstance(images, str):
             images = [images]
         if video_url:
