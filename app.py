@@ -241,25 +241,13 @@ def find_answer(core_question):
     return find_answer_and_media(core_question)[0]
 
 # Khởi tạo VnCoreNLP cho tách từ (dùng trong split_sticky_words)
-@st.cache_resource
-def load_vncorenlp_model():
-    try:
-        import py_vncorenlp  # optional dependency; may not be installed in deployment
-        return py_vncorenlp.VnCoreNLP(save_dir=os.path.join(os.path.dirname(__file__), 'vncorenlp'))
-    except Exception:
-        return None
-
-# vncorenlp_model = load_vncorenlp_model()  # Lazy-load inside function instead
-
+# Removed Java-based VnCoreNLP; use pyvi's ViTokenizer instead.
 
 def split_sticky_words(text):
-    # Sử dụng VnCoreNLP để tách từ nếu sẵn sàng, nếu lỗi thì trả nguyên văn
-    model = load_vncorenlp_model()
-    if not model:
-        return text
+    """Word-segment Vietnamese using pyvi if available; fallback to original text."""
     try:
-        segments = model.word_segment(text)
-        return ' '.join(segments)
+        from pyvi import ViTokenizer
+        return ViTokenizer.tokenize(text)
     except Exception:
         return text
 
