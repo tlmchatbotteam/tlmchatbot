@@ -1,8 +1,8 @@
-streamlit==1.36.0
-scikit-learn==1.5.0
-numpy==1.26.4
-torch==2.8.0
-Pillow==10.3.0
-pyvi==0.1.1
+streamlit
+scikit-learn
+numpy
+torch
+Pillow
+pyvi
 py_vncorenlp
-sentence-transformers==2.2.2
+sentence-transformers
