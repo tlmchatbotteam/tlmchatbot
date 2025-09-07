@@ -29,7 +29,7 @@ jobs:
 
       - name: Deploy to VM
         env:
-          PROJECT_DIR: ~/test2
+          PROJECT_DIR: /home/ubuntu/test2
           REPO_URL:    https://github.com/${{ github.repository }}.git
         run: |
           echo "VM_USER=$VM_USER" 
