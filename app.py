@@ -1,16 +1,11 @@
 # Copyright (c) [2025] [Nguyễn Minh Tấn Phúc]. Bảo lưu mọi quyền.
+# Nguồn: https://tlmchattest.streamlit.app/
 import json
 import os
 import re
-from sentence_transformers import SentenceTransformer, util
 import torch
-from pyvi import ViTokenizer
 import unicodedata
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
-import py_vncorenlp
-import difflib
+from difflib import SequenceMatcher
 from flask import Flask, request, jsonify, send_from_directory
 
 # --- KHỞI TẠO FLASK APP ---
@@ -33,7 +28,6 @@ def remove_vietnamese_accents(text):
     return "".join(c for c in unicodedata.normalize('NFD', text)
                    if unicodedata.category(c) != 'Mn')
 
-
 def remove_vietnamese_stopwords(tokenized_text):
     stopwords = [
         'là', 'và', 'có', 'của', 'trong', 'được', 'cho', 'với', 'tại', 'từ',
@@ -44,16 +38,14 @@ def remove_vietnamese_stopwords(tokenized_text):
     tokens = tokenized_text.split() if isinstance(tokenized_text, str) else tokenized_text
     return [token for token in tokens if token not in stopwords]
 
-
 def normalize_text(text):
     text = text.lower().strip()
     text = re.sub(r'\s+', ' ', text)
     return text
 
-
 def add_li_ly_variants(keyword):
     # Thêm cả hai biến thể 'li' và 'ly' cho chính tả tiếng Việt
-    variants = set([keyword])
+    variants = {keyword}
     if ' li ' in f' {keyword} ':
         variants.add(keyword.replace(' li ', ' ly '))
     if ' ly ' in f' {keyword} ':
@@ -98,20 +90,79 @@ def normalize_and_unaccent(text):
     norm = re.sub(r'\bly\b', 'li', norm)
     return norm
 
-# Tách ý nhỏ cho câu hỏi nhiều ý, không dấu
+# Loại bỏ các cụm dẫn nhập thường gặp (không mang ý nghĩa nội dung chính)
+def strip_leadin_phrases(text: str) -> str:
+    norm = normalize_and_unaccent(text)
+    leadins = [
+        r'^toi\s*muon\s*biet\s*ve\s*',
+        r'^toi\s*muon\s*biet\s*',  # new: handle sentences without "về"
+        r'^toi\s*muon\s*hoi\s*',   # new: handle "tôi muốn hỏi"
+        r'^cho\s*t\s*oi\s*biet\s*ve\s*',
+        r'^cho\s*toi\s*biet\s*ve\s*',
+        r'^thong\s*tin\s*ve\s*',
+        r'^gioi\s*thieu\s*ve\s*',
+        r'^ve\s*'
+    ]
+    for pat in leadins:
+        norm = re.sub(pat, '', norm)
+    # Trim trailing filler words like "của"/"về"
+    norm = re.sub(r'\b(cua|ve)\s*$', '', norm).strip()
+    # Also trim trailing "cua truong ..." (generic school tail) to expose core keyword
+    norm = re.sub(r'\bcua\s*(truong|thpt|trg|truong\s*thpt|trung\s*hoc\s*pho\s*thong)\b.*$', '', norm).strip()
+    return norm
 
+# Tách ý nhỏ cho câu hỏi nhiều ý, không dấu
 def split_subquestions(text):
     norm_text = normalize_and_unaccent(text)
-    # Chỉ tách theo các liên từ rõ ràng, không tách theo trùng từ khóa
-    conjunctions = [r'và', r'hay', r'hoặc', r'va', r'hoac']
-    pattern = r'[;,]|\b(' + '|'.join(conjunctions) + r')\b'
-    subqs = re.split(pattern, norm_text)
-    subqs = [q.strip() for q in subqs if q and len(q.strip()) > 2]
+    # Chỉ tách theo các liên từ rõ ràng, dùng non-capturing group để không giữ lại từ nối
+    conjunctions = [
+        r'va', r'và', r'hoac', r'hay',
+        r'voi', r'với',
+        r'cung', r'cùng', r'cung\s*voi', r'cùng\s*với',
+        r'roi', r'rồi', r'sau\s*do'
+    ]
+    pattern = r'[;,]|\b(?:' + '|'.join(conjunctions) + r')\b'
+    parts = re.split(pattern, norm_text)
+    subqs = [p.strip() for p in parts if p and len(p.strip()) > 2]
     return subqs
-
 
 def get_answer(question):
     norm_question = normalize_text(question)
+    # Only return early for exact question matches (collect all duplicates)
+    norm_unaccent_question = normalize_and_unaccent(question)
+    exact_matches = []
+    for item in admissions_data.get('questions', []):
+        questions = item.get('question', [])
+        if isinstance(questions, str):
+            questions = [questions]
+        for q in questions:
+            if normalize_and_unaccent(q) == norm_unaccent_question:
+                if item not in exact_matches:
+                    exact_matches.append(item)
+                break  # avoid adding same item multiple times
+    if exact_matches:
+        responses = []
+        for item in exact_matches:
+            ans = item.get('answer', "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.")
+            media_type = "text"
+            media_content = None
+            images = item.get('images')
+            captions = item.get('captions')
+            video_url = item.get('video_url')
+            if images and isinstance(images, str):
+                images = [images]
+            if video_url:
+                media_type = "video"; media_content = video_url
+            elif images:
+                media_type = "image"; media_content = (images, captions)
+            responses.append({"text": ans, "media_type": media_type, "media_content": media_content})
+        return responses
+
+    # Fallback for "hiệu trưởng" keyword
+    if "hiệu trưởng" in norm_question:
+        hardcoded_response = "Bạn muốn biết về hiệu trưởng hiện tại hay hiệu trưởng qua từng thời kỳ?"
+        return [{"text": hardcoded_response, "media_type": "text", "media_content": None}]
+
     SCHOOL_NAME_VARIANTS = [
         "trường thpt", "thpt", "trường trung học phổ thông", "trung học phổ thông",
         "ten lơ men", "ten lơ man", "ten-lơ-man", "ten-lơ-men", "trường cấp 3", "cấp 3", "cấp ba", "trường cấp ba",
@@ -127,25 +178,77 @@ def get_answer(question):
     if re.fullmatch(rf"(\s*{school_pattern}\s*)+", norm_question, flags=re.IGNORECASE):
         ans, media_type, media_content = find_answer_and_media(norm_question)
         return [{"text": ans, "media_type": media_type, "media_content": media_content}]
+
     core_question = re.sub(school_pattern, "", norm_question, flags=re.IGNORECASE).strip()
     if not core_question or core_question in ["", "về", "của"]:
         ans, media_type, media_content = find_answer_and_media(norm_question)
         return [{"text": ans, "media_type": media_type, "media_content": media_content}]
+
     # TÁCH Ý NHỎ
+    core_question = strip_leadin_phrases(core_question)
     sub_questions = split_subquestions(core_question)
+    # If single sub-question, try multi-hit return via map before falling back
     if len(sub_questions) <= 1:
+        norm_core = normalize_and_unaccent(core_question)
+        multi = KEYWORD_TO_ITEMS_MAP.get(norm_core, [])
+        if len(multi) > 1:
+            results = []
+            for item in multi:
+                ans = item.get('answer', "Không có câu trả lời.")
+                images = item.get('images')
+                captions = item.get('captions')
+                video_url = item.get('video_url')
+                media_type = "text"; media_content = None
+                if images and isinstance(images, str):
+                    images = [images]
+                if video_url:
+                    media_type = "video"; media_content = video_url
+                elif images:
+                    media_type = "image"; media_content = (images, captions)
+                results.append({"text": ans, "media_type": media_type, "media_content": media_content})
+            return results
+        # NEW: Search substrings for duplicate keyword mappings (e.g., "hieu pho")
+        tokens = norm_core.split()
+        for length in range(len(tokens), 1, -1):
+            for i in range(len(tokens) - length + 1):
+                phrase = ' '.join(tokens[i:i+length])
+                multi_sub = KEYWORD_TO_ITEMS_MAP.get(phrase, [])
+                if len(multi_sub) > 1:
+                    results = []
+                    for item in multi_sub:
+                        ans = item.get('answer', "Không có câu trả lời.")
+                        images = item.get('images')
+                        captions = item.get('captions')
+                        video_url = item.get('video_url')
+                        media_type = "text"; media_content = None
+                        if images and isinstance(images, str):
+                            images = [images]
+                        if video_url:
+                            media_type = "video"; media_content = video_url
+                        elif images:
+                            media_type = "image"; media_content = (images, captions)
+                        results.append({"text": ans, "media_type": media_type, "media_content": media_content})
+                    return results
+        # Prefer original text for semantic/fuzzy, then fallback to normalized
         ans, media_type, media_content = find_answer_and_media(core_question)
+        if ans and ans.strip() and ans != "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.":
+            return [{"text": ans, "media_type": media_type, "media_content": media_content}]
+        ans, media_type, media_content = find_answer_and_media(norm_core)
         return [{"text": ans, "media_type": media_type, "media_content": media_content}]
+
     # Nếu có nhiều ý nhỏ, trả về từng câu trả lời
     results = []
     for subq in sub_questions:
+        # Prefer original sub-question first (retains dấu cho embedding/fuzzy)
         ans, media_type, media_content = find_answer_and_media(subq)
+        if (not ans or not ans.strip() or ans == "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp."):
+            sub_norm = normalize_and_unaccent(subq)
+            ans, media_type, media_content = find_answer_and_media(sub_norm)
         if ans and ans.strip():
             results.append({"text": ans, "media_type": media_type, "media_content": media_content})
     if results:
         return results
     return [{"text": "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp cho các ý bạn hỏi.", "media_type": "text", "media_content": None}]
-
 
 def get_school_info_answer():
     for item in admissions_data.get('questions', []):
@@ -159,21 +262,20 @@ def get_school_info_answer():
                 return item.get('answer', "Thông tin về trường THPT Ten Lơ Man...")
     return "Thông tin về trường THPT Ten Lơ Man..."
 
-
 def remove_school_name(question):
     pattern = r"(trường\s+thpt\s+ten\s+lơ\s+man|thpt\s+ten\s+lơ\s+man|ernst\s+thälmann|ernst\s+thalmann)"
     return re.sub(pattern, "", question, flags=re.IGNORECASE).strip()
 
-
 def find_answer(core_question):
     return find_answer_and_media(core_question)[0]
 
-
 def split_sticky_words(text):
-    # Sử dụng VnCoreNLP để tách từ
-    segments = vncorenlp_model.word_segment(text)
-    return ' '.join(segments)
-
+    """Word-segment Vietnamese using pyvi if available; fallback to original text."""
+    try:
+        from pyvi import ViTokenizer
+        return ViTokenizer.tokenize(text)
+    except Exception:
+        return text
 
 # --- CẤU HÌNH VÀ TẢI DỮ LIỆU ---
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -187,135 +289,184 @@ except Exception as e:
 
 QUESTION_KEYWORDS = get_all_question_keywords()
 
-try:
-    def load_sentence_transformer_model():
-        return SentenceTransformer('bkai-foundation-models/vietnamese-bi-encoder', device=device)
-    model = load_sentence_transformer_model()
-except Exception as e:
-    print(f"Lỗi khi tải mô hình SentenceTransformer: {e}")
-    model = None
+# Tạo từ điển tra cứu cho so khớp từ khóa trực tiếp và n-gram
+KEYWORD_ANSWER_MAP = {}
+ALL_KEYWORDS_SET = set()
+KEYWORD_TO_ITEM_MAP = {}
+KEYWORD_TO_ITEMS_MAP = {}
+for item in admissions_data.get('questions', []):
+    questions = item.get('question', [])
+    if isinstance(questions, str):
+        questions = [questions]
+    for q in questions:
+        key = normalize_and_unaccent(q)
+        KEYWORD_ANSWER_MAP[key] = item
+        KEYWORD_TO_ITEM_MAP[key] = item
+        ALL_KEYWORDS_SET.add(key)
+        # Multi-map for duplicates
+        lst = KEYWORD_TO_ITEMS_MAP.setdefault(key, [])
+        if item not in lst:
+            lst.append(item)
 
-# Tải và cache TF-IDF vectorizer
-try:
-    def load_tfidf_vectorizer():
-        return TfidfVectorizer(analyzer='word', token_pattern=r'\w{1,}')
-    tfidf_vectorizer = load_tfidf_vectorizer()
-except Exception as e:
-    print(f"Lỗi khi tải TfidfVectorizer: {e}")
-    tfidf_vectorizer = None
+# Lazy-load cross-encoder cho rerank (đa ngôn ngữ dựa trên XLM-R)
+def load_cross_encoder_model():
+    try:
+        from sentence_transformers import CrossEncoder
+        return CrossEncoder("cross-encoder/stsb-xlm-r-multilingual")
+    except Exception:
+        return None
 
-# Initialize VnCoreNLP for word segmentation
-try:
-    def load_vncorenlp_model():
-        return py_vncorenlp.VnCoreNLP(save_dir=os.path.join(os.path.dirname(__file__), 'vncorenlp'))
-    vncorenlp_model = load_vncorenlp_model()
-except Exception as e:
-    print(f"Lỗi khi tải VnCoreNLP: {e}")
-    vncorenlp_model = None
+cross_encoder_model = load_cross_encoder_model()
 
-# --- ENCODE DATA ---
-question_texts = []
-unaccented_questions_for_encoding = []
-question_data_map = {}
-question_embeddings = None
-tfidf_matrix = None
+# Lazy-load SBERT/E5 bi-encoder (ưu tiên cho tiếng Việt)
+def load_sentence_transformer_model():
+    try:
+        from sentence_transformers import SentenceTransformer
+        return SentenceTransformer("paraphrase-multilingual-mpnet-base-v2")
+    except Exception:
+        return None
 
-if model and tfidf_vectorizer and vncorenlp_model:
-    for item in admissions_data.get('questions', []):
+sbert_model = load_sentence_transformer_model()
+
+# Hàm mã hóa thống nhất: chỉ SBERT; trả torch.Tensor (N, d) hoặc (1, d)
+def encode_question_embedding(inputs):
+    try:
+        if sbert_model is not None:
+            if isinstance(inputs, list):
+                embs = sbert_model.encode(inputs, batch_size=32, normalize_embeddings=True, convert_to_tensor=True)
+                return embs  # (N, d)
+            else:
+                embs = sbert_model.encode([inputs], batch_size=32, normalize_embeddings=True, convert_to_tensor=True)
+                return embs  # (1, d)
+        else:
+            return None
+    except Exception:
+        return None
+
+# Xây dựng embeddings cho toàn bộ câu hỏi trong dữ liệu
+def build_question_embeddings_and_maps(admissions_data_local):
+    question_texts = []
+    question_items = []
+    for item in admissions_data_local.get('questions', []):
         questions = item.get('question', [])
-        if not isinstance(questions, list):
+        if isinstance(questions, str):
             questions = [questions]
         for q in questions:
-            if not isinstance(q, str) or not q.strip():
+            qn_embed = normalize_text(q)
+            if len(qn_embed) < 2:
                 continue
-            norm_q = normalize_text(q)
-            split_q = split_sticky_words(norm_q)
-            tokenized_q = ViTokenizer.tokenize(split_q)
-            unaccented_q = remove_vietnamese_accents(tokenized_q)
-            unaccented_questions_for_encoding.append(unaccented_q)
-            question_texts.append(tokenized_q)
-            question_data_map[tokenized_q] = item
-    if unaccented_questions_for_encoding:
-        question_embeddings = model.encode(unaccented_questions_for_encoding, convert_to_tensor=True)
-        tfidf_matrix = tfidf_vectorizer.fit_transform(unaccented_questions_for_encoding)
-    else:
-        question_embeddings = None
-        tfidf_matrix = None
+            question_texts.append(qn_embed)
+            question_items.append(item)
+    if not question_texts:
+        return [], None, {}
+    # Mã hóa theo batch (ưu tiên SBERT)
+    embeddings = encode_question_embedding(question_texts)
+    # Lưu map từ text -> item (ưu tiên danh sách nếu trùng)
+    text_to_item = {}
+    for t, it in zip(question_texts, question_items):
+        if t in text_to_item:
+            pass
+        else:
+            text_to_item[t] = it
+    return question_texts, embeddings, text_to_item
 
+# --- Adaptive routing helpers ---
 
-# --- HÀM TÌM KIẾM CÂU TRẢ LỜI (HYBRID SEARCH) ---
-def fuzzy_match_question(user_question, admissions_data, min_ratio=0.7):
-    user_question_norm = normalize_and_unaccent(user_question)
-    best_ratio = 0
+def fuzzy_best_item(question_text: str):
+    """Trả về (item_tốt_nhất, tỷ_lệ_fuzzy). Nếu không có, trả (None, 0)."""
     best_item = None
+    best_ratio = 0.0
     for item in admissions_data.get('questions', []):
         questions = item.get('question', [])
         if isinstance(questions, str):
             questions = [questions]
         for q in questions:
-            q_norm = normalize_and_unaccent(q)
-            ratio = difflib.SequenceMatcher(None, user_question_norm, q_norm).ratio()
-            if user_question_norm in q_norm or q_norm in user_question_norm:
-                ratio += 0.2
+            ratio = SequenceMatcher(None, question_text, q).ratio()
             if ratio > best_ratio:
                 best_ratio = ratio
                 best_item = item
-    if best_item and best_ratio >= min_ratio:
-        return best_item.get('answer'), best_item.get('images'), best_item.get('captions')
-    return None
+    return best_item, best_ratio
 
-# Tạo từ điển tra cứu cho so khớp từ khóa trực tiếp
-KEYWORD_ANSWER_MAP = {}
-for item in admissions_data.get('questions', []):
-    questions = item.get('question', [])
-    if isinstance(questions, str):
-        questions = [questions]
-    for q in questions:
-        norm_q = normalize_text(q)
-        unaccented_q = remove_vietnamese_accents(norm_q)
-        # Chỉ thêm dạng có dấu và không dấu
-        KEYWORD_ANSWER_MAP[norm_q] = item
-        KEYWORD_ANSWER_MAP[unaccented_q] = item
+def retrieve_topk_embeddings(query_text: str, top_k: int = 10):
+    """Trả về danh sách [(index, cosine)] giảm dần theo cosine, tối đa top_k. Nếu không sẵn sàng, trả []."""
+    if sbert_model is None:
+        return []
+    if 'question_embeddings' not in app.session_state or app.session_state.question_embeddings is None or len(app.session_state.question_texts) == 0:
+        return []
+    # Ưu tiên FAISS nếu có
+    index = app.session_state.get('faiss_index')
+    if index is not None:
+        try:
+            # Chuẩn hóa truy vấn và tìm top-k bằng FAISS (inner product)
+            q_emb = encode_question_embedding(normalize_text(query_text))  # (1, d)
+            q_norm = torch.nn.functional.normalize(q_emb, dim=1)
+            q_np = q_norm.detach().cpu().numpy().astype('float32')
+            k = min(top_k, app.session_state.question_embeddings.shape[0])
+            D, I = index.search(q_np, k)
+            sims = D[0].tolist(); inds = I[0].tolist()
+            return [(int(i), float(s)) for i, s in zip(inds, sims) if i >= 0]
+        except Exception:
+            pass
+    try:
+        # Fallback tính cosine bằng torch
+        q_emb = encode_question_embedding(normalize_text(query_text))  # (1, d)
+        q = torch.nn.functional.normalize(q_emb, dim=1)
+        c = torch.nn.functional.normalize(app.session_state.question_embeddings, dim=1)
+        sims = torch.mm(q, c.t()).squeeze(0)  # (N,)
+        values, indices = torch.topk(sims, k=min(top_k, sims.shape[0]))
+        return [(int(idx.item()), float(val.item())) for val, idx in zip(values, indices)]
+    except Exception:
+        return []
 
-# Tạo tập hợp tất cả từ khóa đã chuẩn hóa/loại dấu để so khớp từng phần/từng từ
-ALL_KEYWORDS_SET = set()
-KEYWORD_TO_ITEM_MAP = {}
-for item in admissions_data.get('questions', []):
-    questions = item.get('question', [])
-    if isinstance(questions, str):
-        questions = [questions]
-    for q in questions:
-        norm_q = normalize_text(q)
-        unaccented_q = remove_vietnamese_accents(norm_q)
-        ALL_KEYWORDS_SET.add(norm_q)
-        ALL_KEYWORDS_SET.add(unaccented_q)
-        KEYWORD_TO_ITEM_MAP[norm_q] = item
-        KEYWORD_TO_ITEM_MAP[unaccented_q] = item
-
+def rerank_with_cross_encoder(query_text: str, candidate_indices):
+    """Dùng cross-encoder để chấm điểm (query, candidate_text) và trả về (best_idx, best_score)."""
+    if cross_encoder_model is None or not candidate_indices:
+        return None, 0.0
+    try:
+        pairs = []
+        qt = normalize_text(query_text)
+        for idx in candidate_indices:
+            cand_text = app.session_state.question_texts[idx]
+            pairs.append((qt, normalize_text(cand_text)))
+        scores = cross_encoder_model.predict(pairs)
+        try:
+            scores = scores.tolist()
+        except Exception:
+            pass
+        if not scores:
+            return None, 0.0
+        best_pos = max(range(len(scores)), key=lambda i: scores[i])
+        return candidate_indices[best_pos], float(scores[best_pos])
+    except Exception:
+        return None, 0.0
 
 def find_answer_and_media(question):
-    if not model or question_embeddings is None or tfidf_matrix is None:
-        return "Chatbot đang gặp sự cố, vui lòng thử lại sau.", "text", None
+    # Chuẩn hóa (bỏ dấu) cho các bước đối sánh từ khóa/chuỗi
     norm_question = normalize_and_unaccent(question)
-    # Tra cứu từ khóa trực tiếp (ưu tiên khớp chính xác)
-    direct_item = KEYWORD_ANSWER_MAP.get(norm_question)
-    if direct_item:
-        answer = direct_item.get('answer', "Không có câu trả lời.")
-        images = direct_item.get('images')
-        captions = direct_item.get('captions')
-        video_url = direct_item.get('video_url')
-        if images and isinstance(images, str):
-            images = [images]
-        if video_url:
-            return answer, "video", video_url
-        if images:
-            return answer, "image", (images, captions)
-        return answer, "text", None
 
+    # 0) Đối sánh trực tiếp với dữ liệu gốc
+    for item in admissions_data.get('questions', []):
+        questions = item.get('question', [])
+        if isinstance(questions, str):
+            questions = [questions]
+        for q in questions:
+            if normalize_and_unaccent(q) == norm_question:
+                answer = item.get('answer', "Không có câu trả lời.")
+                images = item.get('images')
+                captions = item.get('captions')
+                video_url = item.get('video_url')
+                if images and isinstance(images, str):
+                    images = [images]
+                if video_url:
+                    return answer, "video", video_url
+                if images:
+                    return answer, "image", (images, captions)
+                return answer, "text", None
+
+    # 1) Bản đồ từ khóa trực tiếp
     tokens = norm_question.split()
     num_tokens = len(tokens)
 
-    # 1. Khớp chính xác (đã chuẩn hóa và loại dấu)
     direct_item = KEYWORD_TO_ITEM_MAP.get(norm_question)
     if direct_item:
         answer = direct_item.get('answer', "Không có câu trả lời.")
@@ -330,19 +481,26 @@ def find_answer_and_media(question):
             return answer, "image", (images, captions)
         return answer, "text", None
 
-    # 2. Khớp cụm từ n-gram (từ dài nhất đến ngắn nhất)
-    phrase_matches = []
-    for length in range(num_tokens, 1, -1):
-        for i in range(num_tokens - length + 1):
-            phrase = ' '.join(tokens[i:i+length])
-            item = KEYWORD_TO_ITEM_MAP.get(phrase)
-            if item:
-                phrase_matches.append((phrase, item, length))
-    # Nếu có khớp cụm từ, luôn trả về cụm từ tốt nhất và bỏ qua khớp từng từ
-    if phrase_matches:
-        # Tìm cụm từ khớp dài nhất và ưu tiên cao nhất
-        phrase_matches.sort(key=lambda x: (-x[2], -len(x[0])))
-        best_phrase, best_item, _ = phrase_matches[0]
+    # 1b) Prefix/contains fallback to catch partial phrases (e.g., 'tien ich' -> 'tien ich xung quanh truong')
+    contains_candidates = []
+    nq = norm_question
+    if len(nq) >= 3:
+        # punctuation-stripped versions to improve partial matching
+        def _pun(s: str) -> str:
+            try:
+                return re.sub(r"\W+", " ", s).strip()
+            except Exception:
+                return s
+        np = _pun(nq)
+        for key, it in KEYWORD_TO_ITEM_MAP.items():
+            if key.startswith(nq) or nq.startswith(key) or (nq in key) or (key in nq):
+                contains_candidates.append((key, it))
+                continue
+            kp = _pun(key)
+            if kp and np and (kp.startswith(np) or np.startswith(kp) or (np in kp) or (kp in np)):
+                contains_candidates.append((key, it))
+    if contains_candidates:
+        best_key, best_item = max(contains_candidates, key=lambda x: len(x[0]))
         answer = best_item.get('answer', "Không có câu trả lời.")
         images = best_item.get('images')
         captions = best_item.get('captions')
@@ -355,7 +513,30 @@ def find_answer_and_media(question):
             return answer, "image", (images, captions)
         return answer, "text", None
 
-    # 3. Nếu truy vấn có 2 từ, thử khớp cụm từ 2 từ
+    # 2) N-gram cụm từ dài nhất
+    phrase_matches = []
+    for length in range(num_tokens, 1, -1):
+        for i in range(num_tokens - length + 1):
+            phrase = ' '.join(tokens[i:i+length])
+            item = KEYWORD_TO_ITEM_MAP.get(phrase)
+            if item:
+                phrase_matches.append((phrase, item, length))
+    if phrase_matches:
+        phrase_matches.sort(key=lambda x: (-x[2], -len(x[0])))
+        _, best_item, _ = phrase_matches[0]
+        answer = best_item.get('answer', "Không có câu trả lời.")
+        images = best_item.get('images')
+        captions = best_item.get('captions')
+        video_url = best_item.get('video_url')
+        if images and isinstance(images, str):
+            images = [images]
+        if video_url:
+            return answer, "video", video_url
+        if images:
+            return answer, "image", (images, captions)
+        return answer, "text", None
+
+    # 3) Xử lý danh xưng 2 từ (thay/co + tên)
     if num_tokens == 2:
         phrase = ' '.join(tokens)
         item = KEYWORD_TO_ITEM_MAP.get(phrase)
@@ -371,11 +552,59 @@ def find_answer_and_media(question):
             if images:
                 return answer, "image", (images, captions)
             return answer, "text", None
+        honorifics = {"thay", "co"}
+        t0, t1 = tokens[0], tokens[1]
+        if t0 in honorifics:
+            direct = KEYWORD_TO_ITEM_MAP.get(t1)
+            if direct:
+                answer = direct.get('answer', "Không có câu trả lời.")
+                images = direct.get('images')
+                captions = direct.get('captions')
+                video_url = direct.get('video_url')
+                if images and isinstance(images, str):
+                    images = [images]
+                if video_url:
+                    return answer, "video", video_url
+                if images:
+                    return answer, "image", (images, captions)
+                return answer, "text", None
+            fuzzy_res = fuzzy_match_question(t1, admissions_data, min_ratio=0.6)
+            if fuzzy_res:
+                answer, images, captions = fuzzy_res
+                if images and isinstance(images, str):
+                    images = [images]
+                if images:
+                    return answer, "image", (images, captions)
+                return answer, "text", None
 
-    # 4. Nếu truy vấn >2 từ, chuyển sang khớp từng từ nếu không có khớp cụm từ
+    # 3b) Truy vấn 1 từ (tên ngắn...)
+    if num_tokens == 1:
+        single = tokens[0]
+        direct = KEYWORD_TO_ITEM_MAP.get(single)
+        if direct:
+            answer = direct.get('answer', "Không có câu trả lời.")
+            images = direct.get('images')
+            captions = direct.get('captions')
+            video_url = direct.get('video_url')
+            if images and isinstance(images, str):
+                images = [images]
+            if video_url:
+                return answer, "video", video_url
+            if images:
+                return answer, "image", (images, captions)
+            return answer, "text", None
+        fuzzy_res = fuzzy_match_question(single, admissions_data, min_ratio=0.6)
+        if fuzzy_res:
+            answer, images, captions = fuzzy_res
+            if images and isinstance(images, str):
+                images = [images]
+            if images:
+                return answer, "image", (images, captions)
+            return answer, "text", None
+
+    # 4) Truy vấn dài: chọn span tốt nhất hoặc token phù hợp nhất
     matched_items = []
     matched_tokens = []
-    # Chỉ thực hiện khớp từng từ nếu không c�� khớp cụm từ
     if num_tokens > 2 and not phrase_matches:
         best_token_item = None
         best_token_length = 0
@@ -398,7 +627,6 @@ def find_answer_and_media(question):
             if images:
                 return answer, "image", (images, captions)
             return answer, "text", None
-        # Nếu không có best_token_item, thử khớp từng từ (chỉ trả về cái tốt nhất)
         for token in tokens:
             item = KEYWORD_TO_ITEM_MAP.get(token)
             if item and item not in matched_items:
@@ -414,22 +642,19 @@ def find_answer_and_media(question):
                     questions = [questions]
                 for q in questions:
                     norm_q = normalize_and_unaccent(q)
-                    if norm_q in user_input:
-                        if len(norm_q) > best_length:
-                            best_length = len(norm_q)
-                            best_item = item
+                    if norm_q in user_input and len(norm_q) > best_length:
+                        best_length = len(norm_q)
+                        best_item = item
             if not best_item:
-                best_length = 0
                 for idx, item in enumerate(matched_items):
                     questions = item.get('question', [])
                     if isinstance(questions, str):
                         questions = [questions]
                     for q in questions:
                         norm_q = normalize_and_unaccent(q)
-                        if norm_q == matched_tokens[idx]:
-                            if len(norm_q) > best_length:
-                                best_length = len(norm_q)
-                                best_item = item
+                        if norm_q == matched_tokens[idx] and len(norm_q) > best_length:
+                            best_length = len(norm_q)
+                            best_item = item
             if not best_item:
                 best_item = matched_items[0]
             answer = best_item.get('answer', "Không có câu trả lời.")
@@ -444,27 +669,78 @@ def find_answer_and_media(question):
                 return answer, "image", (images, captions)
             return answer, "text", None
 
-    # 5. Khớp mờ (fuzzy matching) là phương án cuối cùng
-    fuzzy_result = fuzzy_match_question(question, admissions_data, min_ratio=0.6)
-    if fuzzy_result:
-        answer, images, captions = fuzzy_result
+    # 5 & 6) Adaptive routing giữa fuzzy và embeddings (+ cross-encoder rerank nếu sẵn)
+    FUZZY_STRONG = 0.88
+    EMBED_STRONG = 0.72
+    FUZZY_MIN = 0.60
+    EMBED_MIN = 0.60
+
+    best_fuzzy_item, best_fuzzy_ratio = fuzzy_best_item(question)
+
+    best_embed_index = None
+    best_embed_sim = 0.0
+    embed_candidates = []
+    if hasattr(app.session_state, 'question_embeddings') and app.session_state.question_embeddings is not None and len(app.session_state.question_texts) > 0:
+        embed_candidates = retrieve_topk_embeddings(question, top_k=10)
+        if embed_candidates:
+            best_embed_index, best_embed_sim = embed_candidates[0]
+            # Cross-encoder rerank trên cùng danh sách
+            candidate_indices = [idx for idx, _ in embed_candidates]
+            ce_idx, ce_score = rerank_with_cross_encoder(question, candidate_indices)
+            # Nếu cross-encoder hoạt động và điểm không kém, dùng nó
+            if ce_idx is not None and ce_score >= EMBED_MIN and ce_score >= best_embed_sim:
+                best_embed_index = ce_idx
+                best_embed_sim = ce_score
+
+    # Quyết định
+    chosen_item = None
+    if best_fuzzy_ratio >= FUZZY_STRONG and best_fuzzy_ratio >= (best_embed_sim + 0.10):
+        chosen_item = best_fuzzy_item
+    elif best_embed_index is not None and best_embed_sim >= EMBED_STRONG:
+        matched_question = app.session_state.question_texts[best_embed_index]
+        chosen_item = app.session_state.question_data_map.get(matched_question)
+    else:
+        # Nếu cả hai không mạnh, nhưng một trong hai vượt tối thiểu, chọn cái cao hơn
+        if best_fuzzy_ratio >= FUZZY_MIN or (best_embed_index is not None and best_embed_sim >= EMBED_MIN):
+            if (best_embed_index is not None and best_embed_sim >= EMBED_MIN) and (best_embed_sim >= best_fuzzy_ratio):
+                matched_question = app.session_state.question_texts[best_embed_index]
+                chosen_item = app.session_state.question_data_map.get(matched_question)
+            else:
+                chosen_item = best_fuzzy_item
+
+    if chosen_item:
+        answer = chosen_item.get('answer', "Không có câu trả lời.")
+        images = chosen_item.get('images')
+        captions = chosen_item.get('captions')
+        video_url = chosen_item.get('video_url')
         if images and isinstance(images, str):
             images = [images]
-        if images:
-            return answer, "image", (images, captions)
-        return answer, "text", None
-    fuzzy_result = fuzzy_match_question(norm_question, admissions_data, min_ratio=0.6)
-    if fuzzy_result:
-        answer, images, captions = fuzzy_result
-        if images and isinstance(images, str):
-            images = [images]
+        if video_url:
+            return answer, "video", video_url
         if images:
             return answer, "image", (images, captions)
         return answer, "text", None
 
-    # Không tìm thấy kết quả phù hợp
     return "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "text", None
 
+def fuzzy_match_question(question, admissions_data, min_ratio=0.6):
+    best_match = None
+    best_ratio = 0
+    for item in admissions_data.get('questions', []):
+        questions = item.get('question', [])
+        if isinstance(questions, str):
+            questions = [questions]
+        for q in questions:
+            ratio = SequenceMatcher(None, question, q).ratio()
+            if ratio > best_ratio and ratio >= min_ratio:
+                best_ratio = ratio
+                best_match = item
+    if best_match:
+        answer = best_match.get('answer', "Không có câu trả lời.")
+        images = best_match.get('images')
+        captions = best_match.get('captions')
+        return answer, images, captions
+    return None
 
 # --- FLASK ENDPOINTS ---
 @app.route('/ask', methods=['POST'])
