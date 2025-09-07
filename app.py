@@ -139,6 +139,33 @@ def get_answer(question):
     norm_question = normalize_text(question)
     # Only return early for exact question matches (collect all duplicates)
     norm_unaccent_question = normalize_and_unaccent(question)
+    # NEW: direct routing for principal variants
+    if 'hieu truong' in norm_unaccent_question:
+        # Current principal intents
+        if any(tok in norm_unaccent_question for tok in ['hien tai', 'hien nay', 'hien hanh']):
+            # Map to the existing key 'hieu truong nha truong'
+            it = KEYWORD_TO_ITEM_MAP.get('hieu truong nha truong')
+            if it:
+                ans = it.get('answer', 'Không có câu trả lời.')
+                images = it.get('images'); captions = it.get('captions'); video_url = it.get('video_url')
+                if images and isinstance(images, str): images = [images]
+                if video_url: return [{"text": ans, "media_type": "video", "media_content": video_url}]
+                if images: return [{"text": ans, "media_type": "image", "media_content": (images, captions)}]
+                return [{"text": ans, "media_type": "text", "media_content": None}]
+        # Principals across periods intents
+        if ('qua tung thoi ky' in norm_unaccent_question) or ('tung thoi ky' in norm_unaccent_question):
+            # Find any key that mentions principals across periods
+            cand = None
+            for key, it in KEYWORD_TO_ITEM_MAP.items():
+                if ('hieu truong' in key) and (('qua tung thoi ky' in key) or ('tung thoi ky' in key)):
+                    cand = it; break
+            if cand:
+                ans = cand.get('answer', 'Không có câu trả lời.')
+                images = cand.get('images'); captions = cand.get('captions'); video_url = cand.get('video_url')
+                if images and isinstance(images, str): images = [images]
+                if video_url: return [{"text": ans, "media_type": "video", "media_content": video_url}]
+                if images: return [{"text": ans, "media_type": "image", "media_content": (images, captions)}]
+                return [{"text": ans, "media_type": "text", "media_content": None}]
     exact_matches = []
     for item in admissions_data.get('questions', []):
         questions = item.get('question', [])
@@ -167,11 +194,14 @@ def get_answer(question):
             responses.append({"text": ans, "media_type": media_type, "media_content": media_content})
         return responses
 
-    # Fallback for "hiệu trưởng" keyword
-    if "hiệu trưởng" in norm_question:
-        hardcoded_response = "Bạn muốn biết về hiệu trưởng hiện tại hay hiệu trưởng qua từng thời kỳ?"
-        return [{"text": hardcoded_response, "media_type": "text", "media_content": None}]
-
+    # Fallback for "hiệu trưởng" keyword (exact only)
+    try:
+        # Match exact 'hiệu trưởng' (with accents) or unaccented 'hieu truong', optional punctuation/whitespace
+        if re.fullmatch(r"\s*hiệu\s*trưởng\s*[\?\.!]*\s*", norm_question) or re.fullmatch(r"\s*hieu\s*truong\s*[\?\.!]*\s*", norm_unaccent_question):
+            hardcoded_response = "Bạn muốn biết về hiệu trưởng hiện tại hay hiệu trưởng qua từng thời kỳ?"
+            return [{"text": hardcoded_response, "media_type": "text", "media_content": None}]
+    except Exception:
+        pass
     SCHOOL_NAME_VARIANTS = [
         "trường thpt", "thpt", "trường trung học phổ thông", "trung học phổ thông",
         "ten lơ men", "ten lơ man", "ten-lơ-man", "ten-lơ-men", "trường cấp 3", "cấp 3", "cấp ba", "trường cấp ba",
