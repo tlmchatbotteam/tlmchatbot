@@ -400,10 +400,12 @@ def retrieve_topk_embeddings(query_text: str, top_k: int = 10):
     """Trả về danh sách [(index, cosine)] giảm dần theo cosine, tối đa top_k. Nếu không sẵn sàng, trả []."""
     if sbert_model is None:
         return []
-    if 'question_embeddings' not in app.session_state or app.session_state.question_embeddings is None or len(app.session_state.question_texts) == 0:
+    # Fix: use hasattr instead of membership test on SimpleNamespace
+    if (not hasattr(app.session_state, 'question_embeddings') or app.session_state.question_embeddings is None
+            or not hasattr(app.session_state, 'question_texts') or len(app.session_state.question_texts) == 0):
         return []
     # Ưu tiên FAISS nếu có
-    index = app.session_state.get('faiss_index')
+    index = getattr(app.session_state, 'faiss_index', None)
     if index is not None:
         try:
             # Chuẩn hóa truy vấn và tìm top-k bằng FAISS (inner product)
@@ -577,6 +579,7 @@ def find_answer_and_media(question):
                 if images:
                     return answer, "image", (images, captions)
                 return answer, "text", None
+            # Fuzzy match chỉ trên tên sau danh xưng
             fuzzy_res = fuzzy_match_question(t1, admissions_data, min_ratio=0.6)
             if fuzzy_res:
                 answer, images, captions = fuzzy_res
@@ -585,6 +588,29 @@ def find_answer_and_media(question):
                 if images:
                     return answer, "image", (images, captions)
                 return answer, "text", None
+            # NEW: tìm key chứa cả danh xưng và tên (token) trong bản đồ từ khóa đã chuẩn hóa
+            try:
+                candidates = []
+                for key, it in KEYWORD_TO_ITEM_MAP.items():
+                    ktoks = key.split()
+                    if ktoks and ktoks[0] in honorifics and t1 in ktoks:
+                        candidates.append((key, it))
+                if candidates:
+                    # Ưu tiên key dài hơn (đủ họ tên) để chính xác hơn
+                    best_key, best_item = max(candidates, key=lambda x: len(x[0]))
+                    answer = best_item.get('answer', "Không có câu trả lời.")
+                    images = best_item.get('images')
+                    captions = best_item.get('captions')
+                    video_url = best_item.get('video_url')
+                    if images and isinstance(images, str):
+                        images = [images]
+                    if video_url:
+                        return answer, "video", video_url
+                    if images:
+                        return answer, "image", (images, captions)
+                    return answer, "text", None
+            except Exception:
+                pass
 
     # 3b) Truy vấn 1 từ (tên ngắn...)
     if num_tokens == 1:

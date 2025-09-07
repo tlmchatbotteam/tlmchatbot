@@ -14,9 +14,9 @@
         .image-container figure { margin: 0; }
         .image-container img { max-width: 200px; display: block; }
         .image-container figcaption { font-size: 12px; color: #555; }
-        #input-container { display: flex; margin-top: 10px; }
+        #input-container { display: flex; margin-top: 10px; gap: 8px; }
         #question { flex-grow: 1; padding: 10px; }
-        #send-btn { padding: 10px; }
+        #send-btn, #intro-btn { padding: 10px; }
     </style>
 </head>
 <body>
@@ -25,9 +25,22 @@
     <div id="input-container">
         <input type="text" id="question" placeholder="Nhập câu hỏi của bạn...">
         <button id="send-btn" onclick="sendQuestion()">Gửi</button>
+        <button id="intro-btn" onclick="sendIntroVideo()">Giới thiệu về trường</button>
     </div>
 
     <script>
+        function toEmbedUrl(url) {
+            try {
+                if (!url) return url;
+                const u = new URL(url);
+                if ((u.hostname.includes('youtube.com') && u.pathname === '/watch') || u.hostname === 'youtu.be') {
+                    const id = u.hostname === 'youtu.be' ? u.pathname.slice(1) : u.searchParams.get('v');
+                    if (id) return `https://www.youtube.com/embed/${id}`;
+                }
+            } catch (_) { /* ignore */ }
+            return url;
+        }
+
         async function sendQuestion() {
             const questionInput = document.getElementById('question');
             const question = questionInput.value.trim();
@@ -47,59 +60,7 @@
                 });
 
                 const data = await response.json();
-
-                // data is expected to be an array of entries
-                const entries = Array.isArray(data) ? data : (data ? [data] : []);
-
-                if (entries.length === 0) {
-                    const emptyMsg = document.createElement('div');
-                    emptyMsg.className = 'message bot';
-                    emptyMsg.textContent = 'Không nhận được phản hồi.';
-                    chatContainer.appendChild(emptyMsg);
-                } else {
-                    entries.forEach((item) => {
-                        const botMessage = document.createElement('div');
-                        botMessage.className = 'message bot';
-
-                        if (item.text) {
-                            const p = document.createElement('p');
-                            p.textContent = item.text;
-                            botMessage.appendChild(p);
-                        }
-
-                        if (item.images && item.images.length) {
-                            const imageContainer = document.createElement('div');
-                            imageContainer.className = 'image-container';
-                            item.images.forEach((img, index) => {
-                                const figure = document.createElement('figure');
-                                const imgElement = document.createElement('img');
-                                imgElement.src = img;
-                                imgElement.alt = `Ảnh ${index + 1}`;
-                                const caption = document.createElement('figcaption');
-                                const cap = (item.captions && item.captions[index]) ? item.captions[index] : `Ảnh ${index + 1}`;
-                                caption.textContent = cap;
-                                figure.appendChild(imgElement);
-                                figure.appendChild(caption);
-                                imageContainer.appendChild(figure);
-                            });
-                            botMessage.appendChild(imageContainer);
-                        }
-
-                        if (item.video_url) {
-                            const videoElement = document.createElement('iframe');
-                            videoElement.src = item.video_url;
-                            videoElement.width = '560';
-                            videoElement.height = '315';
-                            videoElement.frameBorder = '0';
-                            videoElement.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-                            videoElement.allowFullscreen = true;
-                            botMessage.appendChild(videoElement);
-                        }
-
-                        chatContainer.appendChild(botMessage);
-                    });
-                }
-
+                renderEntries(data);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
                 questionInput.value = '';
             } catch (error) {
@@ -109,6 +70,86 @@
                 errorMessage.textContent = 'Có lỗi xảy ra. Vui lòng thử lại!';
                 chatContainer.appendChild(errorMessage);
             }
+        }
+
+        async function sendIntroVideo() {
+            const chatContainer = document.getElementById('chat-container');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = 'Giới thiệu về trường';
+            chatContainer.appendChild(userMessage);
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: 'video' })
+                });
+                const data = await response.json();
+                renderEntries(data);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            } catch (error) {
+                console.error('Error:', error);
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'message bot';
+                errorMessage.textContent = 'Có lỗi xảy ra. Vui lòng thử lại!';
+                chatContainer.appendChild(errorMessage);
+            }
+        }
+
+        function renderEntries(data) {
+            const chatContainer = document.getElementById('chat-container');
+            const entries = Array.isArray(data) ? data : (data ? [data] : []);
+
+            if (entries.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.className = 'message bot';
+                emptyMsg.textContent = 'Không nhận được phản hồi.';
+                chatContainer.appendChild(emptyMsg);
+                return;
+            }
+
+            entries.forEach((item) => {
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot';
+
+                if (item.text) {
+                    const p = document.createElement('p');
+                    p.textContent = item.text;
+                    botMessage.appendChild(p);
+                }
+
+                if (item.images && item.images.length) {
+                    const imageContainer = document.createElement('div');
+                    imageContainer.className = 'image-container';
+                    item.images.forEach((img, index) => {
+                        const figure = document.createElement('figure');
+                        const imgElement = document.createElement('img');
+                        imgElement.src = img;
+                        imgElement.alt = `Ảnh ${index + 1}`;
+                        const caption = document.createElement('figcaption');
+                        const cap = (item.captions && item.captions[index]) ? item.captions[index] : `Ảnh ${index + 1}`;
+                        caption.textContent = cap;
+                        figure.appendChild(imgElement);
+                        figure.appendChild(caption);
+                        imageContainer.appendChild(figure);
+                    });
+                    botMessage.appendChild(imageContainer);
+                }
+
+                if (item.video_url) {
+                    const videoElement = document.createElement('iframe');
+                    videoElement.src = toEmbedUrl(item.video_url);
+                    videoElement.width = '560';
+                    videoElement.height = '315';
+                    videoElement.frameBorder = '0';
+                    videoElement.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+                    videoElement.allowFullscreen = true;
+                    botMessage.appendChild(videoElement);
+                }
+
+                chatContainer.appendChild(botMessage);
+            });
         }
 
         document.getElementById('question').addEventListener('keypress', (e) => {
