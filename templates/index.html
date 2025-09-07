@@ -1,90 +1,119 @@
 <!DOCTYPE html>
-     <html lang="vi">
-     <head>
-         <meta charset="UTF-8">
-         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-         <title>Chatbot Tuyển Sinh</title>
-         <style>
-             body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-             #chat-container { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: scroll; }
-             .message { margin: 10px; padding: 10px; border-radius: 5px; }
-             .user { background-color: #e1f5fe; text-align: right; }
-             .bot { background-color: #f5f5f5; }
-             .image-container { display: flex; flex-wrap: wrap; gap: 10px; }
-             .image-container img { max-width: 200px; }
-             #input-container { display: flex; margin-top: 10px; }
-             #question { flex-grow: 1; padding: 10px; }
-             #send-btn { padding: 10px; }
-         </style>
-     </head>
-     <body>
-         <h1>Chatbot Tuyển Sinh</h1>
-         <div id="chat-container"></div>
-         <div id="input-container">
-             <input type="text" id="question" placeholder="Nhập câu hỏi của bạn...">
-             <button id="send-btn" onclick="sendQuestion()">Gửi</button>
-         </div>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Tuyển Sinh</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        #chat-container { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: scroll; }
+        .message { margin: 10px; padding: 10px; border-radius: 5px; }
+        .user { background-color: #e1f5fe; text-align: right; }
+        .bot { background-color: #f5f5f5; }
+        .image-container { display: flex; flex-wrap: wrap; gap: 10px; }
+        .image-container figure { margin: 0; }
+        .image-container img { max-width: 200px; display: block; }
+        .image-container figcaption { font-size: 12px; color: #555; }
+        #input-container { display: flex; margin-top: 10px; }
+        #question { flex-grow: 1; padding: 10px; }
+        #send-btn { padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Chatbot Tuyển Sinh</h1>
+    <div id="chat-container"></div>
+    <div id="input-container">
+        <input type="text" id="question" placeholder="Nhập câu hỏi của bạn...">
+        <button id="send-btn" onclick="sendQuestion()">Gửi</button>
+    </div>
 
-         <script>
-             async function sendQuestion() {
-                 const questionInput = document.getElementById('question');
-                 const question = questionInput.value.trim();
-                 if (!question) return;
+    <script>
+        async function sendQuestion() {
+            const questionInput = document.getElementById('question');
+            const question = questionInput.value.trim();
+            if (!question) return;
 
-                 const chatContainer = document.getElementById('chat-container');
-                 const userMessage = document.createElement('div');
-                 userMessage.className = 'message user';
-                 userMessage.textContent = question;
-                 chatContainer.appendChild(userMessage);
+            const chatContainer = document.getElementById('chat-container');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = question;
+            chatContainer.appendChild(userMessage);
 
-                 try {
-                     const response = await fetch('/ask', {
-                         method: 'POST',
-                         headers: { 'Content-Type': 'application/json' },
-                         body: JSON.stringify({ question })
-                     });
-                     const data = await response.json();
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
 
-                     const botMessage = document.createElement('div');
-                     botMessage.className = 'message bot';
-                     botMessage.textContent = data.response;
+                const data = await response.json();
 
-                     if (data.media_type === 'image' || data.media_type === 'multimedia') {
-                         const imageContainer = document.createElement('div');
-                         imageContainer.className = 'image-container';
-                         data.images.forEach((img, index) => {
-                             const imgElement = document.createElement('img');
-                             imgElement.src = img;
-                             const caption = document.createElement('div');
-                             caption.textContent = data.captions[index] || `Ảnh ${index + 1}`;
-                             imageContainer.appendChild(imgElement);
-                             imageContainer.appendChild(caption);
-                         });
-                         botMessage.appendChild(imageContainer);
-                     }
-                     if (data.media_type === 'video' || data.media_type === 'multimedia') {
-                         const videoElement = document.createElement('iframe');
-                         videoElement.src = data.video_url;
-                         videoElement.width = '560';
-                         videoElement.height = '315';
-                         botMessage.appendChild(videoElement);
-                     }
+                // data is expected to be an array of entries
+                const entries = Array.isArray(data) ? data : (data ? [data] : []);
 
-                     chatContainer.appendChild(botMessage);
-                     chatContainer.scrollTop = chatContainer.scrollHeight;
-                     questionInput.value = '';
-                 } catch (error) {
-                     console.error('Error:', error);
-                     const errorMessage = document.createElement('div');
-                     errorMessage.className = 'message bot';
-                     errorMessage.textContent = 'Có lỗi xảy ra. Vui lòng thử lại!';
-                     chatContainer.appendChild(errorMessage);
-                 }
-             }
+                if (entries.length === 0) {
+                    const emptyMsg = document.createElement('div');
+                    emptyMsg.className = 'message bot';
+                    emptyMsg.textContent = 'Không nhận được phản hồi.';
+                    chatContainer.appendChild(emptyMsg);
+                } else {
+                    entries.forEach((item) => {
+                        const botMessage = document.createElement('div');
+                        botMessage.className = 'message bot';
 
-             document.getElementById('question').addEventListener('keypress', (e) => {
-                 if (e.key === 'Enter') sendQuestion();
-             });
-         </script>
-     </body>
-     </html>
+                        if (item.text) {
+                            const p = document.createElement('p');
+                            p.textContent = item.text;
+                            botMessage.appendChild(p);
+                        }
+
+                        if (item.images && item.images.length) {
+                            const imageContainer = document.createElement('div');
+                            imageContainer.className = 'image-container';
+                            item.images.forEach((img, index) => {
+                                const figure = document.createElement('figure');
+                                const imgElement = document.createElement('img');
+                                imgElement.src = img;
+                                imgElement.alt = `Ảnh ${index + 1}`;
+                                const caption = document.createElement('figcaption');
+                                const cap = (item.captions && item.captions[index]) ? item.captions[index] : `Ảnh ${index + 1}`;
+                                caption.textContent = cap;
+                                figure.appendChild(imgElement);
+                                figure.appendChild(caption);
+                                imageContainer.appendChild(figure);
+                            });
+                            botMessage.appendChild(imageContainer);
+                        }
+
+                        if (item.video_url) {
+                            const videoElement = document.createElement('iframe');
+                            videoElement.src = item.video_url;
+                            videoElement.width = '560';
+                            videoElement.height = '315';
+                            videoElement.frameBorder = '0';
+                            videoElement.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+                            videoElement.allowFullscreen = true;
+                            botMessage.appendChild(videoElement);
+                        }
+
+                        chatContainer.appendChild(botMessage);
+                    });
+                }
+
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                questionInput.value = '';
+            } catch (error) {
+                console.error('Error:', error);
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'message bot';
+                errorMessage.textContent = 'Có lỗi xảy ra. Vui lòng thử lại!';
+                chatContainer.appendChild(errorMessage);
+            }
+        }
+
+        document.getElementById('question').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendQuestion();
+        });
+    </script>
+</body>
+</html>

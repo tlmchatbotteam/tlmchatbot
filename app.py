@@ -6,10 +6,19 @@ import re
 import torch
 import unicodedata
 from difflib import SequenceMatcher
-from flask import Flask, request, jsonify, send_from_directory
+from types import SimpleNamespace
+from flask import Flask, request, jsonify, send_from_directory, render_template
 
 # --- KHỞI TẠO FLASK APP ---
 app = Flask(__name__)
+# Provide a lightweight session_state to avoid AttributeError in optional features
+if not hasattr(app, 'session_state'):
+    app.session_state = SimpleNamespace(
+        question_embeddings=None,
+        question_texts=[],
+        question_data_map={},
+        faiss_index=None
+    )
 
 # --- CẤU HÌNH VÀ TẢI DỮ LIỆU ---
 try:
@@ -776,7 +785,7 @@ def serve_image(filename):
 
 @app.route('/')
 def index():
-    return "Chatbot Tuyển sinh Flask API. Sử dụng endpoint /ask để hỏi."
+    return render_template('index.html')
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080)
