@@ -30,7 +30,7 @@
 
         /* App shell */
         .shell { min-height: 100vh; display: grid; grid-template-columns: 260px 1fr; }
-        .sidebar { background: rgba(255,255,255,0.9); border-right: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; background: rgba(255,255,255,0.9); border-right: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         .sidebar .logo { display: flex; align-items: center; justify-content: center; }
         .sidebar .logo img { max-height: 80px; width: auto; object-fit: contain; }
         .sidebar .nav { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
@@ -71,16 +71,23 @@
         /* Balanced layout for text + single image */
         .answer { display: grid; grid-template-columns: 1.1fr 0.9fr; align-items: start; gap: 16px; }
         .answer.has-image .text { align-self: start; }
-        .answer .text p { max-width: none; }
+        .answer .text p { max-width: none; /* override .bot p width cap */ margin: 0 0 8px; /* avoid auto-centering inside grid cell */ }
         .answer .media { }
+        .answer .media img { width: 100%; height: auto; max-height: 420px; object-fit: cover; border-radius: 10px; }
 
         /* Image gallery */
-        .image-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+        .image-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
         .image-container.single { grid-template-columns: 1fr; }
         .image-container figure { margin: 0; background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
         .image-container img { width: 100%; height: auto; display: block; }
         .image-container figcaption { padding: 6px 8px; font-size: 0.9rem; color: var(--muted); }
         .bot .image-container, .bot .video { margin-left: auto; margin-right: auto; max-width: 1100px; }
+
+        /* Stacked image cards like the reference UI */
+        .image-list { display: flex; flex-direction: column; gap: 12px; }
+        .image-list figure { width: min(720px, 100%); margin: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .image-list img { width: 100%; height: auto; display: block; }
+        .image-list figcaption { padding: 6px 8px; font-size: 0.9rem; color: var(--muted); }
 
         .video { position: relative; width: min(960px, 100%); aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; }
         .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
@@ -92,8 +99,8 @@
         #send-btn { padding: 12px 14px; border: none; border-radius: 999px; cursor: pointer; color: #fff; background: var(--brand); font-size: 0.95rem; }
         #send-btn:hover { background: var(--brand-600); }
 
-        /* Full-width answers for balance */
-        .bot p { max-width: 75ch; margin: 0 auto 8px; }
+        /* Full-width answers for balance - left aligned like the reference */
+        .bot p { max-width: 75ch; margin: 0 0 8px; }
 
         /* Responsive */
         @media (max-width: 1024px) {
@@ -104,13 +111,35 @@
         }
         @media (max-width: 768px) {
             .answer { grid-template-columns: 1fr; }
+            .answer .media img { max-height: 60vh; }
         }
         @media (max-width: 640px) {
             .shell { grid-template-columns: 1fr; }
-            .sidebar { position: sticky; top: 0; z-index: 30; flex-direction: row; align-items: center; justify-content: space-between; }
+            .sidebar { position: sticky; top: 0; z-index: 30; height: auto; overflow: visible; flex-direction: row; align-items: center; justify-content: space-between; }
             .sidebar .nav { flex-direction: row; }
             #input-container { padding: 10px 12px; }
         }
+
+        /* Typing indicator */
+        .typing-line { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
+        .dots { display: inline-flex; align-items: center; gap: 4px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand); display: inline-block; animation: dotPulse 1.2s infinite ease-in-out; opacity: 0.9; }
+        .dot:nth-child(1) { animation-delay: 0s; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotPulse {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Lightbox */
+        .lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 24px; }
+        .lightbox-overlay.show { display: flex; }
+        .lightbox-content { position: relative; max-width: 92vw; max-height: 88vh; display: flex; flex-direction: column; align-items: center; }
+        .lightbox-image { max-width: 100%; max-height: 80vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); background: #111; }
+        .lightbox-caption { color: #e5e7eb; margin-top: 10px; text-align: center; font-size: 0.95rem; max-width: 90vw; }
+        .lightbox-close { position: absolute; top: -12px; right: -12px; width: 36px; height: 36px; border: none; border-radius: 999px; background: #fff; color: #111; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.25); font-size: 20px; line-height: 36px; padding: 0; }
+        .lightbox-close:hover { background: #f3f4f6; }
     </style>
 </head>
 <body>
@@ -158,6 +187,15 @@
         </section>
     </div>
 
+    <!-- Lightbox root -->
+    <div id="lightbox" class="lightbox-overlay" aria-hidden="true" tabindex="-1">
+        <div class="lightbox-content" role="dialog" aria-modal="true">
+            <button class="lightbox-close" aria-label="Đóng">×</button>
+            <img class="lightbox-image" src="" alt="Hình ảnh" />
+            <div class="lightbox-caption"></div>
+        </div>
+    </div>
+
     <script>
         function toEmbedUrl(url) {
             try {
@@ -189,6 +227,44 @@
             sendQuestion();
         }
 
+        function showTyping() {
+            const chatContainer = document.getElementById('chat-container');
+            const typing = document.createElement('div');
+            typing.className = 'message bot';
+            typing.dataset.typing = 'true';
+            const p = document.createElement('p');
+            const wrap = document.createElement('span');
+            wrap.className = 'typing-line';
+            const dots = document.createElement('span');
+            dots.className = 'dots';
+            for (let i = 0; i < 3; i++) {
+                const d = document.createElement('span');
+                d.className = 'dot';
+                dots.appendChild(d);
+            }
+            const text = document.createElement('span');
+            text.textContent = 'Đang suy nghĩ...';
+            wrap.appendChild(dots);
+            wrap.appendChild(text);
+            p.appendChild(wrap);
+            typing.appendChild(p);
+            chatContainer.appendChild(typing);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            updateEmptyStateVisibility();
+            return typing;
+        }
+        function hideTyping(typingEl) {
+            try {
+                if (typingEl && typingEl.parentNode) typingEl.parentNode.removeChild(typingEl);
+                else {
+                    // Fallback: remove any leftover typing bubbles
+                    const chatContainer = document.getElementById('chat-container');
+                    const leftovers = chatContainer.querySelectorAll('[data-typing="true"]');
+                    leftovers.forEach(el => el.remove());
+                }
+            } catch (_) { /* noop */ }
+        }
+
         async function sendQuestion() {
             const questionInput = document.getElementById('question');
             const question = questionInput.value.trim();
@@ -201,6 +277,7 @@
             chatContainer.appendChild(userMessage);
             updateEmptyStateVisibility();
 
+            const typingEl = showTyping();
             try {
                 const response = await fetch('/ask', {
                     method: 'POST',
@@ -209,11 +286,13 @@
                 });
 
                 const data = await response.json();
+                hideTyping(typingEl);
                 renderEntries(data);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
                 questionInput.value = '';
             } catch (error) {
                 console.error('Error:', error);
+                hideTyping(typingEl);
                 const errorMessage = document.createElement('div');
                 errorMessage.className = 'message bot';
                 errorMessage.textContent = 'Có lỗi xảy ra. Vui lòng thử lại!';
@@ -231,6 +310,7 @@
             chatContainer.appendChild(userMessage);
             updateEmptyStateVisibility();
 
+            const typingEl = showTyping();
             try {
                 const response = await fetch('/ask', {
                     method: 'POST',
@@ -238,10 +318,12 @@
                     body: JSON.stringify({ question: 'video' })
                 });
                 const data = await response.json();
+                hideTyping(typingEl);
                 renderEntries(data);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             } catch (error) {
                 console.error('Error:', error);
+                hideTyping(typingEl);
                 const errorMessage = document.createElement('div');
                 errorMessage.className = 'message bot';
                 errorMessage.textContent = 'Có lỗi xảy ra. Vui lòng thử lại!';
@@ -312,6 +394,7 @@
 
         async function askAndRender(question) {
             const chatContainer = document.getElementById('chat-container');
+            const typingEl = showTyping();
             try {
                 const response = await fetch('/ask', {
                     method: 'POST',
@@ -319,10 +402,12 @@
                     body: JSON.stringify({ question })
                 });
                 const data = await response.json();
+                hideTyping(typingEl);
                 renderEntries(data);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             } catch (error) {
                 console.error('Error:', error);
+                hideTyping(typingEl);
                 const errorMessage = document.createElement('div');
                 errorMessage.className = 'message bot';
                 errorMessage.textContent = 'Có lỗi xảy ra. Vui lòng thử lại!';
@@ -353,103 +438,45 @@
                 const hasImages = Array.isArray(item.images) && item.images.length > 0;
                 const hasVideo = !!item.video_url;
 
-                if (hasText && hasImages && !hasVideo) {
-                    // First image side-by-side, rest as gallery below
-                    const answer = document.createElement('div');
-                    answer.className = 'answer has-image';
-
-                    const textDiv = document.createElement('div');
-                    textDiv.className = 'text';
+                // Text first
+                if (hasText) {
                     const p = document.createElement('p');
                     p.textContent = item.text;
-                    textDiv.appendChild(p);
+                    botMessage.appendChild(p);
+                }
 
-                    const mediaDiv = document.createElement('div');
-                    mediaDiv.className = 'media';
-                    const imageContainer = document.createElement('div');
-                    imageContainer.className = 'image-container single';
+                // Images stacked as large cards (like the reference UI)
+                if (hasImages) {
+                    const list = document.createElement('div');
+                    list.className = 'image-list';
+                    item.images.forEach((img, index) => {
+                        const figure = document.createElement('figure');
+                        const imgElement = document.createElement('img');
+                        imgElement.src = img;
+                        const cap = (item.captions && item.captions[index]) ? item.captions[index] : `Ảnh ${index + 1}`;
+                        imgElement.alt = cap;
+                        imgElement.loading = 'lazy';
+                        imgElement.style.cursor = 'zoom-in';
+                        imgElement.onclick = () => window.open(img, '_blank');
+                        const caption = document.createElement('figcaption');
+                        caption.textContent = cap;
+                        figure.appendChild(imgElement);
+                        figure.appendChild(caption);
+                        list.appendChild(figure);
+                    });
+                    botMessage.appendChild(list);
+                }
 
-                    const figure = document.createElement('figure');
-                    const imgElement = document.createElement('img');
-                    const firstImg = item.images[0];
-                    imgElement.src = firstImg;
-                    const firstCap = (item.captions && item.captions[0]) ? item.captions[0] : 'Hình ảnh';
-                    imgElement.alt = firstCap;
-                    imgElement.loading = 'lazy';
-                    imgElement.style.cursor = 'zoom-in';
-                    imgElement.onclick = () => window.open(firstImg, '_blank');
-
-                    const caption = document.createElement('figcaption');
-                    caption.textContent = firstCap;
-
-                    figure.appendChild(imgElement);
-                    figure.appendChild(caption);
-                    imageContainer.appendChild(figure);
-                    mediaDiv.appendChild(imageContainer);
-
-                    answer.appendChild(textDiv);
-                    answer.appendChild(mediaDiv);
-                    botMessage.appendChild(answer);
-
-                    if (item.images.length > 1) {
-                        const gallery = document.createElement('div');
-                        gallery.className = 'image-container';
-                        item.images.slice(1).forEach((img, idx) => {
-                            const figure2 = document.createElement('figure');
-                            const img2 = document.createElement('img');
-                            img2.src = img;
-                            const cap2 = (item.captions && item.captions[idx + 1]) ? item.captions[idx + 1] : `Ảnh ${idx + 2}`;
-                            img2.alt = cap2;
-                            img2.loading = 'lazy';
-                            img2.style.cursor = 'zoom-in';
-                            img2.onclick = () => window.open(img, '_blank');
-                            const caption2 = document.createElement('figcaption');
-                            caption2.textContent = cap2;
-                            figure2.appendChild(img2);
-                            figure2.appendChild(caption2);
-                            gallery.appendChild(figure2);
-                        });
-                        botMessage.appendChild(gallery);
-                    }
-                } else {
-                    if (hasText) {
-                        const p = document.createElement('p');
-                        p.textContent = item.text;
-                        botMessage.appendChild(p);
-                    }
-
-                    if (hasImages) {
-                        const imageContainer = document.createElement('div');
-                        imageContainer.className = 'image-container';
-                        item.images.forEach((img, index) => {
-                            const figure = document.createElement('figure');
-                            const imgElement = document.createElement('img');
-                            imgElement.src = img;
-                            const cap = (item.captions && item.captions[index]) ? item.captions[index] : `Ảnh ${index + 1}`;
-                            imgElement.alt = cap;
-                            imgElement.loading = 'lazy';
-                            imgElement.style.cursor = 'zoom-in';
-                            imgElement.onclick = () => window.open(img, '_blank');
-
-                            const caption = document.createElement('figcaption');
-                            caption.textContent = cap;
-                            figure.appendChild(imgElement);
-                            figure.appendChild(caption);
-                            imageContainer.appendChild(figure);
-                        });
-                        botMessage.appendChild(imageContainer);
-                    }
-
-                    if (hasVideo) {
-                        const wrap = document.createElement('div');
-                        wrap.className = 'video';
-                        const iframe = document.createElement('iframe');
-                        iframe.src = toEmbedUrl(item.video_url);
-                        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-                        iframe.allowFullscreen = true;
-                        wrap.appendChild(iframe);
-                        botMessage.appendChild(wrap);
-                    }
+                // Optional video
+                if (hasVideo) {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'video';
+                    const iframe = document.createElement('iframe');
+                    iframe.src = toEmbedUrl(item.video_url);
+                    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+                    iframe.allowFullscreen = true;
+                    wrap.appendChild(iframe);
+                    botMessage.appendChild(wrap);
                 }
 
                 chatContainer.appendChild(botMessage);
@@ -472,6 +499,63 @@
 
         // Initialize empty state visibility
         updateEmptyStateVisibility();
+
+        // Lightbox helpers
+        function openLightbox(src, captionText) {
+            const lb = document.getElementById('lightbox');
+            if (!lb) return;
+            const img = lb.querySelector('.lightbox-image');
+            const cap = lb.querySelector('.lightbox-caption');
+            img.src = src || '';
+            img.alt = captionText || 'Hình ảnh';
+            cap.textContent = captionText || '';
+            lb.classList.add('show');
+            lb.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            lb.focus();
+        }
+        function closeLightbox() {
+            const lb = document.getElementById('lightbox');
+            if (!lb) return;
+            const img = lb.querySelector('.lightbox-image');
+            const cap = lb.querySelector('.lightbox-caption');
+            lb.classList.remove('show');
+            lb.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            img.src = '';
+            img.alt = '';
+            cap.textContent = '';
+        }
+        (function wireLightbox() {
+            const lb = document.getElementById('lightbox');
+            if (!lb) return;
+            const closeBtn = lb.querySelector('.lightbox-close');
+            closeBtn.addEventListener('click', closeLightbox);
+            lb.addEventListener('click', (e) => { if (e.target === lb) closeLightbox(); });
+            window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+        })();
+
+        // Replace window.open image handlers with lightbox opens inside renderEntries
+        const _origRenderEntries = typeof renderEntries === 'function' ? renderEntries : null;
+        if (_origRenderEntries) {
+            renderEntries = function(data) {
+                const result = _origRenderEntries.call(this, data);
+                try {
+                    const chatContainer = document.getElementById('chat-container');
+                    if (!chatContainer) return result;
+                    // Rebind ALL bot images to open in the lightbox
+                    chatContainer.querySelectorAll('.message.bot figure').forEach((fig) => {
+                        const img = fig.querySelector('img');
+                        const cap = fig.querySelector('figcaption');
+                        if (img) {
+                            img.onclick = () => openLightbox(img.src, cap ? cap.textContent : 'Hình ảnh');
+                            img.style.cursor = 'zoom-in';
+                        }
+                    });
+                } catch (_) { /* no-op */ }
+                return result;
+            }
+        }
     </script>
 </body>
 </html>

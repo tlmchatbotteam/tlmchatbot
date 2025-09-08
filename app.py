@@ -104,68 +104,167 @@ def strip_leadin_phrases(text: str) -> str:
     norm = normalize_and_unaccent(text)
     leadins = [
         r'^toi\s*muon\s*biet\s*ve\s*',
-        r'^toi\s*muon\s*biet\s*',  # new: handle sentences without "về"
-        r'^toi\s*muon\s*hoi\s*',   # new: handle "tôi muốn hỏi"
+        r'^toi\s*muon\s*biet\s*',
+        r'^toi\s*muon\s*hoi\s*',
         r'^cho\s*t\s*oi\s*biet\s*ve\s*',
         r'^cho\s*toi\s*biet\s*ve\s*',
         r'^thong\s*tin\s*ve\s*',
         r'^gioi\s*thieu\s*ve\s*',
-        r'^ve\s*'
+        r'^ve\s*',
+        # NEW: common school/generic prefixes
+        r'^truong\s*co\s*',
+        r'^truong\s*co\s*cac\s*',
+        r'^truong\s*co\s*nhung\s*'
     ]
     for pat in leadins:
         norm = re.sub(pat, '', norm)
     # Trim trailing filler words like "của"/"về"
     norm = re.sub(r'\b(cua|ve)\s*$', '', norm).strip()
-    # Also trim trailing "cua truong ..." (generic school tail) to expose core keyword
+    # NEW: trim common Vietnamese interrogatives at tail
+    norm = re.sub(r'\b(bao\s*nhieu|nao|khong|khong\s*\?|gi|gi\s*\?)\s*$', '', norm).strip()
+    # Also trim trailing "cua truong ..." to expose core keyword
     norm = re.sub(r'\bcua\s*(truong|thpt|trg|truong\s*thpt|trung\s*hoc\s*pho\s*thong)\b.*$', '', norm).strip()
     return norm
 
 # Tách ý nhỏ cho câu hỏi nhiều ý, không dấu
+
 def split_subquestions(text):
     norm_text = normalize_and_unaccent(text)
     # Chỉ tách theo các liên từ rõ ràng, dùng non-capturing group để không giữ lại từ nối
     conjunctions = [
         r'va', r'và', r'hoac', r'hay',
-        r'voi', r'với',
+        r'voi', r'với', r'voi\s*lai', r'với\s*lại', r'vs',
         r'cung', r'cùng', r'cung\s*voi', r'cùng\s*với',
-        r'roi', r'rồi', r'sau\s*do'
+        r'roi', r'rồi', r'xong', r'tiep', r'tiep\s*theo', r'sau\s*do', r'sau\s*do',
+        r'con', r'nua', r'kèm', r'kem'
     ]
-    pattern = r'[;,]|\b(?:' + '|'.join(conjunctions) + r')\b'
+    # Thêm các ký tự phân tách phổ biến: ; , / + & |
+    sep_chars = r'[;,/\+&|]'
+    pattern = sep_chars + r'|\b(?:' + '|'.join(conjunctions) + r')\b'
     parts = re.split(pattern, norm_text)
     subqs = [p.strip() for p in parts if p and len(p.strip()) > 2]
+
+    # NEW: tách theo đánh số liệt kê (1., 2), i), a), - ...) nếu chưa tách được
+    if len(subqs) <= 1:
+        numbered = re.split(r'(?:\b\d+[).]|\bthu\s*(?:nhat|hai|ba|tu|nam|sau|bay|tam|chin)\b|\b(?:i|ii|iii|iv|v|vi|vii|viii|ix|x)\))', norm_text)
+        numbered = [s.strip() for s in numbered if s and len(s.strip()) > 2 and not re.fullmatch(r'(?:i|ii|iii|iv|v|vi|vii|viii|ix|x|nhat|hai|ba|tu|nam|sau|bay|tam|chin)', s)]
+        if len(numbered) > 1:
+            subqs = numbered
+
+    # NEW: nếu không tách được nhưng có nhiều danh xưng (thay/co), tách theo mốc danh xưng
+    if len(subqs) <= 1:
+        tokens = norm_text.split()
+        honorifics = {"thay", "co"}
+        segments = []
+        current = []
+        for t in tokens:
+            if t in honorifics:
+                if current:
+                    segments.append(' '.join(current).strip())
+                    current = []
+                current = [t]
+            else:
+                if current:
+                    current.append(t)
+        if current:
+            segments.append(' '.join(current).strip())
+        # Giữ các đoạn có ít nhất 2 token (danh xưng + tên)
+        segments = [s for s in segments if len(s.split()) >= 2]
+        if len(segments) > 1:
+            return segments
+
+    # NEW: nếu vẫn không tách được, thử tách theo các từ khóa đã biết trong kho dữ liệu (khớp liên tiếp)
+    if len(subqs) <= 1:
+        try:
+            tokens = norm_text.split()
+            n = len(tokens)
+            if n >= 2 and KEYWORD_TO_ITEM_MAP:
+                # Tính độ dài cụm từ khóa lớn nhất
+                try:
+                    max_key_len = max(len(k.split()) for k in KEYWORD_TO_ITEM_MAP.keys())
+                except Exception:
+                    max_key_len = 6
+                STOP_TOKENS = {"truong", "co", "cua", "ve", "la", "nao", "gi", "cai", "cac", "nhung", "o", "dau"}
+                i = 0
+                found_spans = []
+                while i < n:
+                    matched = False
+                    Lmax = min(max_key_len, n - i)
+                    for L in range(Lmax, 0, -1):
+                        phrase = ' '.join(tokens[i:i+L])
+                        if phrase in KEYWORD_TO_ITEM_MAP:
+                            # Bỏ qua match quá yếu (toàn stop token 1-2 từ)
+                            toks = phrase.split()
+                            if len(toks) == 1 and toks[0] in STOP_TOKENS:
+                                continue
+                            if len(toks) == 2 and all(t in STOP_TOKENS for t in toks):
+                                continue
+                            found_spans.append((i, i+L, phrase))
+                            i += L
+                            matched = True
+                            break
+                    if not matched:
+                        i += 1
+                if len(found_spans) > 1:
+                    # Hợp nhất các span tách biệt để tạo các tiểu ý
+                    result = [p for (_, _, p) in found_spans]
+                    # Loại bỏ trùng lặp liên tiếp
+                    dedup = []
+                    for p in result:
+                        if not dedup or dedup[-1] != p:
+                            dedup.append(p)
+                    if len(dedup) > 1:
+                        return dedup
+        except Exception:
+            pass
+
+    # NEW: nếu vẫn không tách được, thử bỏ từ đệm (gap-tolerant) rồi quét từ khóa
+    if len(subqs) <= 1:
+        try:
+            tokens = norm_text.split()
+            if tokens and KEYWORD_TO_ITEM_MAP:
+                FILLERS = {
+                    'la', 'thi', 'thoi', 'nhe', 'nha', 'voi', 'va', 'và', 'vs', 'lai', 'nua', 'cai', 'cua', 've', 'la',
+                    'cac', 'nhung', 'o', 'dau', 'roi', 'xong', 'tiep', 'sau', 'do', 'tiep', 'theo'
+                }
+                filtered = [t for t in tokens if t not in FILLERS]
+                if len(filtered) >= 2:
+                    try:
+                        max_key_len = max(len(k.split()) for k in KEYWORD_TO_ITEM_MAP.keys())
+                    except Exception:
+                        max_key_len = 6
+                    i = 0
+                    n = len(filtered)
+                    spans = []
+                    while i < n:
+                        matched = False
+                        Lmax = min(max_key_len, n - i)
+                        for L in range(Lmax, 0, -1):
+                            phrase = ' '.join(filtered[i:i+L])
+                            if phrase in KEYWORD_TO_ITEM_MAP:
+                                spans.append(phrase)
+                                i += L
+                                matched = True
+                                break
+                        if not matched:
+                            i += 1
+                    if len(spans) > 1:
+                        # Loại trùng lặp liên tiếp
+                        dedup2 = []
+                        for p in spans:
+                            if not dedup2 or dedup2[-1] != p:
+                                dedup2.append(p)
+                        if len(dedup2) > 1:
+                            return dedup2
+        except Exception:
+            pass
+
     return subqs
 
 def get_answer(question):
     norm_question = normalize_text(question)
-    # Only return early for exact question matches (collect all duplicates)
     norm_unaccent_question = normalize_and_unaccent(question)
-    # NEW: direct routing for principal variants
-    if 'hieu truong' in norm_unaccent_question:
-        # Current principal intents
-        if any(tok in norm_unaccent_question for tok in ['hien tai', 'hien nay', 'hien hanh']):
-            # Map to the existing key 'hieu truong nha truong'
-            it = KEYWORD_TO_ITEM_MAP.get('hieu truong nha truong')
-            if it:
-                ans = it.get('answer', 'Không có câu trả lời.')
-                images = it.get('images'); captions = it.get('captions'); video_url = it.get('video_url')
-                if images and isinstance(images, str): images = [images]
-                if video_url: return [{"text": ans, "media_type": "video", "media_content": video_url}]
-                if images: return [{"text": ans, "media_type": "image", "media_content": (images, captions)}]
-                return [{"text": ans, "media_type": "text", "media_content": None}]
-        # Principals across periods intents
-        if ('qua tung thoi ky' in norm_unaccent_question) or ('tung thoi ky' in norm_unaccent_question):
-            # Find any key that mentions principals across periods
-            cand = None
-            for key, it in KEYWORD_TO_ITEM_MAP.items():
-                if ('hieu truong' in key) and (('qua tung thoi ky' in key) or ('tung thoi ky' in key)):
-                    cand = it; break
-            if cand:
-                ans = cand.get('answer', 'Không có câu trả lời.')
-                images = cand.get('images'); captions = cand.get('captions'); video_url = cand.get('video_url')
-                if images and isinstance(images, str): images = [images]
-                if video_url: return [{"text": ans, "media_type": "video", "media_content": video_url}]
-                if images: return [{"text": ans, "media_type": "image", "media_content": (images, captions)}]
-                return [{"text": ans, "media_type": "text", "media_content": None}]
+    # Removed special-case routing for "câu lạc bộ/CLB" to use general matching
     exact_matches = []
     for item in admissions_data.get('questions', []):
         questions = item.get('question', [])
@@ -197,7 +296,7 @@ def get_answer(question):
     # Fallback for "hiệu trưởng" keyword (exact only)
     try:
         # Match exact 'hiệu trưởng' (with accents) or unaccented 'hieu truong', optional punctuation/whitespace
-        if re.fullmatch(r"\s*hiệu\s*trưởng\s*[\?\.!]*\s*", norm_question) or re.fullmatch(r"\s*hieu\s*truong\s*[\?\.!]*\s*", norm_unaccent_question):
+        if re.fullmatch(r"\s*hiệu\s*trưởng\s*[?.!]*\s*", norm_question) or re.fullmatch(r"\s*hieu\s*truong\s*[?.!]*\s*", norm_unaccent_question):
             hardcoded_response = "Bạn muốn biết về hiệu trưởng hiện tại hay hiệu trưởng qua từng thời kỳ?"
             return [{"text": hardcoded_response, "media_type": "text", "media_content": None}]
     except Exception:
@@ -367,6 +466,20 @@ def load_sentence_transformer_model():
 
 sbert_model = load_sentence_transformer_model()
 
+# --- Initialize semantic resources (embeddings + maps) once ---
+
+def initialize_semantic_resources():
+    """Build embeddings and lookup maps so semantic search works for full sentences."""
+    try:
+        question_texts, embeddings, text_to_item = build_question_embeddings_and_maps(admissions_data)
+        # Store in app.session_state for reuse
+        app.session_state.question_texts = question_texts or []
+        app.session_state.question_embeddings = embeddings
+        app.session_state.question_data_map = text_to_item or {}
+    except Exception as e:
+        print(f"Lỗi khởi tạo embeddings: {e}")
+
+
 # Hàm mã hóa thống nhất: chỉ SBERT; trả torch.Tensor (N, d) hoặc (1, d)
 def encode_question_embedding(inputs):
     try:
@@ -413,6 +526,8 @@ def build_question_embeddings_and_maps(admissions_data_local):
 
 def fuzzy_best_item(question_text: str):
     """Trả về (item_tốt_nhất, tỷ_lệ_fuzzy). Nếu không có, trả (None, 0)."""
+    # Normalize both user question and dataset questions to unaccented lowercase
+    user_q = normalize_and_unaccent(question_text)
     best_item = None
     best_ratio = 0.0
     for item in admissions_data.get('questions', []):
@@ -420,7 +535,7 @@ def fuzzy_best_item(question_text: str):
         if isinstance(questions, str):
             questions = [questions]
         for q in questions:
-            ratio = SequenceMatcher(None, question_text, q).ratio()
+            ratio = SequenceMatcher(None, user_q, normalize_and_unaccent(q)).ratio()
             if ratio > best_ratio:
                 best_ratio = ratio
                 best_item = item
@@ -692,7 +807,11 @@ def find_answer_and_media(question):
             if images:
                 return answer, "image", (images, captions)
             return answer, "text", None
+        # NEW: ignore stopword/short tokens to avoid mapping "co" (có/cô), etc.
+        STOP_TOKENS = {"truong", "co", "cua", "ve", "la", "nao", "gi", "cai", "cac", "nhung", "o", "dau"}
         for token in tokens:
+            if len(token) < 3 or token in STOP_TOKENS:
+                continue
             item = KEYWORD_TO_ITEM_MAP.get(token)
             if item and item not in matched_items:
                 matched_items.append(item)
@@ -789,6 +908,8 @@ def find_answer_and_media(question):
     return "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "text", None
 
 def fuzzy_match_question(question, admissions_data, min_ratio=0.6):
+    # Normalize both sides for robust Vietnamese fuzzy matching
+    user_q = normalize_and_unaccent(question)
     best_match = None
     best_ratio = 0
     for item in admissions_data.get('questions', []):
@@ -796,7 +917,7 @@ def fuzzy_match_question(question, admissions_data, min_ratio=0.6):
         if isinstance(questions, str):
             questions = [questions]
         for q in questions:
-            ratio = SequenceMatcher(None, question, q).ratio()
+            ratio = SequenceMatcher(None, user_q, normalize_and_unaccent(q)).ratio()
             if ratio > best_ratio and ratio >= min_ratio:
                 best_ratio = ratio
                 best_match = item
@@ -813,6 +934,9 @@ def ask():
     data = request.get_json()
     if not data or 'question' not in data:
         return jsonify({"error": "Vui lòng cung cấp câu hỏi trong JSON (key: 'question')"}), 400
+    # Ensure semantic resources exist even if warmup didn’t run yet (e.g., in some WSGI setups)
+    if getattr(app.session_state, 'question_embeddings', None) is None or not getattr(app.session_state, 'question_texts', []):
+        initialize_semantic_resources()
     question = data['question']
     responses = get_answer(question)
     # Build response for frontend
