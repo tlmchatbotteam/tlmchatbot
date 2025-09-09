@@ -17,7 +17,8 @@ if not hasattr(app, 'session_state'):
         question_embeddings=None,
         question_texts=[],
         question_data_map={},
-        faiss_index=None
+        faiss_index=None,
+        knn_index=None  # sklearn NearestNeighbors (cosine) fallback
     )
 
 # --- CẤU HÌNH VÀ TẢI DỮ LIỆU ---
@@ -476,6 +477,19 @@ def initialize_semantic_resources():
         app.session_state.question_texts = question_texts or []
         app.session_state.question_embeddings = embeddings
         app.session_state.question_data_map = text_to_item or {}
+        # Build a fast cosine KNN index (fallback when FAISS isn't available)
+        try:
+            if embeddings is not None and embeddings.shape[0] > 0:
+                from sklearn.neighbors import NearestNeighbors
+                # embeddings are already normalized; cosine distance ~ 1 - cosine sim
+                nn = NearestNeighbors(metric='cosine', algorithm='auto')
+                # sklearn expects numpy arrays
+                emb_np = embeddings.detach().cpu().numpy()
+                nn.fit(emb_np)
+                app.session_state.knn_index = nn
+        except Exception as e:
+            # Keep running even if KNN init fails
+            print(f"Khởi tạo KNN index thất bại: {e}")
     except Exception as e:
         print(f"Lỗi khởi tạo embeddings: {e}")
 
@@ -561,6 +575,26 @@ def retrieve_topk_embeddings(query_text: str, top_k: int = 10):
             D, I = index.search(q_np, k)
             sims = D[0].tolist(); inds = I[0].tolist()
             return [(int(i), float(s)) for i, s in zip(inds, sims) if i >= 0]
+        except Exception:
+            pass
+    # Ưu tiên KNN sklearn nếu có
+    knn = getattr(app.session_state, 'knn_index', None)
+    if knn is not None:
+        try:
+            q_emb = encode_question_embedding(normalize_text(query_text))  # (1, d)
+            if q_emb is None:
+                return []
+            # embeddings were fit as normalized tensors; convert to numpy
+            q_np = torch.nn.functional.normalize(q_emb, dim=1).detach().cpu().numpy()
+            k = min(top_k, app.session_state.question_embeddings.shape[0])
+            distances, indices = knn.kneighbors(q_np, n_neighbors=k, return_distance=True)
+            inds = indices[0].tolist()
+            dists = distances[0].tolist()
+            # Convert cosine distances to cosine similarity
+            sims = [1.0 - float(d) for d in dists]
+            # Pair and sort by similarity desc (robustness)
+            pairs = sorted([(int(i), float(s)) for i, s in zip(inds, sims)], key=lambda x: x[1], reverse=True)
+            return pairs
         except Exception:
             pass
     try:
@@ -967,5 +1001,31 @@ def serve_image(filename):
 def index():
     return render_template('index.html')
 
+@app.route('/status', methods=['GET'])
+def status():
+    try:
+        n_items = len(admissions_data.get('questions', []))
+        n_texts = len(getattr(app.session_state, 'question_texts', []) or [])
+        has_emb = app.session_state.question_embeddings is not None
+        has_knn = getattr(app.session_state, 'knn_index', None) is not None
+        has_ce = cross_encoder_model is not None
+        has_sbert = sbert_model is not None
+        return jsonify({
+            "items": n_items,
+            "questions_indexed": n_texts,
+            "embeddings": bool(has_emb),
+            "knn_index": bool(has_knn),
+            "cross_encoder": bool(has_ce),
+            "sbert": bool(has_sbert)
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
+    # Warm up semantic resources on startup to reduce first-request latency
+    try:
+        initialize_semantic_resources()
+    except Exception as _e:
+        # Still start the server even if warmup fails
+        pass
     app.run(host='0.0.0.0', port=8080)
