@@ -142,6 +142,12 @@
         .lightbox-caption { color: #e5e7eb; margin-top: 10px; text-align: center; font-size: 0.95rem; max-width: 90vw; }
         .lightbox-close { position: absolute; top: -12px; right: -12px; width: 36px; height: 36px; border: none; border-radius: 999px; background: #fff; color: #111; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.25); font-size: 20px; line-height: 36px; padding: 0; }
         .lightbox-close:hover { background: #f3f4f6; }
+
+        /* Choice buttons */
+        .choice-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .choice-btn { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-size: 0.95rem; }
+        .choice-btn:hover { background: rgba(0,0,0,0.04); }
+        .choice-btn:disabled { opacity: 0.6; cursor: default; }
     </style>
 </head>
 <body>
@@ -193,6 +199,22 @@
     </div>
 
     <script>
+        // Persistent per-page session id for lightweight context on the server
+        let SESSION_ID = (() => {
+            try { return (crypto && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).slice(2); }
+            catch (_) { return Math.random().toString(36).slice(2); }
+        })();
+
+        function startNewChat() {
+            // Reset UI and create a new session id so server clears context for this chat
+            clearChat();
+            try {
+                SESSION_ID = (crypto && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+            } catch (_) {
+                SESSION_ID = Math.random().toString(36).slice(2);
+            }
+        }
+
         function toEmbedUrl(url) {
             try {
                 if (!url) return url;
@@ -213,8 +235,14 @@
             empty.style.display = hasMessages ? 'none' : 'grid';
         }
 
-        function startNewChat() {
-            clearChat();
+        function clearChat() {
+            try {
+                const chatContainer = document.getElementById('chat-container');
+                if (chatContainer) chatContainer.innerHTML = '';
+                const input = document.getElementById('question');
+                if (input) input.value = '';
+                updateEmptyStateVisibility();
+            } catch (_) { /* noop */ }
         }
 
         function sendQuick(q) {
@@ -278,7 +306,7 @@
                 const response = await fetch('/ask', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question })
+                    body: JSON.stringify({ question, session_id: SESSION_ID })
                 });
 
                 const data = await response.json();
@@ -311,7 +339,7 @@
                 const response = await fetch('/ask', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: 'video' })
+                    body: JSON.stringify({ question: 'video', session_id: SESSION_ID })
                 });
                 const data = await response.json();
                 hideTyping(typingEl);
@@ -395,7 +423,7 @@
                 const response = await fetch('/ask', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question })
+                    body: JSON.stringify({ question, session_id: SESSION_ID })
                 });
                 const data = await response.json();
                 hideTyping(typingEl);
@@ -413,145 +441,173 @@
             }
         }
 
+        function renderHieuTruongButtons(intoEl) {
+            try {
+                const bar = document.createElement('div');
+                bar.className = 'choice-bar';
+
+                const btnCurrent = document.createElement('button');
+                btnCurrent.className = 'choice-btn';
+                btnCurrent.textContent = 'Hiệu trưởng hiện tại';
+                btnCurrent.onclick = () => { disableChoices(bar); askHieuTruongCurrent(); };
+
+                const btnHistory = document.createElement('button');
+                btnHistory.className = 'choice-btn';
+                btnHistory.textContent = 'Hiệu trưởng qua từng thời kỳ';
+                btnHistory.onclick = () => { disableChoices(bar); askHieuTruongHistory(); };
+
+                bar.appendChild(btnCurrent);
+                bar.appendChild(btnHistory);
+                intoEl.appendChild(bar);
+            } catch (_) { /* no-op */ }
+        }
+
         function renderEntries(data) {
             const chatContainer = document.getElementById('chat-container');
             const entries = Array.isArray(data) ? data : (data ? [data] : []);
 
-            if (entries.length === 0) {
-                const emptyMsg = document.createElement('div');
-                emptyMsg.className = 'message bot';
-                emptyMsg.textContent = 'Không nhận được phản hồi.';
-                chatContainer.appendChild(emptyMsg);
+            if (!entries.length) {
                 updateEmptyStateVisibility();
                 return;
             }
 
-            entries.forEach((item) => {
-                const botMessage = document.createElement('div');
-                botMessage.className = 'message bot';
-
-                const hasText = !!item.text;
-                const hasImages = Array.isArray(item.images) && item.images.length > 0;
-                const hasVideo = !!item.video_url;
-
-                // Text first
-                if (hasText) {
+            const createParagraphs = (text) => {
+                const frag = document.createDocumentFragment();
+                try {
+                    const parts = String(text || '').split(/\n\n+/);
+                    parts.forEach((t, idx) => {
+                        const p = document.createElement('p');
+                        p.textContent = t.trim();
+                        frag.appendChild(p);
+                    });
+                } catch (_) {
                     const p = document.createElement('p');
-                    p.textContent = item.text;
-                    botMessage.appendChild(p);
+                    p.textContent = text || '';
+                    frag.appendChild(p);
                 }
+                return frag;
+            };
 
-                // Images stacked as large cards (like the reference UI)
-                if (hasImages) {
+            const makeImageFigure = (src, captionText) => {
+                const fig = document.createElement('figure');
+                const img = document.createElement('img');
+                img.src = src;
+                if (captionText) img.alt = captionText; else img.alt = 'Hình ảnh';
+                img.decoding = 'async';
+                img.loading = 'lazy';
+                if (captionText) img.dataset.caption = captionText;
+                img.addEventListener('click', () => openLightbox(img.src, img.dataset.caption || ''));
+                fig.appendChild(img);
+                if (captionText) {
+                    const cap = document.createElement('figcaption');
+                    cap.textContent = captionText;
+                    fig.appendChild(cap);
+                }
+                return fig;
+            };
+
+            entries.forEach((entry) => {
+                const e = entry || {};
+                const wrap = document.createElement('div');
+                wrap.className = 'message bot';
+
+                const text = e.text || '';
+                const mediaType = e.media_type || 'text';
+                const images = Array.isArray(e.images) ? e.images : [];
+                const captions = Array.isArray(e.captions) ? e.captions : [];
+                const videoUrl = e.video_url ? toEmbedUrl(e.video_url) : null;
+
+                if (mediaType === 'video' && videoUrl) {
+                    // Text + video stacked (text first, then video)
+                    if (text) wrap.appendChild(createParagraphs(text));
+                    const v = document.createElement('div');
+                    v.className = 'video';
+                    const iframe = document.createElement('iframe');
+                    iframe.src = videoUrl;
+                    iframe.title = 'Video giới thiệu';
+                    iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+                    iframe.setAttribute('allowfullscreen', '');
+                    v.appendChild(iframe);
+                    wrap.appendChild(v);
+                } else if (mediaType === 'image' && images.length > 0) {
+                    // Stack images as full-width cards like the reference UI
+                    if (text) wrap.appendChild(createParagraphs(text));
                     const list = document.createElement('div');
                     list.className = 'image-list';
-                    item.images.forEach((img, index) => {
-                        const figure = document.createElement('figure');
-                        const imgElement = document.createElement('img');
-                        imgElement.src = img;
-                        const cap = (item.captions && item.captions[index]) ? item.captions[index] : `Ảnh ${index + 1}`;
-                        imgElement.alt = cap;
-                        imgElement.loading = 'lazy';
-                        imgElement.style.cursor = 'zoom-in';
-                        imgElement.onclick = () => window.open(img, '_blank');
-                        const caption = document.createElement('figcaption');
-                        caption.textContent = cap;
-                        figure.appendChild(imgElement);
-                        figure.appendChild(caption);
-                        list.appendChild(figure);
+                    images.forEach((src, i) => {
+                        const cap = captions && captions[i] ? captions[i] : '';
+                        list.appendChild(makeImageFigure(src, cap));
                     });
-                    botMessage.appendChild(list);
+                    wrap.appendChild(list);
+                } else {
+                    // Pure text
+                    wrap.appendChild(createParagraphs(text));
                 }
 
-                // Optional video
-                if (hasVideo) {
-                    const wrap = document.createElement('div');
-                    wrap.className = 'video';
-                    const iframe = document.createElement('iframe');
-                    iframe.src = toEmbedUrl(item.video_url);
-                    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-                    iframe.allowFullscreen = true;
-                    wrap.appendChild(iframe);
-                    botMessage.appendChild(wrap);
+                // Optional action hooks from backend (e.g., choice buttons)
+                if (e.action === 'hieutruong_choices') {
+                    renderHieuTruongButtons(wrap);
                 }
 
-                chatContainer.appendChild(botMessage);
+                chatContainer.appendChild(wrap);
             });
+
+            chatContainer.scrollTop = chatContainer.scrollHeight;
             updateEmptyStateVisibility();
         }
 
-        function clearChat() {
-            const chatContainer = document.getElementById('chat-container');
-            if (!chatContainer) return;
-            chatContainer.innerHTML = '';
-            const questionInput = document.getElementById('question');
-            if (questionInput) questionInput.value = '';
-            updateEmptyStateVisibility();
-        }
-
-        document.getElementById('question').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendQuestion();
-        });
-
-        // Initialize empty state visibility
-        updateEmptyStateVisibility();
-
-        // Lightbox helpers
-        function openLightbox(src, captionText) {
-            const lb = document.getElementById('lightbox');
-            if (!lb) return;
-            const img = lb.querySelector('.lightbox-image');
-            const cap = lb.querySelector('.lightbox-caption');
-            img.src = src || '';
-            img.alt = captionText || 'Hình ảnh';
-            cap.textContent = captionText || '';
-            lb.classList.add('show');
-            lb.setAttribute('aria-hidden', 'false');
-            document.body.style.overflow = 'hidden';
-            lb.focus();
+        // --- Lightbox logic ---
+        function openLightbox(src, caption) {
+            try {
+                const overlay = document.getElementById('lightbox');
+                if (!overlay) return;
+                const img = overlay.querySelector('.lightbox-image');
+                const cap = overlay.querySelector('.lightbox-caption');
+                img.src = src || '';
+                img.alt = caption || 'Hình ảnh';
+                cap.textContent = caption || '';
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+            } catch (_) { /* noop */ }
         }
         function closeLightbox() {
-            const lb = document.getElementById('lightbox');
-            if (!lb) return;
-            const img = lb.querySelector('.lightbox-image');
-            const cap = lb.querySelector('.lightbox-caption');
-            lb.classList.remove('show');
-            lb.setAttribute('aria-hidden', 'true');
-            document.body.style.overflow = '';
-            img.src = '';
-            img.alt = '';
-            cap.textContent = '';
+            try {
+                const overlay = document.getElementById('lightbox');
+                if (!overlay) return;
+                overlay.classList.remove('show');
+                overlay.setAttribute('aria-hidden', 'true');
+                const img = overlay.querySelector('.lightbox-image');
+                if (img) img.src = '';
+            } catch (_) { /* noop */ }
         }
-        (function wireLightbox() {
-            const lb = document.getElementById('lightbox');
-            if (!lb) return;
-            const closeBtn = lb.querySelector('.lightbox-close');
-            closeBtn.addEventListener('click', closeLightbox);
-            lb.addEventListener('click', (e) => { if (e.target === lb) closeLightbox(); });
-            window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
-        })();
 
-        // Replace window.open image handlers with lightbox opens inside renderEntries
-        const _origRenderEntries = typeof renderEntries === 'function' ? renderEntries : null;
-        if (_origRenderEntries) {
-            renderEntries = function(data) {
-                const result = _origRenderEntries.call(this, data);
-                try {
-                    const chatContainer = document.getElementById('chat-container');
-                    if (!chatContainer) return result;
-                    // Rebind ALL bot images to open in the lightbox
-                    chatContainer.querySelectorAll('.message.bot figure').forEach((fig) => {
-                        const img = fig.querySelector('img');
-                        const cap = fig.querySelector('figcaption');
-                        if (img) {
-                            img.onclick = () => openLightbox(img.src, cap ? cap.textContent : 'Hình ảnh');
-                            img.style.cursor = 'zoom-in';
+        // Init basic events
+        (function initUI() {
+            try {
+                const input = document.getElementById('question');
+                if (input) {
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendQuestion();
                         }
                     });
-                } catch (_) { /* no-op */ }
-                return result;
-            }
-        }
+                }
+            } catch (_) { /* noop */ }
+            try {
+                const overlay = document.getElementById('lightbox');
+                if (overlay) {
+                    const btn = overlay.querySelector('.lightbox-close');
+                    if (btn) btn.addEventListener('click', closeLightbox);
+                    overlay.addEventListener('click', (e) => {
+                        if (e.target === overlay) closeLightbox();
+                    });
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape') closeLightbox();
+                    });
+                }
+            } catch (_) { /* noop */ }
+        })();
     </script>
 </body>
 </html>

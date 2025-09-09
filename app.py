@@ -18,8 +18,87 @@ if not hasattr(app, 'session_state'):
         question_texts=[],
         question_data_map={},
         faiss_index=None,
-        knn_index=None  # sklearn NearestNeighbors (cosine) fallback
+        knn_index=None,  # sklearn NearestNeighbors (cosine) fallback
+        sessions={}      # in-memory conversation store: {session_id: [{role, text}]}
     )
+
+# Conversation helpers for lightweight per-session memory
+
+def get_session_history(session_id: str):
+    try:
+        if not session_id:
+            return []
+        return app.session_state.sessions.get(session_id, [])
+    except Exception:
+        return []
+
+def append_history(session_id: str, role: str, text: str, limit: int = 10):
+    try:
+        if not session_id:
+            return
+        hist = app.session_state.sessions.setdefault(session_id, [])
+        hist.append({"role": role, "text": (text or "")[:2000]})
+        # keep only last N turns
+        if len(hist) > limit:
+            app.session_state.sessions[session_id] = hist[-limit:]
+    except Exception:
+        pass
+
+def last_user_turn(session_id: str) -> str:
+    try:
+        hist = get_session_history(session_id)
+        for m in reversed(hist):
+            if m.get('role') == 'user' and m.get('text'):
+                return m.get('text')
+        return ""
+    except Exception:
+        return ""
+
+def looks_context_dependent(q: str) -> bool:
+    # Heuristics to detect short/elliptical follow-ups likely needing context
+    try:
+        nq = normalize_and_unaccent(q)
+        if len(nq) <= 25:
+            return True
+        patterns = [
+            r'^(con|the\s*con|va\s*con)\b',
+            r'^(vay|the\s*nao|the\s*thi|con\s*gi)\b',
+            r'\b(o\s*dau|khi\s*nao|bao\s*gio|bao\s*nhieu|ten\s*gi)\b',
+            r'^(cai\s*do|nguoi\s*do|no|the)\b',
+        ]
+        for p in patterns:
+            if re.search(p, nq):
+                return True
+        return False
+    except Exception:
+        return False
+
+def augment_with_context(session_id: str, q: str) -> str:
+    """If query looks context-dependent and there is a previous user turn, prepend it."""
+    try:
+        # Don't augment the canonical trigger so UI buttons can render
+        nq_self = normalize_and_unaccent(q)
+        if re.fullmatch(r"hieu\s*truong", nq_self):
+            return q
+        prev = last_user_turn(session_id)
+        if not prev:
+            return q
+        if looks_context_dependent(q):
+            # Combine as two sub-questions so existing splitter can help
+            return f"{prev} ; {q}"
+        # If no direct keywords detected, also try augmenting
+        nq = normalize_and_unaccent(q)
+        has_known = False
+        if len(nq) >= 3:
+            for key in KEYWORD_TO_ITEM_MAP.keys():
+                if len(key) >= 3 and (key in nq or nq in key):
+                    has_known = True
+                    break
+        if not has_known:
+            return f"{prev} ; {q}"
+        return q
+    except Exception:
+        return q
 
 # --- CẤU HÌNH VÀ TẢI DỮ LIỆU ---
 try:
@@ -299,7 +378,8 @@ def get_answer(question):
         # Match exact 'hiệu trưởng' (with accents) or unaccented 'hieu truong', optional punctuation/whitespace
         if re.fullmatch(r"\s*hiệu\s*trưởng\s*[?.!]*\s*", norm_question) or re.fullmatch(r"\s*hieu\s*truong\s*[?.!]*\s*", norm_unaccent_question):
             hardcoded_response = "Bạn muốn biết về hiệu trưởng hiện tại hay hiệu trưởng qua từng thời kỳ?"
-            return [{"text": hardcoded_response, "media_type": "text", "media_content": None}]
+            # Include an action flag so UI can render choice buttons
+            return [{"text": hardcoded_response, "media_type": "text", "media_content": None, "action": "hieutruong_choices"}]
     except Exception:
         pass
     SCHOOL_NAME_VARIANTS = [
@@ -386,8 +466,26 @@ def get_answer(question):
         if ans and ans.strip():
             results.append({"text": ans, "media_type": media_type, "media_content": media_content})
     if results:
+        # Deduplicate identical results (common when multiple keyword splits map to the same item)
+        try:
+            import json as _json
+            seen = set()
+            unique = []
+            for r in results:
+                key = (
+                    (r.get("text") or "").strip(),
+                    r.get("media_type"),
+                    _json.dumps(r.get("media_content"), ensure_ascii=False, sort_keys=True)
+                    if isinstance(r.get("media_content"), (dict, list, tuple)) else str(r.get("media_content"))
+                )
+                if key not in seen:
+                    seen.add(key)
+                    unique.append(r)
+            if unique:
+                return unique
+        except Exception:
+            return results
         return results
-    return [{"text": "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp cho các ý bạn hỏi.", "media_type": "text", "media_content": None}]
 
 def get_school_info_answer():
     for item in admissions_data.get('questions', []):
@@ -972,7 +1070,27 @@ def ask():
     if getattr(app.session_state, 'question_embeddings', None) is None or not getattr(app.session_state, 'question_texts', []):
         initialize_semantic_resources()
     question = data['question']
-    responses = get_answer(question)
+    session_id = data.get('session_id', None)
+
+    # Append user turn to history
+    if session_id:
+        append_history(session_id, 'user', question)
+        # Augment question with short context when appropriate
+        question_for_answer = augment_with_context(session_id, question)
+    else:
+        question_for_answer = question
+
+    responses = get_answer(question_for_answer)
+
+    # Store bot turn (text only, first response) for lightweight history
+    try:
+        if session_id and responses and isinstance(responses, list):
+            first_text = responses[0].get('text') if isinstance(responses[0], dict) else None
+            if first_text:
+                append_history(session_id, 'bot', first_text)
+    except Exception:
+        pass
+
     # Build response for frontend
     result = []
     for resp in responses:
@@ -984,6 +1102,9 @@ def ask():
             "captions": [],
             "video_url": None
         }
+        # pass-through action for frontend UI hints
+        if isinstance(resp, dict) and "action" in resp:
+            entry["action"] = resp["action"]
         if resp["media_type"] == "video" and resp["media_content"]:
             entry["video_url"] = resp["media_content"]
         elif resp["media_type"] == "image" and resp["media_content"]:
