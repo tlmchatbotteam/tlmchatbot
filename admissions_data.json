@@ -1,15 +1,27 @@
 {
   "questions": [
     {
-      "question": ["Học phí của trường là bao nhiêu?", "học phí", "giá tiền", "tiền học"],
-      "answer": "Học phí trung bình là 30 triệu VNĐ/năm, tùy theo ngành học(thông tin thử nghiệm)",
+      "question": [
+        "Học phí của trường là bao nhiêu?",
+        "học phí",
+        "giá tiền",
+        "tiền học"
+      ],
+      "answer": "Học phí dao động từ 500.000 đ đến 2.000.000 đồng ",
       "images": null,
       "captions": null
     },
     {
-      "question": ["đồng phục","uniform","đồng phục của trường"],
+      "question": [
+        "đồng phục",
+        "uniform",
+        "đồng phục của trường"
+      ],
       "answer": "Đây là hình ảnh đồng phục của trường",
-      "images": ["images/students.jpg", "images/students2.jpg"],
+      "images": [
+        "images/students.jpg",
+        "images/students2.jpg"
+      ],
       "captions": null
     },
     {
@@ -19,552 +31,1278 @@
       "captions": null
     },
     {
-      "question": ["đi học được mang điện thoại không", "được mang điện thoại không", "đem điện thoại được không", "được dùng điện thoại không", "xài điện thoại được không", "điện thoại"],
+      "question": [
+        "đi học được mang điện thoại không",
+        "được mang điện thoại không",
+        "đem điện thoại được không",
+        "được dùng điện thoại không",
+        "xài điện thoại được không",
+        "điện thoại"
+      ],
       "answer": "Học sinh được mang điện thoại vào trường, học sinh được sử dụng trong khoảng thời gian ngoài giờ học, được phép dùng trong giờ học nếu được sự cho phép của giáo viên",
       "images": null,
       "captions": null
     },
     {
-      "question": ["căn tin như thế nào", "đồ ăn có mắc không", "nước có mắc không", "thông tin về căn tin trường", "căn tin trường","căn tin","đồ ăn và nước uống ở căn tin"],
+      "question": [
+        "căn tin",
+        "đồ ăn có mắc không",
+        "nước có mắc không",
+        "thông tin về căn tin trường",
+        "căn tin trường",
+        "căn tin",
+        "đồ ăn và nước uống ở căn tin"
+      ],
       "answer": "Căn tin có máy lạnh, giá cả đồ ăn phù với túi tiền học sinh",
       "images": null,
       "captions": null
     },
     {
-      "question": ["xe máy gửi bao nhiêu", "xe đạp gửi bao nhiêu", "gửi xe bao nhiêu", "gửi xe ở trường", "giữ xe ở trường", "gửi xe", "giữ xe"],
+      "question": [
+        "xe máy gửi bao nhiêu",
+        "xe đạp gửi bao nhiêu",
+        "gửi xe bao nhiêu",
+        "gửi xe ở trường",
+        "giữ xe ở trường",
+        "gửi xe",
+        "giữ xe"
+      ],
       "answer": "Xe đạp: 2000 đ/ lượt còn Xe máy: 4000 đ/ lượt",
       "images": null,
       "captions": null
     },
     {
-      "question": ["ban lãnh đạo nhà trường", "ban lãnh đạo","ban giám hiệu", "ban giám hiệu nhà trường"],
+      "question": [
+        "ban lãnh đạo nhà trường",
+        "ban lãnh đạo",
+        "ban giám hiệu",
+        "ban giám hiệu nhà trường"
+      ],
       "answer": "Trong quá trình hình thành và phát triển của trường THPT Ten Lơ Man, Ban lãnh đạo luôn giữ vai trò quan trọng trong việc dẫn dắt, định hướng và duy trì những giá trị cốt lõi của nhà trường. Với tâm huyết, trách nhiệm và tài năng lãnh đạo, quý thầy cô trong Ban lãnh đạo nhà trường qua các thời kỳ đã và đang cống hiến mình cho những bước tiến vững chắc trong sự nghiệp trồng người. Ban lãnh đạo đương nhiệm của nhà trường là những thầy cô tâm huyết, trách nhiệm, đoàn kết, sáng tạo và tài năng sẽ giúp cho trường THPT Ten Lơ Man không ngừng vươn lên",
-      "images": ["images/hinhthaykhuong.jpg", "images/hinhcotrang.jpg", "images/hinhthaybinh.jpg", "images/hinhthaykhuong2.jpg", "images/bld.jpg"],
-      "captions": ["Thầy Nguyễn Hùng Khương - Người thắp sáng tầm nhìn chiến lược -Hiệu trưởng từ năm 2023\nVới vai trò là Bí thư chi bộ và Hiệu trưởng nhà trường, thầy Nguyễn Hùng Khương đã góp phần quan trọng trong việc định hình phong cách giáo dục hiện đại, gắn kết truyền thống với sự đổi mới. Thầy luôn là một người lãnh đạo vui vẻ, thân thiện nhưng quyết đoán, tận tâm và sáng tạo trong việc xây dựng những chính sách giáo dục toàn diện. Nhờ có sự dẫn dắt của thầy, trường THPT Ten Lơ Man không chỉ là nơi đào tạo những thế hệ học sinh tài năng, mà còn là một ngôi nhà chung đầy yêu thương và khích lệ sáng tạo.\n", "Cô Phan Thị Phương Trang - Phó hiệu trưởng - Hiện thân của sự dẫn dắt và tận tâm\nGiữ vai trò Phó Bí thư chi bộ và Phó Hiệu trưởng nhà trường, cô Phan Thị Phương Trang là một nhân tố lãnh đạo tận tâm và luôn sát cánh cùng thầy trò trong nhiều hoạt động, chăm lo, bảo quản các trang thiết bị, cơ sở vật chất phục vụ các hoạt động dạy học. Cô chú trọng việc kết nối giữa các thành viên trong nhà trường, góp phần tạo nên sự gắn kết chặt chẽ giữa giáo viên và học sinh. Bên cạnh đó cô còn phụ công tác tổ chức bán trú, quan tâm các hoạt động ngoại khóa, các phong trào thi đua đã mang lại những kỷ niệm đẹp và ấn tượng cho nhiều thế hệ học sinh. \n", "Thầy Trần Hải Bình - Phó hiệu trưởng - Trái tim của chân chính nghiêm minh và kỷ luật\nVới vai trò Phó Hiệu trưởng phụ trách chuyên môn và kỷ luật học sinh, thầy đã mang đến những đóng góp thiết thực trong việc duy trì nề nếp kỷ cương và kỷ luật nghiêm minh của nhà trường. Thầy luôn đặt lợi ích của học sinh lên hàng đầu, đề cao tinh thần giáo dục nhân cách song hành cùng việc rèn luyện tri thức. Nhờ vào những nguyên tắc quản lý kỷ luật hiệu quả của thầy, nhà trường luôn đảm bảo môi trường học tập an toàn, kỷ cương và lành mạnh.\nTiếp nối truyền thống của Ban lãnh đạo nhà trường suốt 75 năm qua, Ban lãnh đạo đương nhiệm tiếp tục giữ tinh thần đoàn kết, thống nhất, năng động, sáng tạo; đặt lợi ích tập thể lên trên lợi ích cá nhân với phương châm tất cả vì học sinh thân yêu, vì sự phát triển bền vững của nhà trường. \n", "Thầy Nguyễn Hùng Khương – Hiệu trưởng phát biểu trong Lễ Khai giảng năm học 2024 - 2025", "Hình Ban Lãnh đạo nhà trường năm học 2024-2025 (Từ phải qua: Thầy Nguyễn Hùng Khương – Hiệu trưởng; Thầy Trần Hải Bình – Phó Hiệu trưởng; Cô Phan Thị Phương Trang – Phó Hiệu trưởng)"]
+      "images": [
+        "images/hinhthaykhuong.jpg",
+        "images/hinhcotrang.jpg",
+        "images/hinhthaybinh.jpg",
+        "images/hinhthaykhuong2.jpg",
+        "images/bld.jpg"
+      ],
+      "captions": [
+        "Thầy Nguyễn Hùng Khương - Người thắp sáng tầm nhìn chiến lược -Hiệu trưởng từ năm 2023\nVới vai trò là Bí thư chi bộ và Hiệu trưởng nhà trường, thầy Nguyễn Hùng Khương đã góp phần quan trọng trong việc định hình phong cách giáo dục hiện đại, gắn kết truyền thống với sự đổi mới. Thầy luôn là một người lãnh đạo vui vẻ, thân thiện nhưng quyết đoán, tận tâm và sáng tạo trong việc xây dựng những chính sách giáo dục toàn diện. Nhờ có sự dẫn dắt của thầy, trường THPT Ten Lơ Man không chỉ là nơi đào tạo những thế hệ học sinh tài năng, mà còn là một ngôi nhà chung đầy yêu thương và khích lệ sáng tạo.\n",
+        "Cô Phan Thị Phương Trang - Phó hiệu trưởng - Hiện thân của sự dẫn dắt và tận tâm\nGiữ vai trò Phó Bí thư chi bộ và Phó Hiệu trưởng nhà trường, cô Phan Thị Phương Trang là một nhân tố lãnh đạo tận tâm và luôn sát cánh cùng thầy trò trong nhiều hoạt động, chăm lo, bảo quản các trang thiết bị, cơ sở vật chất phục vụ các hoạt động dạy học. Cô chú trọng việc kết nối giữa các thành viên trong nhà trường, góp phần tạo nên sự gắn kết chặt chẽ giữa giáo viên và học sinh. Bên cạnh đó cô còn phụ công tác tổ chức bán trú, quan tâm các hoạt động ngoại khóa, các phong trào thi đua đã mang lại những kỷ niệm đẹp và ấn tượng cho nhiều thế hệ học sinh. \n",
+        "Thầy Trần Hải Bình - Phó hiệu trưởng - Trái tim của chân chính nghiêm minh và kỷ luật\nVới vai trò Phó Hiệu trưởng phụ trách chuyên môn và kỷ luật học sinh, thầy đã mang đến những đóng góp thiết thực trong việc duy trì nề nếp kỷ cương và kỷ luật nghiêm minh của nhà trường. Thầy luôn đặt lợi ích của học sinh lên hàng đầu, đề cao tinh thần giáo dục nhân cách song hành cùng việc rèn luyện tri thức. Nhờ vào những nguyên tắc quản lý kỷ luật hiệu quả của thầy, nhà trường luôn đảm bảo môi trường học tập an toàn, kỷ cương và lành mạnh.\nTiếp nối truyền thống của Ban lãnh đạo nhà trường suốt 75 năm qua, Ban lãnh đạo đương nhiệm tiếp tục giữ tinh thần đoàn kết, thống nhất, năng động, sáng tạo; đặt lợi ích tập thể lên trên lợi ích cá nhân với phương châm tất cả vì học sinh thân yêu, vì sự phát triển bền vững của nhà trường. \n",
+        "Thầy Nguyễn Hùng Khương – Hiệu trưởng phát biểu trong Lễ Khai giảng năm học 2024 - 2025",
+        "Hình Ban Lãnh đạo nhà trường năm học 2024-2025 (Từ phải qua: Thầy Nguyễn Hùng Khương – Hiệu trưởng; Thầy Trần Hải Bình – Phó Hiệu trưởng; Cô Phan Thị Phương Trang – Phó Hiệu trưởng)"
+      ]
     },
     {
-      "question": ["điểm chuẩn 4 năm gần nhất", "điểm chuẩn bao nhiêu", "điểm chuẩn là bao nhiêu", "điểm chuẩn năm nay","điểm chuẩn của trường"],
-      "answer": "Điểm chuẩn qua các năm: 2022 là 17.75, 2023 là 18.25, 2024 là 18.25, và 2025 là 18",
-      "images": null,
-      "captions": null
+      "question": [
+        "điểm chuẩn",
+        "tỉ lệ chọi"
+      ],
+      "answer": "Đây là điểm chuẩn và tỉ lệ chọi 4 năm gần đây",
+      "images": [
+        "images/diemchuan.jpg",
+        "images/tilechoi.jpg"
+      ]
     },
     {
-      "question": ["sơ đồ trường ra sao", "khu a ở đâu", "khu b ở đâu", "khu c ở đâu", "khu d ở đâu","cho tôi hình ảnh sơ đồ trường"],
+      "question": [
+        "sơ đồ trường ra sao",
+        "khu a ở đâu",
+        "khu b ở đâu",
+        "khu c ở đâu",
+        "khu d ở đâu",
+        "cho tôi hình ảnh sơ đồ trường"
+      ],
       "answer": "đây là hình ảnh sơ đồ trường",
       "images": "images/sodo.jpg",
       "captions": null
     },
     {
-      "question": ["liên hệ trường như thế nào", "làm sao để liên hệ với trường", "thông tin liên hệ", "email","cho tôi thông tin liên hệ","thông tin liên hệ của nhà trường"],
+      "question": [
+        "liên hệ trường như thế nào",
+        "làm sao để liên hệ với trường",
+        "thông tin liên hệ",
+        "email",
+        "cho tôi thông tin liên hệ",
+        "thông tin liên hệ của nhà trường"
+      ],
       "answer": "Trường Trung học phổ thông Tên Lơ Man nằm tại số 8 Trần Hưng Đạo, phường Bến Thành, TP. Hồ Chí Minh. Điện thoại liên hệ: (028)38299702, (028)38218020. Email: c3tenloman.tphochiminh@moet.edu.vn. Ban giám hiệu nhà trường gồm: - Thầy Nguyễn Hùng Khương, chức vụ: Hiệu trưởng, số điện thoại: 0913103045. - Cô Phan Thị Phương Trang, chức vụ: Phó hiệu trưởng, số điện thoại: 0919655589. - Thầy Trần Hải Bình, chức vụ: Phó hiệu trưởng, số điện thoại: 0929289858",
       "images": null,
       "captions": null
     },
     {
-      "question": ["thư viện", "thư viện trường", "thư viện như thế nào", "các hoạt động của thư viện","các sản phẩm của thư viện"],
+      "question": [
+        "thư viện",
+        "thư viện trường",
+        "thư viện như thế nào",
+        "các hoạt động của thư viện",
+        "các sản phẩm của thư viện"
+      ],
       "answer": "Các hoạt động của thư viện trong năm 2024 – 2025\n1.\tTham quan Triển lãm “Kỷ niệm 55 năm thực hiện Di chúc của Chủ tịch Hồ Chí Minh (1969 - 2024)” của Hội Xuất bản Việt Nam tổ chức.\nTriển lãm trưng bày, giới thiệu nhiều ấn phẩm, cuốn sách tiêu biểu viết về cuộc đời, sự nghiệp Cách mạng, tư tưởng, phong cách của Chủ tịch Hồ Chí Minh, về thực hiện Di chúc của Bác đến đông đảo bạn đọc trên địa bàn Thành phố Hồ Chí Minh.\n2.\tHoạt động vui Tết trung thu\nPhối hợp cùng  Câu lạc bộ Sáng tạo (TEAM) tổ chức, gồm các nội dung:\nCuộc đua đèn cá chép.\nTìm nhanh tìm đúng.\nGóc trung thu checkin nhận quà xịn.\nThời gian diễn ra hoạt động từ ngày 16/09/2024 – 18/09/2024.\n3.\tPhó Giáo sư, Tiến sĩ Nguyễn Xuân Tế tặng sách quý về Chủ tịch Hồ Chí Minh cho thư viện trường THPT Ten Lơ Man\nĐây là hoạt động có ý nghĩa sâu sắc trong việc xây dựng và phát triển Không gian văn hóa Hồ Chí Minh trong nhà trường. Những đầu sách quý như \"Chủ tịch Hồ Chí Minh, tư tưởng lý luận, phong cách, đạo đức soi sáng đường chúng ta đi\" và \"Hồ Chí Minh - Trái tim quả đất\" không chỉ giúp bổ sung tài liệu giá trị cho thư viện, mà còn đóng vai trò quan trọng trong việc giáo dục truyền thống yêu nước, giúp học sinh học tập và noi theo tấm gương đạo đức, phong cách của Bác.\nViệc phát triển không gian văn hóa Hồ Chí Minh tại trường THPT Ten Lơ Man giúp giáo dục giúp học sinh nhà trường gần hơn với tư tưởng, phong cách và di sản tinh thần mà Người để lại. Đây là một bước quan trọng trong quá trình hình thành nhân cách, xây dựng lòng yêu nước và trách nhiệm xã hội cho thế hệ trẻ, đặc biệt trong môi trường giáo dục. \nThầy Nguyễn Hùng Khương, Hiệu trưởng nhà trường bày tỏ niềm vui mừng và trân trọng trước món quà quý giá này của Phó Giáo sư Nguyễn Xuân Tế - Nguyên Hiệu trưởng trường Cán bộ Quản lý TP.HCM. Thay mặt Ban Giám hiệu, giáo viên và học sinh trường THPT Ten Lơ Man, xin chân thành cảm ơn Phó Giáo sư đã trao tặng những cuốn sách quý về Bác Hồ cho thư viện trường THPT Ten Lơ Man. Những tài liệu và hình ảnh về hoạt động của Chủ tịch Hồ Chí Minh mà Phó Giáo sư đã tặng sẽ làm phong phú thêm kho tư liệu của trường, đồng thời cung cấp nguồn tài liệu quý giá để phục vụ công tác giảng dạy và học tập cho các em học sinh trong hành trình học tập và làm theo tư tưởng, đạo đức của Chủ tịch Hồ Chí Minh.\n4.\tREADER'S RAVE - CUỘC THI REVIEW SÁCH THƯ VIỆN BẰNG TIẾNG ANH\nĐây là hoạt động thư viện phối hợp với Câu lạc bộ Tiếng Anh. Học sinh sẽ làm video dài 3-5 phút bằng tiếng Anh, giới thiệu và cảm nhận về một quyển sách yêu thích tại thư viện.\nCác thể loại sách: \n- Sách kiến thức và kỹ năng sống.\n- Sách về lịch sử, văn hóa Việt Nam và Bác Hồ.\n- Sách truyền cảm hứng tích cực cho giới trẻ.\n- Sách khám phá khoa học và thiên nhiên.\n- Tác phẩm văn học, nghệ thuật.\n- Sách tiếng Anh, truyện tranh, sách thiếu nhi.\n5. Khai trương tủ sách pháp luật chào mừng Kỷ niệm 78 năm Ngày Pháp luật Việt Nam (09/11/1946 - 09/11/2024)\nTrước tiên chúng ta cùng tìm hiểu đôi nét về Ngày Pháp luật Việt Nam.\nNgày 09/11/1946, bản Hiến pháp đầu tiên của nước Việt Nam Dân chủ Cộng hòa được ban hành (Hiến pháp 1946 - nay đã hết hiệu lực), đánh dấu mốc son trong lịch sử lập pháp của Việt Nam, đây là một sự kiện chính trị - pháp lý có ý nghĩa đặc biệt quan trọng mở đầu con đường phát triển mới về lịch sử lập hiến của đất nước.\nSau Hiến pháp 1946 là các bản Hiến pháp (1959, 1980, 1992, 2013). Hiến pháp 2013 - Hiến pháp hiện hành.\nNhư vậy, ngày 09 tháng 11 hằng năm là Ngày Pháp luật nước Cộng hòa xã hội chủ nghĩa Việt Nam. Ngày Pháp luật được tổ chức nhằm tôn vinh Hiến pháp, Pháp luật, giáo dục ý thức thượng tôn pháp luật cho mọi người trong xã hội .\nNgoài ra, ngày Pháp luật có ý nghĩa giáo dục sâu sắc trong việc đề cao giá trị của pháp luật trong nhà nước pháp quyền. Chính vì vậy, sống và làm theo Hiến pháp, Pháp luật là việc làm thiết thực hưởng ứng ngày Pháp luật nước Cộng hòa xã hội chủ nghĩa Việt Nam.\n6. THỨ BẢY VUI VẺ CÙNG NHÀ TEN, XEM CINE HỌC LỊCH SỬ\nSáng ngày 7/12/2024, suất chiếu phim đặc biệt “Khát vọng Độc lập - Tự do, Phần 5” đã diễn ra tại Thư viện THPT Ten Lơ Man với sự tham gia nhiệt tình của quý thầy cô và các bạn đoàn viên, học sinh. Thông qua tập phim “Khát vọng Độc lập - Tự do\" các bạn đoàn viên, học sinh đã hiểu rõ hơn về khát vọng tự do, độc lập và ý chí kiên cường, bất khuất của dân và quân ta; khẳng định vai trò, công lao to lớn, tấm gương đạo đức sáng ngời của Chủ tịch Hồ Chí Minh, các lãnh đạo tiền bối tiêu biểu của Đảng và cách mạng Việt Nam, các Anh hùng liệt sĩ, đồng chí, đồng bào đã chiến đấu, anh dũng hy sinh cho sự nghiệp của dân tộc. Bên cạnh đó, các bạn đoàn viên, học sinh còn tích cực và hào hứng tham gia phần Sinh hoạt chuyên đề đố vui tìm hiểu và ôn lại truyền thống vẻ vang của Quân đội Việt Nam nhân kỉ niệm 80 năm Ngày thành lập Quận đội Nhân dân Việt Nam (22/12/1944 - 22/12/2024).\n7. Hoạt động đón Giáng sinh\nRing Ring Ring \" Noel sắp đến rồi đó\nCó ai háo hức đón giáng sinh giống thư viện hông ta”\nVà để đón không khí giáng sinh ngày càng đến gần, thư viện chúng mình đã quyết định làm 1 cây thông đó nha.\nMùa đông về thời tiết cũng lạnh dần, vậy để thư viện dùng tấm lòng ấm áp của mình để sưởi ấm cho các bạn nha.\n8. KHÁM PHÁ THƯ VIỆN ĐIỆN TỬ - KẾT NỐI TRI THỨC MỌI LÚC, MỌI NƠI\nVới mong muốn mang đến một môi trường học tập hiện đại, tiện ích, đồng thời đáp ứng xu thế chuyển đổi số trong giáo dục, Trường THPT Ten Lơ Man giới thiệu Thư viện điện tử – nền tảng tri thức số hóa dành cho giáo viên, phụ huynh và học sinh. \nThư viện điện tử không chỉ là nơi lưu trữ và cung cấp nguồn tài liệu học tập phong phú mà còn mở ra cơ hội để mọi người tiếp cận kiến thức một cách dễ dàng, mọi lúc, mọi nơi. Đây chính là bước đột phá giúp nâng cao văn hóa đọc và tạo nên một cộng đồng học tập năng động, sáng tạo.\nHãy đồng hành cùng Thư viện điện tử để biến mỗi trang sách, mỗi tài liệu thành hành trình khám phá tri thức đầy cảm hứng!\n9. Trang trí thư viện những ngày cận Tết\n10. THỨ TƯ VUI VẺ CÙNG NHÀ TEN, XEM CINE HỌC LỊCH SỬ CINE TOUR 2 \n Sáng ngày 22/01/2025, suất chiếu phim đặc biệt “Khát vọng Độc lập - Tự do, Phần 4” đã diễn ra tại Thư viện THPT Ten Lơ Man với sự tham gia nhiệt tình của các thầy cô và các bạn thuộc các câu lạc bộ trong nhà trường. \nBuổi chiếu phim không chỉ giúp các bạn đoàn viên, thanh niên ôn lại một bước ngoặt lịch sử vĩ đại của dân tộc nhân kỉ niệm 95 năm ngày thành lập Đảng Cộng sản Việt Nam (03/02/1930 - 03/02/2025) mà còn giúp các bạn hiểu sâu sắc hơn về sự kiện thành lập Đảng Cộng sản Việt Nam - một bước ngoặt vô cùng quan trọng của lịch sử Cách mạng Việt Nam, quyết định sự phát triển của dân tộc, chấm dứt sự khủng hoảng về đường lối và tổ chức lãnh đạo của phong trào yêu nước Việt Nam đầu thế kỷ XX. Đảng Cộng sản Việt Nam ra đời là thành quả của sự kết hợp chủ nghĩa Mác-Lênin với phong trào công nhân và phong trào yêu nước Việt Nam; chứng tỏ giai cấp công nhân Việt Nam đã trưởng thành, đủ sức lãnh đạo cách mạng.\nBác Hồ từng nói: \"Với tất cả tinh thần khiêm tốn của người cách mạng, chúng ta vẫn có quyền nói rằng: Đảng ta thật là vĩ đại!\".\nHy vọng rằng tinh thần của buổi sáng hôm nay sẽ là động lực để các bạn học sinh không ngừng phấn đấu và học tập, lan tỏa những giá trị tốt đẹp trong cuộc sống. Hẹn gặp lại ở những sự kiện tiếp theo của Nhà Ten nhé!\n11. Đưa sách về nhà\nVới mong muốn mang kiến thức đến với các bạn đọc mọi lúc mọi nơi.\n12. Tiết học Lịch sử tại Thư viện \n13. KỆ SÁCH LƯU ĐỘNG\nKệ sách lưu động đã có mặt tại Phòng giáo viên và trước thư viện rồi đấy ạ.\nVới mong muốn đưa sách tiếp cận được với bạn đọc mọi lúc mọi nơi, thư viện đã trang bị 2 kệ sách không những hay, tiện lợi mà còn luôn cập nhật mới mỗi ngày.\nBên cạnh đó, thư viện cũng cảm ơn bạn đọc vì đã đặt sách lại vị trí cũ để chia sẻ cùng các bạn đọc khác.\nBạn đọc cũng có thể chia sẻ thêm các quyển sách bạn tâm đắc bằng cách lấp đầy kệ hơn nữa nhé.\n14. CUỘC THI GIỚI THIỆU SÁCH TRỰC TUYẾN VỚI CHỦ ĐỀ “SÁCH VÀ TÔI\"\nNhằm nâng cao nhận thức về văn hóa đọc, khơi dậy niềm đam mê đọc sách, hình thành thói quen đọc sách, ý thức tự học, tự nghiên cứu. Trường THPT Ten Lơ Man xây dựng Kế hoạch tổ chức cuộc thi giới thiệu sách trực tuyến với chủ đề “Sách và Tôi” năm học 2024 – 2025.\nĐối tượng dự thi: Toàn thể học sinh trường THPT Ten Lơ Man.\nNội dung bài dự thi: Giới thiệu 01 quyển sách giấy hoặc 01 bản sách điện tử tại thư viện nhà trường (https://thpttenloman.digilib.vn).\nHình thức dự thi: Bài dự thi gồm link podcast và thông tin dự thi (họ tên thí sinh, lớp, tựa đề quyển sách, tác giả, nhà xuất bản, năm xuất bản). Trong đó, podcast giới thiệu quyển sách từ 3 - 4 phút và được đăng tải trên Google Drive ở chế độ công khai.\nLưu ý:\nNgôn từ, hình ảnh sử dụng phải phù hợp với thuần phong mỹ tục và pháp luật Việt Nam. \nPodcast thuộc quyền sở hữu của thí sinh, không sao chép của người khác và có ghi phụ đề ở bên dưới.\nMỗi thí sinh tham gia giới thiệu tối đa 3 quyển sách.\nTiêu chí chấm bài thi\nBan Giám khảo đánh giá, bình chọn: 80% số điểm.\nĐiểm tương tác trên mạng xã hội: 20% số điểm:\nLượt Like hoặc biểu cảm tương tự: 01 điểm/lượt.\nLượt Share: 02 điểm/lượt. Mỗi tài khoản Facebook chỉ tính 01 lượt. \nBài dự thi gửi qua email: thuvientlmedu@gmail.com để đăng tải lên trang Facebook Thư viện Trường THPT Ten Lơ Man, từ ngày 28/03/2025 đến 20h00 ngày 17/04/2025.\nTổng lượt tương tác trên Facebook được tính đến 21h00 ngày 18/04/2025.\nThời gian công bố các giải thưởng (dự kiến): 21/04/2025 tại sân trường.\nCƠ CẤU GIẢI THƯỞNG\n01 giải Nhất trị giá 600.000 đồng.\n01 giải Nhì trị giá 400.000 đồng.\n01 giải Ba trị giá 300.000 đồng.\n05 giải được yêu thích nhất, mỗi giải trị giá 100.000 đồng.\nTheo dõi bài dự thi tại Page Thư viện Trường THPT Ten Lơ Man:\nhttps://www.facebook.com/profile.php?id=61555880630574&mibextid=LQQJ4d\n15. Cine Tour Tháng 4 Chào mừng 50 năm Ngày giải phóng miền Nam, thống nhất đất nước (30/4/1975 - 30/4/2025)\nChiều ngày 21/4/2025, suất chiếu phim đặc biệt “Địa đạo - Mặt trời trong bóng tối” dành riêng cho các bạn học sinh Ten Lơ Man tại Rạp Đống Đa, đã thu hút hơn 130 đoàn viên, học sinh tham gia.\nHướng đến kỷ niệm 50 năm Ngày Giải phóng miền Nam, thống nhất đất nước (30.4.1975 - 30.4.2025), bộ phim đã tái hiện lại thảm cảnh chiến tranh năm 1967. Đội du kích 21 người do Bảy Theo chỉ huy tại căn cứ Bình An Đông trở thành mục tiêu mà quân đội Mỹ tìm và diệt số 1 khi nhận nhiệm vụ bằng mọi giá phải bảo vệ một nhóm thông tin tình báo chiến lược, cũng như phải chiến đấu bảo vệ địa đạo của họ trước sự xâm nhập của quân đội Mỹ.\nNhững trang sử hào hùng của cha ông như sống lại, giúp các em thêm yêu quý và trân trọng những gì mình đang có hôm nay.\n“Có nơi nào như đất nước chúng ta Viết bằng máu cả ngàn chương sử đỏ Khi giặc đến vạn người con quyết tử Cho một lần Tổ quốc được sinh ra”\n -Nhà thơ Nguyễn Việt Chiến-\n16. Triển lãm Sách\nHưởng ứng Ngày Sách và Văn hoá đọc Việt Nam 2025, Thư viện Trường THPT Ten Lơ Man hân hạnh giới thiệu đến bạn Triển lãm sách 2025 với chủ đề “Cùng sách bước vào kỷ nguyên vươn mình của dân tộc”\nTriển lãm sẽ diễn ra từ ngày 28/4/2025 đến ngày 24/5/2025, chi tiết ngày hôm nay bên dưới ạ\nCác bạn còn chần chờ gì mà không đến triển lãm ngay để tham quan, đọc sách và checkin nhận quà “xịn” từ thư viện, bật mí là siêu xinh cấp vũ trụ đó ạ.\n17. HỘI THU SÁCH GIÁO KHOA VÀ ĐỒNG PHỤC\nNhằm lan tỏa yêu thương, gieo mầm sự tử tế, kêu gọi và phát huy tinh thần tương thân tương ái trong cộng đồng học sinh trường Ten\nVà trên hết là hỗ trợ cho các em học sinh có hoàn cảnh khó khăn tại trường, có thể trang bị đủ sách giáo khoa, đồng phục, tiết kiệm chi phí học tập, khi bước vào năm học mới (năm học: 2025 – 2026)\nTrường THPT Ten Lơ Man chính thức phát động hoạt động “Hội thu sách giáo khoa và đồng phục”\nMỗi em học sinh có thể quyên góp trọn bộ hoặc một số đầu sách giáo khoa đã sử dụng trong năm học 2024 – 2025.\nLưu ý: Sách giáo khoa được trao tặng phải còn nguyên, không bị rách, không lem, không phai hình ảnh, màu chữ, không bị viết vẽ những nội dung ngoài chương trình của môn học. Đồng phục trọn bộ hoặc đồng phục thể dục.\nThời gian gửi sách và áo từ ngày 21/05 đến ngày 20/06/2025 tại Thư viện Trường THPT Ten Lơ Man.\nKhi trao tặng sách và áo các em cũng sẽ đổi lấy một món quà lưu niệm từ thư viện đó nha. Hẹn gặp các em tại “Thân tặng sách, thương tặng áo nhận yêu thương” nhé!\n18. HÈ NÀY, HÃY ĐỂ SÁCH DẪN LỐI CHO NHỮNG CHUYẾN PHIÊU LƯU TUYỆT VỜI! \nCùng Thư viện trường THPT Ten Lơ Man tham gia thử thách Du lịch ngày hè cùng sách nhé \nChặng 1: Đặt tên cho mùa hè 2025…\nBước 1: Share bài viết về trang cá nhân \nBước 2: Quét mã QR hoặc truy cập https://wayground.com/join?gc=01888028\nBước 3: Điền TÊN, LỚP NĂM HỌC CŨ và tham gia giải các câu hỏi ở Quizzi \nBước 4: Chờ kết quả, nhận quà từ BTC và chuẩn bị tinh thần cho Chặng \nLưu ý: Chuyến phiêu lưu dành cho tất cả học sinh cả 3 khối năm học 2024 - 2025. Các câu hỏi sẽ liên quan đến các môn học và siêu siêu dễ để tìm ra từ khoá. Mỗi bạn chỉ tham gia tối đa 2 lần thôi nhé. Thời gian tham gia sẽ kéo dài đến 20h00 ngày 07/7/2025 nhé. Vậy còn chần chờ gì mà không “Khởi động tạo mood, Du lịch ngày hè cùng Sách” nhé\n19. SÁCH YÊU THƯƠNG - SÁCH 0 ĐỒNG\nVới mục tiêu ban đầu nhằm lan tỏa yêu thương, phát huy tinh thần đoàn kết trong cộng đồng học sinh trường THPT Ten Lơ Man. Và trên hết là hỗ trợ các em học sinh có hoàn cảnh khó khăn tại trường có thể trang bị đầy đủ sách giáo khoa, tiết kiệm chi phí học tập khi bước vào năm học mới. \nTrường THPT Ten Lơ Man hân hạnh giới thiệu đến các em học sinh Gian hàng sách 0 đồng đến từ hoạt động “Hội thu sách giáo khoa và đồng phục” từ 21/5 đến 20/6/2025 với hơn 50 phụ huynh, học sinh đến quyên góp từ các đầu sách giáo khoa, sách chuyên đề, sách bài tập đến đồng phục chính khoá và đồng phục thể dục.\nGian hàng sẽ diễn ra từ 7h00 ngày 03/7/2025 tại Thư viện nhà trường.\n20. DU LỊCH NGÀY HÈ CÙNG SÁCH\nTrong khi chờ kết quả của Chặng 1 thì bạn hãy check map để kiểm tra xem Chặng 2 có gì nhé\nChặng 2: CHIA SẺ\nĐối tượng tham gia: Quý thầy cô, học sinh các lớp năm học 2025 - 2026, đồng nghĩa là các bạn tân học sinh Khối 10 có thể tham gia nhé.\nCách thức tham gia: Đăng tải trên trang cá nhân hình ảnh hoặc Daily vlog về quyển sách bạn đang đọc trong mùa hè, kèm hastag #GSwithTen và 5 điều cảm thấy thú vị về quyển sách. \nLưu ý: Nội dung quyển sách phải phù hợp với lứa tuổi nhé. \nThời gian tham gia: từ ngày 09/07 – 31/07/2025. \nVà cái gì đặc biệt thì phải nhấn mạnh đúng không nè, các bài tham gia đều sẽ nhận được quà siêu siêu dễ thương từ Ban tổ chức. Vậy còn chần chờ gì mà không “Khởi động tạo mood, Du lịch ngày hè cùng Sách” nhen.\n",
-      "images": ["images/tv1.jpg","images/tv2.jpg","images/tv3.jpg","images/tv4.jpg","images/tv5.jpg","images/tv6.jpg","images/tv7.jpg","images/tv8.jpg","images/tv9.jpg","images/tv10.jpg","images/tv11.jpg","images/tv12.jpg","images/tv13.jpg","images/tv14/jpg","images/tv15.jpg","images/tv16.jpg","images/tv17.jpg","images/tv18.jpg","images/tv19.jpg","images/tv20.jpg","images/tv21.jpg","images/tv22.jpg","images/tv23.jpg","images/tv24.jpg","images/tv25.jpg","images/tv26.jpg","images/tv27.jpg","images/tv28.jpg","images/tv29.jpg","images/tv30.jpg","images/tv31.jpg","images/tv32.jpg","images/tv33.jpg"],
+      "images": [
+        "images/tv1.jpg",
+        "images/tv2.jpg",
+        "images/tv3.jpg",
+        "images/tv4.jpg",
+        "images/tv5.jpg",
+        "images/tv6.jpg",
+        "images/tv7.jpg",
+        "images/tv8.jpg",
+        "images/tv9.jpg",
+        "images/tv10.jpg",
+        "images/tv11.jpg",
+        "images/tv12.jpg",
+        "images/tv13.jpg",
+        "images/tv14/jpg",
+        "images/tv15.jpg",
+        "images/tv16.jpg",
+        "images/tv17.jpg",
+        "images/tv18.jpg",
+        "images/tv19.jpg",
+        "images/tv20.jpg",
+        "images/tv21.jpg",
+        "images/tv22.jpg",
+        "images/tv23.jpg",
+        "images/tv24.jpg",
+        "images/tv25.jpg",
+        "images/tv26.jpg",
+        "images/tv27.jpg",
+        "images/tv28.jpg",
+        "images/tv29.jpg",
+        "images/tv30.jpg",
+        "images/tv31.jpg",
+        "images/tv32.jpg",
+        "images/tv33.jpg"
+      ],
       "captions": null
     },
     {
-      "question": ["phòng học", "lớp học", "phòng học và lớp học như thế nào","phòng học và lớp học của trường"],
+      "question": [
+        "phòng học",
+        "lớp học",
+        "phòng học và lớp học như thế nào",
+        "phòng học và lớp học của trường"
+      ],
       "answer": "100% phòng học, thư viện đều được trang bị 2 cái máy lạnh, 1 cái máy chiếu, micro. Phòng học đủ ánh sáng, không gian lớp học rộng rãi, đạt chuẩn.",
       "images": null,
       "captions": null
     },
     {
-      "question": ["vị trí địa lí", "trường ở đâu", "vị trí của trường", "trường nằm ở vị trí nào"],
+      "question": [
+        "vị trí địa lí",
+        "trường ở đâu",
+        "vị trí của trường",
+        "trường nằm ở vị trí nào"
+      ],
       "answer": "Trường Trung học Phổ thông Ernst Thälmann tọa lạc tại địa chỉ: Số 8, đường Trần Hưng Đạo, phường Phạm Ngũ Lão, Quận 1, Thành phố Hồ Chí Minh. Trường Trung học Phổ thông Ernst Thälmann trước đây từng là nơi xuất phát phong trào đấu tranh chống Mỹ cứu nước đầu tiên của nhân dân Miền Nam ở thời điểm năm 1950. Trong chặng đường lịch sử đấu tranh chống xâm lăng của nhân dân Sài Gòn - Chợ Lớn, tính từ ngày thành lập Đảng Cộng Sản Việt Nam (3-2-1930) đến ngày Giải phóng hoàn toàn miền Nam, thống nhất đất nước (30-4-1975) không thể quên được đỉnh cao của cuộc đấu tranh của nhân dân ở đây với phong trào chống Mỹ đầu tiên nổ ra tại sân trường Tôn Thọ Tường (nay là trường THPT Ernst Thälmann) vào ngày 19-3-1950. Phát huy truyền thống vẻ vang và tự hào của mái trường thân yêu này, từ nhiều thập kỷ qua, trường đã phấn đấu vươn lên không ngừng về mọi mặt để tô thắm cho trang sử vàng ngày càng thêm rực rỡ.",
       "images": null,
       "captions": null
     },
     {
-      "question": ["khái quát", "sơ lược","khái quát về trường","sơ lược về trường","cho tôi thông tin sơ lược và khái quát về trường"],
+      "question": [
+        "khái quát",
+        "sơ lược",
+        "khái quát về trường",
+        "sơ lược về trường",
+        "cho tôi thông tin sơ lược và khái quát về trường"
+      ],
       "answer": "1.1. VỀ VIỆC THÀNH LẬP Trường THPT Ten Lơ Man được thành lập theo Quyết định số 2334/QĐ-UBND ngày 24 tháng 5 năm 2006 của UBND thành phố Hồ Chí Minh. Hiện trường tọa lạc tại số 08, đường Trần Hưng Đạo, phường Phạm Ngũ Lão, Quận 1 Thành phố Hồ Chí Minh. Hiện tại trường có 39 lớp với 1711 học sinh. Tổng số cán bộ giáo viên, nhân viên của trường (tính đến thời điểm hiện tại) là 87. Trong đó cán bộ quản lý 03; giáo viên 71, nhân viên 04. Trường THPT Ten Lơ Man được thành lập theo Quyết định số 2334/QĐ-UBND ngày 24 tháng 5 năm 2006 của UBND thành phố Hồ Chí Minh, là cơ sở giáo dục phổ thông của hệ thống giáo dục quốc dân, là đơn vị sự nghiệp công lập trực thuộc Sở Giáo dục và Đào tạo Thành phố Hồ Chí Minh; thực hiện chức năng, nhiệm vụ, quyền hạn theo Điều lệ Trường trung học cơ sở, THPT và trường phổ thông có nhiều cấp học của Bộ Gáo dục và Đào tạo và các quy định pháp luật có liên quan. Trường có tư cách pháp nhân, có tài khoản và con dấu riêng hoạt động theo quy định của pháp luật.\n1.2. VỀ VỊ TRÍ Trường THPT Ten Lơ Man là cơ sở giáo dục phổ thông của hệ thống giáo dục quốc dân, là đơn vị sự nghiệp công lập trực thuộc Sở Giáo dục và Đào tạo Thành phố Hồ Chí Minh. Trường thực hiện chức năng, nhiệm vụ, quyền hạn theo Điều lệ Trường trung học cơ sở, trung học phổ thông và trường phổ thông có nhiều cấp học của Bộ Giáo dục và Đào tạo và các quy định Pháp luật có liên quan. Trường có tư cách pháp nhân, có tài khoản và con dấu riêng hoạt động theo quy định của Pháp luật.\n2. VỀ NHIỆM VỤ VÀ QUYỀN HẠN CỦA TRƯỜNG THPT TEN LƠ MAN Trường THPT Ten Lơ Man thực hiện nhiệm vụ và quyền hạn sau đây: - Xây dựng kế hoạch chiến lược phát triển nhà trường, gắn với điều kiện kinh tế - xã hội của địa phương; xác định tầm nhìn, sứ mệnh, các giá trị cốt lõi về giáo dục, văn hóa, lịch sử và truyền thống của nhà trường; - Xây dựng và tổ chức thực hiện kế hoạch giáo dục của nhà trường, theo chương trình giáo dục phổ thông do Bộ trưởng Bộ Giáo dục và Đào tạo ban hành, cùng Sở Giáo dục và Đào tạo và nhà trường xây dựng. Phối hợp với gia đình học sinh, tổ chức và cá nhân trong việc tổ chức các hoạt động giáo dục.",
       "images": null,
       "captions": null
     },
     {
-      "question": ["các thầy cô hiệu trưởng qua từng thời kỳ", "hình ảnh các hiệu trưởng qua từng thời kỳ", "thầy cô"],
+      "question": [
+        "các thầy cô hiệu trưởng qua từng thời kỳ",
+        "hình ảnh các hiệu trưởng qua từng thời kỳ",
+        "thầy cô"
+      ],
       "answer": "đây là các thầy cô hiệu trưởng qua từng thời kỳ từ năm 1975 đến nay",
-      "images": ["images/thayhuy.jpg", "images/comai.jpg", "images/thayto.jpg", "images/coloan.jpg", "images/cochau.jpg", "images/cosa.jpg", "images/thayson.jpg", "images/thaythanh.jpg", "images/thayphuoc.jpg", "images/hinhthaykhuong2.jpg"],
-      "captions": ["1.\tThầy Phạm Đức Huy – Nguyên Hiệu trưởng (1975 – 1976)\nHuân chương Kháng chiến chống Mỹ Hạng Ba\n", "2.\tCô Đặng Thị Tuyết Mai - Nguyên Hiệu trưởng  (1976 – 1977)", "3.\tThầy Lê Ngọc Tố - Nguyên Hiệu trưởng (1977 – 1979)\nHuân chương Kháng chiến chống Mỹ Hạng Ba\n", "4.\tCô Lê Thị Loan - Nguyên Hiệu trưởng (1979 – 1990)", "5.\tCô Phan Thị Châu - Nguyên Hiệu trưởng (1990 – 1998)\nHuân chương Kháng chiến chống Mỹ Hạng Ba\n", "6.\tCô Cao Ngọc Sa - Nguyên Hiệu trưởng (1998 – 2008)", "7.\tThầy Nguyễn Ngọc Sơn - Nguyên Hiệu trưởng (2008 – 2012)", "8.\tThầy Nguyễn Văn Thành - Nguyên Hiệu trưởng (2012 – 2021)", "9.\tThầy Lê Văn Phước - Nguyên Hiệu trưởng (2022 – 2023)", "Thầy Nguyễn Hùng Khương - Hiệu trưởng từ 2023 "]
+      "images": [
+        "images/thayhuy.jpg",
+        "images/comai.jpg",
+        "images/thayto.jpg",
+        "images/coloan.jpg",
+        "images/cochau.jpg",
+        "images/cosa.jpg",
+        "images/thayson.jpg",
+        "images/thaythanh.jpg",
+        "images/thayphuoc.jpg",
+        "images/hinhthaykhuong2.jpg"
+      ],
+      "captions": [
+        "1.\tThầy Phạm Đức Huy – Nguyên Hiệu trưởng (1975 – 1976)\nHuân chương Kháng chiến chống Mỹ Hạng Ba\n",
+        "2.\tCô Đặng Thị Tuyết Mai - Nguyên Hiệu trưởng  (1976 – 1977)",
+        "3.\tThầy Lê Ngọc Tố - Nguyên Hiệu trưởng (1977 – 1979)\nHuân chương Kháng chiến chống Mỹ Hạng Ba\n",
+        "4.\tCô Lê Thị Loan - Nguyên Hiệu trưởng (1979 – 1990)",
+        "5.\tCô Phan Thị Châu - Nguyên Hiệu trưởng (1990 – 1998)\nHuân chương Kháng chiến chống Mỹ Hạng Ba\n",
+        "6.\tCô Cao Ngọc Sa - Nguyên Hiệu trưởng (1998 – 2008)",
+        "7.\tThầy Nguyễn Ngọc Sơn - Nguyên Hiệu trưởng (2008 – 2012)",
+        "8.\tThầy Nguyễn Văn Thành - Nguyên Hiệu trưởng (2012 – 2021)",
+        "9.\tThầy Lê Văn Phước - Nguyên Hiệu trưởng (2022 – 2023)",
+        "Thầy Nguyễn Hùng Khương - Hiệu trưởng từ 2023 "
+      ]
     },
     {
-      "question": ["lịch sử ngày truyển thống của trường Ten lơ man 19/3", "lịch sử"],
+      "question": [
+        "lịch sử ngày truyển thống của trường Ten lơ man 19/3",
+        "lịch sử"
+      ],
       "answer": "Ngày 19/3 hàng năm “là ngày toàn quốc chống Mỹ” của nhân dân ta. Đây cũng là ngày truyền thống của trường THPT Ten Lơ Man, bởi cách đây 75 năm về trước, tại trường Tôn Thọ Tường (nay là trường THPT Ten Lơ Man), hàng nghìn nhân sĩ, trí thức, học sinh, sinh viên, công nhân lao động đã tổ chức mít tinh để phản đối đế quốc Mỹ can thiệp vào Đông Dương. Cuối năm 1949 đầu 1950, thực dân Pháp thất bại trong chủ trương “chia để trị” nên chuyển sang thủ đoạn mới “dùng người Việt đánh người Việt” bằng cách lập ra Chính phủ Quốc gia Việt Nam (một chính phủ tay sai của thực dân Pháp) do Bảo Đại đứng đầu. Từ đó, phong trào của trí thức, học sinh, sinh viên và các tầng lớp nhân dân càng lên cao. Chính phủ Bảo Đại ra lệnh bắt lính, mà đối tượng là học sinh, sinh viên để lập ra quân đội chống lại Chính phủ Việt Nam Dân chủ Cộng hòa do Chủ tịch Hồ Chí Minh đứng đầu.\nNgày 9-1-1950, hàng ngàn học sinh, sinh viên với sự phối hợp, tham gia của các đại biểu, các giáo sư, bác sĩ đã tổ chức cuộc biểu tình kéo dài đến Nha học chánh Nam Phần (nay là Bảo tàng Thành phố Hồ Chí Minh) phản đối việc chính quyền tay sai của thực dân Pháp đóng cửa trường học, khủng bố học sinh, đòi bảo vệ an ninh và trả tự do cho học sinh tham gia phong trào yêu nước đang bị bắt giữ. Thực dân Pháp đã đàn áp phong trào dã man làm cho 30 học sinh bị thương nặng; trong đó có Trần Văn Ơn, học sinh trường Pétrus Ký (nay là trường Lê Hồng Phong) cũng bị sát hại. Ngay sau khi cuộc đấu tranh của học sinh sinh viên Sài Gòn - Chợ Lớn bị đàn áp đẫm máu, nhất là sau đám tang “Trò Ơn”, đồng bào các giới ở Sài Gòn - Chợ Lớn càng căm thù thực dân Pháp và tay sai, nhiều phong trào đấu tranh nổ ra như như không họp chợ, học sinh nghỉ học, công nhân đình công ... đã biến Sài Gòn bấy giờ thành một “thành phố chết”. Ngày 9-1-1950 đã đi vào lịch sử dân tộc Việt Nam và sau này trở thành ngày \"Truyền thống đấu tranh của học sinh, sinh viên toàn quốc\".\nCũng từ tháng 1-1950, cuộc kháng chiến chống thực dân Pháp xâm lược của nhân dân Việt Nam có những bước phát triển mới. Để đối phó với việc Liên Xô, Trung Quốc và các nước xã hội chủ nghĩa khác công nhận nước Việt Nam Dân chủ Cộng hòa, Mỹ và Anh công nhận Chính phủ Quốc gia của Bảo Đại (Chính phủ tay sai của thực dân Pháp) từ 7-2-1950. Để tạo thanh thế cho Chính phủ Bảo Đại, ngày 23-2-1950, một phái đoàn kinh tế Mỹ do A. Griffin cầm đầu đến Sài Gòn, tiếp theo là đoàn khảo sát tình hình của đại tá Jessupp đến Đông Dương gặp Bảo Đại. Ngày 14-3-1950, Tư lệnh Hạm đội Mỹ, đô đốc Russel S. Berkey đi trên soái hạm Stickell cùng với khu trục hạm Andreson đến cảng Sài Gòn nhằm biểu dương lực lượng, uy hiếp tinh thần đấu tranh của nhân dân Việt Nam bằng việc xúc tiến kế hoạch thao diễn lực lượng Hạm đội 7 Thái Bình Dương, dọc ven biển Trung Bộ Việt Nam.\nNhằm đánh phủ đầu can thiệp Mỹ bằng đòn phối hợp đấu tranh quân sự và chính trị, hừng sáng chủ nhật ngày 19-3-1950, khi mặt trời chưa lên, đèn điện chưa tắt, dưới sự chỉ đạo của Khu ủy Sài Gòn - Chợ Lớn, 120.000 đồng bào ở đây đã xuống đường biểu tình. Bên cạnh nhiều địa điểm tập hợp, trường tiểu học Tôn Thọ Tường (nay là trường THPT Ernst Thälmann) được chọn làm diễn đàn công khai chống can thiệp Mỹ bằng cuộc tuần hành thị uy của quần chúng. Dòng người như thác đổ từ địa điểm ban đầu tràn ra các đại lộ chính của thành phố như đường Lê Lợi, Nguyễn Huệ… Trên đường tuần hành, số người mỗi lúc một đông, chẳng bao lâu đoàn biểu tình đã lên đến 250.000 người. Trong cuộc mít tinh hôm ấy, luật sư Nguyễn Hữu Thọ đã đến tham dự và nói chuyện với đồng bào. Mặc dù thực dân Pháp và tay sai ra sức đàn áp, khủng bố, nhưng cuộc biểu tình càng lúc càng dâng cao như vũ bão.\nSáng 19-3-1950, quần chúng tấp nập kéo đến trường Tôn Thọ Tường (nay là trường Ernst Thalmann) tổ chức mít tinh chống Mỹ can thiệp, nghe luật sư Nguyễn Hữu Thọ diễn thuyết.  Đến khoảng 9 giờ sáng, trên tầng lầu thứ 3 của trường, tổ xung kích Thanh niên đã nhanh chóng kéo cao lá cờ đỏ sao vàng to lớn bằng lụa đẹp, phất phới bay giữa bầu trời thành phố rực nắng ban mai. Đồng bào giương cao cờ đỏ sao vàng, chân dung Chủ tịch Hồ Chí Minh và hô vang khẩu hiệu: \"Đả đảo đế quốc Pháp và bọn bù nhìn tay sai!”, “Phản đối Mỹ can thiệp vào Việt Nam!\", \"Hồ Chí Minh muôn năm!\"... Ảnh Bảo Đại, cờ vàng ba sọc đỏ, cờ Pháp và cờ Mỹ bị hạ xuống trên những đường có đoàn biểu tình đi qua. Tại bến cảng, đoàn biểu tình rượt đuổi lính Mỹ, làm chúng hoảng sợ bỏ chạy lên tàu và buộc nhà cầm quyền thực dân phải tăng cường cảnh sát, quân đội, hiến binh... Cuộc biểu tình ngày 19-3-1950 thắng lợi, buộc Mỹ phải hủy bỏ cuộc thao diễn thủy quân như đã dự tính và hai tàu chiến Mỹ phải vội vã nhổ neo ngay trong đêm hôm đó, kết thúc cuộc diễu võ, giương oai.\nTừ sau sự kiện này, ngày 19 tháng 3 hàng năm đã trở thành ngày “Toàn quốc chống Mỹ” của nhân dân Việt Nam và cũng là ngày truyền thống của trường THPT Ernst Thälmann. 19/3 hàng năm trở thành ngày mà thầy trò trường THPT Ernst Thälmann cùng nhau nhìn lại lịch sử hào hùng của dân tộc Việt Nam nói chung và lịch sử của ngôi trường giàu truyền thống - nơi xuất phát phong trào đấu tranh chống Mỹ cứu nước đầu tiên của nhân dân Miền Nam ở thời điểm năm 1950 nói riêng.\n",
-      "images": ["images/hinhthayco.jpg", "images/past.jpg"],
-      "captions": ["Hình ảnh: Bác Nguyễn Hữu Châu (Con trai trưởng cố Luật sư Nguyễn Hữu Thọ) và Ban Lãnh đạo trường các thời kỳ cùng Ban Đai diện CMHS, giáo viên trường THPT Ten Lơ Man dâng hương tưởng niệm tại bia truyền thống trường nhân kỉ niệm 74 năm ngày truyền thống trường \n(19/3/1950 – 19/3/2024)\n", "Ngày 19 tháng 3 năm 1950, hàng ngàn đồng bào Sài Gòn xuống đường đấu tranh phản đối Mỹ can thiệp vào Đông Dương. Cuộc biểu tình đã đạt được thắng lợi và đi vào lịch sử, trở thành “Ngày Toàn quốc chống Mỹ”. "]
+      "images": [
+        "images/hinhthayco.jpg",
+        "images/past.jpg"
+      ],
+      "captions": [
+        "Hình ảnh: Bác Nguyễn Hữu Châu (Con trai trưởng cố Luật sư Nguyễn Hữu Thọ) và Ban Lãnh đạo trường các thời kỳ cùng Ban Đai diện CMHS, giáo viên trường THPT Ten Lơ Man dâng hương tưởng niệm tại bia truyền thống trường nhân kỉ niệm 74 năm ngày truyền thống trường \n(19/3/1950 – 19/3/2024)\n",
+        "Ngày 19 tháng 3 năm 1950, hàng ngàn đồng bào Sài Gòn xuống đường đấu tranh phản đối Mỹ can thiệp vào Đông Dương. Cuộc biểu tình đã đạt được thắng lợi và đi vào lịch sử, trở thành “Ngày Toàn quốc chống Mỹ”. "
+      ]
     },
     {
-      "question": ["ý nghĩa ngày truyền thống", "ý nghĩa ngày truyền thống trường"],
+      "question": [
+        "ý nghĩa ngày truyền thống",
+        "ý nghĩa ngày truyền thống trường"
+      ],
       "answer": "Sân trường năm ấy nơi xuất phát phong trào đấu tranh chống Mỹ cứu nước đầu tiên của nhân dân Miền Nam ở thời điểm năm 1950 không chỉ là nơi ghi dấu ấn lịch sử, mà còn là nơi ươm mầm tri thức, phát triển văn hóa, đào tạo nhân tài cho đất nước và cũng là nơi lưu giữ những kí ức tươi đẹp của biết bao thế hệ học sinh nhà trường, nơi mà mỗi khi nhắc đến, các thế hệ học sinh của trường luôn bồi hồi, xúc động và tự hào.\nNgày 19/3 hàng năm là dịp để thầy và trò trường THPT Ernst Thälmann cùng cả nước ôn lại lịch sử quá khứ hào hùng của dân tộc Việt Nam - “Ngày toàn quốc chống Mỹ”. Đây cũng là dịp để các thế hệ thầy và trò của trường qua các thời kì có thể tề tựu về, cùng nhau ôn lại lịch sử truyền thống với bao thăng trầm, đang từng ngày thay da đổi thịt, không ngừng phát triển, là động lực cho các thế hệ hiện tại và mai sau viết tiếp trang sử vẻ vang ấy.\nThầy và trò trường Ernst Thälmann sẽ quyết tâm nỗ lực xây dựng trường Ernst Thälmann trở thành một ngôi trường hạnh phúc như thầy Hiệu trưởng Nguyễn Hùng Khương đã nói: “Với bề dày lịch sử, tập thể nhà trường và các em học sinh sẽ cùng nhau gắn kết, quyết tâm xây dựng Trường THPT Ten Lơ Man ngày càng tốt đẹp hơn, xây dựng trường trở thành là ngôi trường hạnh phúc, để mỗi ngày thầy và trò đến trường đều là những ngày vui. Để học sinh đến trường được an toàn, thầy cô đến trường được an vui, phụ huynh đưa con đến trường được an tâm”.\n",
       "images": null,
       "captions": null
     },
     {
-      "question": ["trường nữ sinh chợ đũi", "trường nữ sinh", "trường nữ"],
+      "question": [
+        "trường nữ sinh chợ đũi",
+        "trường nữ sinh",
+        "trường nữ"
+      ],
       "answer": "Tiền thân của trường THPT Ernst Thälmann trước đây là trường Nữ sinh Chợ Đũi, chuyên giảng dạy cho nữ sinh. Sau này được đổi tên thành trường Tôn Thọ Tường, mở cửa giáo dục cho cả nam lẫn nữ .  Là một trong những ngôi trường giàu truyền thống và có bề dày lịch sử, trải qua nhiều thăng trầm và biến cố lịch sử cùng đất nước, trường THPT Ernst Thälmann đã có nhiều lần đổi tên.",
-      "images": ["images/truongnu.jpg", "images/truongnu1.jpg", "images/truongnu2.jpg"],
-      "captions": ["Trường nữ sinh Chợ Đũi, nay là trường THPT Ernst Thälmann tại số 8 Trần Hưng Đạo, Quận 1", "Trường nữ sinh Chợ Đũi, mặt phía đường Phạm Ngũ Lão, Quận 1 ngày nay", "Sân trong trường nữ sinh Chợ Đũi"]
+      "images": [
+        "images/truongnu.jpg",
+        "images/truongnu1.jpg",
+        "images/truongnu2.jpg"
+      ],
+      "captions": [
+        "Trường nữ sinh Chợ Đũi, nay là trường THPT Ernst Thälmann tại số 8 Trần Hưng Đạo, Quận 1",
+        "Trường nữ sinh Chợ Đũi, mặt phía đường Phạm Ngũ Lão, Quận 1 ngày nay",
+        "Sân trong trường nữ sinh Chợ Đũi"
+      ]
     },
     {
-      "question": ["trường tiểu học tôn thọ tường", "tôn thọ tường"],
+      "question": [
+        "trường tiểu học tôn thọ tường",
+        "tôn thọ tường"
+      ],
       "answer": "Trước năm 1954, trường mang tên Tôn Thọ Tường (tên một nhà thơ từng làm việc cho thực dân Pháp).",
       "images": "images/tieuhoc.jpg",
-      "captions": ["khung cảnh trường Tôn Thọ Tường"]
+      "captions": [
+        "khung cảnh trường Tôn Thọ Tường"
+      ]
     },
     {
-      "question": ["trường tiểu học phan văn trị", "phan văn trị"],
+      "question": [
+        "trường tiểu học phan văn trị",
+        "phan văn trị"
+      ],
       "answer": "Từ năm 1954 đến 1962, trường mang tên Phan Văn Trị (tên một nhà thơ yêu nước thế kỷ XIX).",
-      "images": ["images/pvt.jpg", "images/pvt1.jpg", "images/pvt2.jpg", "images/pvt3.jpg"],
-      "captions": ["Trường Tiểu học Phan Văn Trị ", "Trường Tiểu học Phan Văn Trị.", "Trường nữ tiểu học Phan Văn Trị - Sài Gòn năm 1965", "Hình ảnh Lớp Nhất (Tương đương Lớp 5 hiện nay) của trường Tôn Thọ Tường, nay chụp cùng cô Khuyên (đứng giữa, hàng cuối) vào năm 1958"]
+      "images": [
+        "images/pvt.jpg",
+        "images/pvt1.jpg",
+        "images/pvt2.jpg",
+        "images/pvt3.jpg"
+      ],
+      "captions": [
+        "Trường Tiểu học Phan Văn Trị ",
+        "Trường Tiểu học Phan Văn Trị.",
+        "Trường nữ tiểu học Phan Văn Trị - Sài Gòn năm 1965",
+        "Hình ảnh Lớp Nhất (Tương đương Lớp 5 hiện nay) của trường Tôn Thọ Tường, nay chụp cùng cô Khuyên (đứng giữa, hàng cuối) vào năm 1958"
+      ]
     },
     {
-      "question": ["trường nữ trung học đô thị cô giang", "trường trung học cô giang"],
+      "question": [
+        "trường nữ trung học đô thị cô giang",
+        "trường trung học cô giang"
+      ],
       "answer": "Từ năm 1962 cho đến 1979, Trường mang tên vị anh hùng trong cao trào đấu tranh chống thực dân ở những năm 1928-1930 là Cô Giang. ",
       "images": null,
       "captions": null
     },
     {
-      "question": ["trường trung hoc phổ thông Ernst Thalmann", "thpt Ernst Thalmann", "trường trung học phổ thông Ten lơ man", "thpt Ten lơ man"],
+      "question": [
+        "thành lập",
+        "Khái quát"
+      ],
       "answer": "Đến ngày 8-3-1979, theo Quyết định số 840/QĐ/UB của Ủy Ban Nhân Dân Thành phố Hồ Chí Minh, trường chính thức được mang tên vị lãnh tụ của giai cấp vô sản Đức, đồng thời cũng là nhà họat động lỗi lạc trong phong trào cộng sản và công nhân quốc tế nửa đầu thế kỷ XX - Trường THPT Ernst Thälmann, là trường kết nghĩa với trường Hồ Chí Minh của thành phố Leipzig, Cộng hòa Dân chủ Đức trước đây.",
       "images": "images/tlm.jpg",
-      "captions": ["Trường THPT Ernst Thälmann, Quận 1, Thành phố Hồ Chí Minh, Việt Nam"]
+      "captions": [
+        "Trường THPT Ernst Thälmann, Quận 1, Thành phố Hồ Chí Minh, Việt Nam"
+      ]
     },
     {
-      "question": ["thành tích nổi bật của nhà trường", "thành tích của nhà trường", "thành tích","một số thành tích của trường"],
+      "question": [
+        "thành tích nổi bật của nhà trường",
+        "thành tích của nhà trường",
+        "thành tích",
+        "một số thành tích của trường"
+      ],
       "answer": "Trong những năm học vừa qua, mặc dù gặp nhiều khó khăn song tập thể cán bộ, giáo viên, nhân viên trường THPT Ten Lơ Man đã nỗ lực hoàn thành xuất sắc nhiệm vụ được giao, với kết quả đáng tự hào như:\nLiên tục nhiều năm liền, nhà trường đều được UBND Thành phố công nhận danh hiệu “Tập thể Lao động xuất sắc”. Riêng năm học 2023 - 2024 được công nhận “Tập thể hoàn thành tốt nhiệm vụ”, có 02 giáo viên được nhận Bằng khen của UBND Thành phố.\nTừ năm 2020 đến 2024, Chi bộ nhà trường đạt danh hiệu Hoàn thành tốt nhiệm vụ 05 năm liền. Nhiều năm liên tục, Chi bộ được Quận ủy Quận 1 khen thưởng vì có thành tích xuất sắc trong thực hiện công tác Tuyên giáo; trong học tập và làm theo tư tưởng đạo đức và phong cách Hồ Chí Minh. Năm 2023 Chi bộ được Quận ủy khen thưởng có thành tích xuất sắc trong thực hiện Nghị quyết số 29-NQ/TW ngày 04/11/2013 của BCH Trung ương Đảng khóa XI về đổi mới căn bản, toàn diện giáo dục và đào tạo đáp ứng yêu cầu công nghiệp hóa - hiện đại hóa đất nước trong điều kiện định hướng Xã hội chủ nghĩa và hội nhập quốc tế; Giấy khen tập thể chi bộ có thành tích xuất sắc trong công tác bảo vệ nền tảng tư tưởng của Đảng, đấu tranh phản bác các quan điểm sai trái, thù địch năm 2024…                  Ngoài ra, hàng năm, Chi bộ đã tham gia nhiều hoạt động của Quận ủy và đạt được thành tích cao: Giải B phim ngắn Hội thi tìm hiểu Nghị quyết Đại hội Đảng bộ các cấp - truyền thống lịch sử 45 năm hình thành, xây dựng và phát triển Quận 1 gắn với việc thực hiện Chỉ thị 05-CT/TW; Giải Ba Hội thi Báo cáo viên giỏi cấp Thành phố năm 2021; Giải phong trào trong Hội thi giảng viên lý luận chính trị giỏi năm 2022; Giải Chi bộ có số lượng bài tham gia nhiều nhất trong Hội thi Nét đẹp Quận 1 lần 02 năm 2024; 02 giải Ba và giải Khuyến khích hội thi “Đảng ta thật vĩ đại” do BTG Quận ủy Quận 1 tổ chức năm 2024…\nCông đoàn nhà trường trong năm học 2019 - 2020, được Giấy khen Công đoàn vững mạnh; Hoàn thành xuất sắc nhiệm vụ (năm học 2020 - 2021 và 2022 - 2023); Hoàn thành tốt nhiệm vụ (năm học 2021 - 2022 và 2023 - 2024); Giấy khen “Đã có thành tích tiêu biểu trong phong trào thi đua lao động giỏi và hoạt động Công đoàn năm học 2023 - 2024. Hàng năm, nhiều công đoàn viên đạt các danh hiệu thi đua và khen thưởng như: Giấy khen tuyên dương “Trái tim người Thầy” nhân kỷ niệm 37 năm Ngày Nhà giáo Việt Nam (20/11/1982-20/11/2019) của Công đoàn ngành giáo dục Thành phố năm 2019; Giấy khen “Người tốt, việc tốt”; Giấy khen “Lao động giỏi, lao động sáng tạo”, Giấy khen đã có thành tích tiêu biểu trong “Học tập và làm theo tư tưởng, đạo đức, phong cách Hồ Chí Minh”; Giấy khen “Người cán bộ Công đoàn của chúng tôi”  của Công đoàn ngành giáo dục Thành phố”…; Bằng khen của Liên đoàn Lao động Thành phố Hồ Chí Minh. Trong năm học 2021 - 2022, có một giáo viên đạt giải Ba hội thi “Báo cáo viên giỏi cấp Thành phố”, một giáo viên đạt giải Nhất hội thi “Giảng viên lý luận chính trị Giỏi cấp Quận” và nhiều giấy khen, giải thưởng khác.           \nĐoàn Thanh niên có nhiều hoạt động và đạt được nhiều thành tích ấn tượng trong giai đoạn từ năm 2021 đến 2024, khẳng định vai trò nổi bật trong phong trào thanh niên và công tác Đoàn trường học: 03 năm liên tiếp (2021 - 2024) nhận Bằng khen từ Thành đoàn Thành phố Hồ Chí Minh với các thành tích: Tham gia tích cực và hoàn thành tốt các hoạt động trong chiến dịch tình nguyện Hoa Phượng đỏ; Xuất sắc trong công tác Đoàn và phong trào thanh niên trường học; Đã có thành tích xuất sắc trong hoạt động Xuân tình nguyện. Năm học 2023 - 2024 được Trung ương Đoàn trao tặng Bằng khen vì “Thành tích xuất sắc trong công tác Đoàn và phong trào thanh niên trường học” và nhiều giấy khen từ Chủ tịch UBND Quận 1 và Quận Đoàn 1.\nChi đoàn giáo viên được Chủ tịch UBND Quận 1 và Quận Đoàn 1 khen thưởng có “Thành tích xuất sắc trong công tác Đoàn và phong trào thanh niên trường học” trong năm học 2021 - 2022.\n    ",
-      "images": ["images/giaykhen.jpg", "images/giaykhen1.jpg", "images/giaykhen2.jpg", "images/giaykhen3.jpg", "images/giaykhen4.jpg", "images/giaykhen5.jpg"],
-      "captions": ["Hình ảnh: Chi bộ nhà trường nhận được giấy của Quận ủy Quận 1 năm 2024", "Hình ảnh: Chi bộ nhà trường nhận được giấy của Quận ủy Quận 1 năm 2024."]
+      "images": [
+        "images/giaykhen.jpg",
+        "images/giaykhen1.jpg",
+        "images/giaykhen2.jpg",
+        "images/giaykhen3.jpg",
+        "images/giaykhen4.jpg",
+        "images/giaykhen5.jpg"
+      ],
+      "captions": [
+        "Hình ảnh: Chi bộ nhà trường nhận được giấy của Quận ủy Quận 1 năm 2024",
+        "Hình ảnh: Chi bộ nhà trường nhận được giấy của Quận ủy Quận 1 năm 2024."
+      ]
     },
     {
-      "question": ["tổ toán", "toán","các giáo viên tổ toán"],
+      "question": [
+        "tổ toán",
+        "toán",
+        "các giáo viên tổ toán"
+      ],
       "answer": "Tổ Toán trường THPT Ten Lơ Man trong năm học 2024-2025 là một tập thể đoàn kết, sáng tạo và không ngừng vươn xa với 11 thành viên, gồm 5 giáo viên trình độ Thạc sĩ, 6 giáo viên trình độ Cử nhân và 3 đảng viên. Sự kết hợp hài hòa giữa các giáo viên giàu kinh nghiệm và đội ngũ trẻ đầy nhiệt huyết đã tạo nên một tập thể vững mạnh, vừa kế thừa truyền thống quý báu, vừa đổi mới để đáp ứng yêu cầu giáo dục hiện đại. Nhờ đó, Tổ Toán không chỉ đạt thành tích xuất sắc trong chuyên môn mà còn xây dựng môi trường làm việc đoàn kết, thân thiện, truyền cảm hứng, góp phần vào sự phát triển bền vững của nhà trường.\nTổ Toán kế thừa tinh thần cầu tiến của các thế hệ đi trước, luôn học hỏi để nâng cao chất lượng giảng dạy, đồng thời trân trọng những cống hiến của các thầy cô đã đặt nền móng cho sự phát triển của tổ. Tinh thần này được thể hiện qua nỗ lực đổi mới phương pháp giảng dạy, ứng dụng công nghệ thông tin và tiến bộ khoa học, giúp môn Toán trở nên sinh động, gần gũi và mang tính ứng dụng cao. Học sinh được khuyến khích chủ động học tập qua các phương pháp đa dạng như làm việc nhóm, thuyết trình và thực hiện dự án.\nNhờ sự tận tâm và sáng tạo, Tổ Toán đạt nhiều thành tích đáng tự hào: điểm trung bình tốt nghiệp môn Toán của học sinh vượt mức trung bình Thành phố; các thầy cô liên tục cống hiến trong bồi dưỡng đội tuyển học sinh giỏi lớp 12, các kỳ thi Olympic 30/4, giải toán trên máy tính Casio và cuộc thi Giáo viên giỏi cấp Thành phố, mang về nhiều giải thưởng giá trị. Với tinh thần đoàn kết và nhiệt huyết, tổ liên tục đạt danh hiệu Lao động tiên tiến, xây dựng môi trường làm việc chuyên nghiệp, hiệu quả.\nTổ Toán không chỉ là nơi vun đắp kiến thức mà còn là nguồn cảm hứng, giúp học sinh tự tin vươn xa trên hành trình học tập và trưởng thành, trở thành niềm tự hào của trường THPT Ten Lơ Man.",
-      "images": ["images/toan.jpg", "images/toan1.jpg","images/toan2.jpg", "images/toan3.jpg", "images/toan4.jpg", "images/toan5.jpg", "images/toan6.jpg"],
-      "captions": ["Tổ Toán hiện nay - ảnh chụp trong Lễ khai giảng năm học 2024 – 2025 (Từ trái qua: thầy Lưu Quốc Vũ (Tổ phó), thầy Mai Xuân Long (Tổ trưởng), cô Trần Đình Vũ Huyên, cô Nguyễn Bích Dung, cô Trần Huỳnh Anh, thầy Trần Hải Bình (Phó Hiệu trưởng), thầy Nguyễn Hùng Khương (Hiệu trưởng), cô Lê Thị Phương Thảo, cô Nguyễn Ngọc Lan Vy (Tổ trưởng Công đoàn), cô Lê Thị Thanh Hương, cô Lê Thị Phương Thảo, thầy Nguyễn Tứ Đình Trí, thầy Nguyễn Văn Hường)", "Trong ảnh là một số thầy cô tổ Toán từ trái qua: Hàng thứ nhất: cô Trần Đình Vũ Huyên, cô Lê Thị An Vinh, thầy Trần Hải Bình. Hàng thứ hai: thầy Mai Xuân Long, thầy Lưu Quốc Vũ, thầy Nguyễn Tiến, thầy Trần Lê Dũng. Hàng thứ ba: thầy Đỗ Phúc Đình, thầy Võ Đường, thầy Nguyễn Lương Bằng.", "Ảnh chụp thầy Trần Lê Dũng (bên trái) và thầy Nguyễn Thiện Nguyện (bên phải) trong Lễ Truyền thống trường 19/3/2022", "Ảnh chụp cô Lê Thị An Vinh (bên trái) và thầy Nguyễn Tiến (bên phải)", "Thầy Nguyễn Hùng Khương – Hiệu trưởng cùng các thầy cô tổ Toán trong Cụm 1 tham gia tiết học dự án Hàm số bậc hai, năm học 2023 - 2024", "Ảnh chụp cô Lê Thị Phương Thảo (thứ hai từ trái qua) cùng các thầy cô dạy trong Lễ tri ân thầy cô bồi dưỡng học sinh giỏi cấp Thành phố, Olympic tháng 4, năm học 2023 – 2024", "Ảnh chụp cô Lê Thị Thanh Hương trong Lễ tri ân thầy cô bồi dưỡng học sinh giỏi cấp Thành phố, Olympic tháng 4, năm học 2023 – 2024"]
+      "images": [
+        "images/toan.jpg",
+        "images/toan1.jpg",
+        "images/toan2.jpg",
+        "images/toan3.jpg",
+        "images/toan4.jpg",
+        "images/toan5.jpg",
+        "images/toan6.jpg"
+      ],
+      "captions": [
+        "Tổ Toán hiện nay - ảnh chụp trong Lễ khai giảng năm học 2024 – 2025 (Từ trái qua: thầy Lưu Quốc Vũ (Tổ phó), thầy Mai Xuân Long (Tổ trưởng), cô Trần Đình Vũ Huyên, cô Nguyễn Bích Dung, cô Trần Huỳnh Anh, thầy Trần Hải Bình (Phó Hiệu trưởng), thầy Nguyễn Hùng Khương (Hiệu trưởng), cô Lê Thị Phương Thảo, cô Nguyễn Ngọc Lan Vy (Tổ trưởng Công đoàn), cô Lê Thị Thanh Hương, cô Lê Thị Phương Thảo, thầy Nguyễn Tứ Đình Trí, thầy Nguyễn Văn Hường)",
+        "Trong ảnh là một số thầy cô tổ Toán từ trái qua: Hàng thứ nhất: cô Trần Đình Vũ Huyên, cô Lê Thị An Vinh, thầy Trần Hải Bình. Hàng thứ hai: thầy Mai Xuân Long, thầy Lưu Quốc Vũ, thầy Nguyễn Tiến, thầy Trần Lê Dũng. Hàng thứ ba: thầy Đỗ Phúc Đình, thầy Võ Đường, thầy Nguyễn Lương Bằng.",
+        "Ảnh chụp thầy Trần Lê Dũng (bên trái) và thầy Nguyễn Thiện Nguyện (bên phải) trong Lễ Truyền thống trường 19/3/2022",
+        "Ảnh chụp cô Lê Thị An Vinh (bên trái) và thầy Nguyễn Tiến (bên phải)",
+        "Thầy Nguyễn Hùng Khương – Hiệu trưởng cùng các thầy cô tổ Toán trong Cụm 1 tham gia tiết học dự án Hàm số bậc hai, năm học 2023 - 2024",
+        "Ảnh chụp cô Lê Thị Phương Thảo (thứ hai từ trái qua) cùng các thầy cô dạy trong Lễ tri ân thầy cô bồi dưỡng học sinh giỏi cấp Thành phố, Olympic tháng 4, năm học 2023 – 2024",
+        "Ảnh chụp cô Lê Thị Thanh Hương trong Lễ tri ân thầy cô bồi dưỡng học sinh giỏi cấp Thành phố, Olympic tháng 4, năm học 2023 – 2024"
+      ]
     },
     {
-      "question": ["bán trú", "tổ chức bán trú", "quy định bán trú","những quy định khi tham gia bán trú"],
+      "question": [
+        "bán trú",
+        "tổ chức bán trú",
+        "quy định bán trú",
+        "những quy định khi tham gia bán trú"
+      ],
       "answer": "ĂN TRƯA: Sau khi kết thúc tiết 5 (11 giờ 15 phút), học sinh di chuyển từ phòng học đến phòng ăn. Nhận cơm từ thầy/cô trực sân ăn, mang khay cơm ngồi vào đúng chỗ quy định theo sơ đồ niêm yết. Sau khi ăn xong, mang khay để đúng nơi quy định. Nếu vắng, học sinh phải báo cắt trước 16 giờ 00 ngày hôm trước (hoặc trước 7 giờ 30 cùng ngày nếu bệnh đột xuất) qua đường link https://forms.gle/RQ3QxEho8nECu9HYA. Không báo cắt đúng giờ sẽ không được trừ tiền ăn của buổi vắng.\nNGỦ TRƯA (PHÒNG MÁY LẠNH): Sau khi ăn và vệ sinh cá nhân, học sinh di chuyển lên lầu 1, lầu 2 Khu B để nhận gối chiếu cá nhân và về phòng ngủ, chậm nhất là 11 giờ 50 phút. Lưu ý:\n\n\nĐặt giày dép bên ngoài cửa phòng; cặp sách và đồ dùng cá nhân tự bảo quản.\nKhông sử dụng điện thoại di động (đặt chế độ im lặng).\nKhông nói chuyện, gây ồn ào hoặc làm việc riêng (làm bài tập, học bài…).\nNếu ra khỏi phòng trong giờ ngủ, phải xin phép giáo viên trực phòng.\nTrước khi rời phòng, dọn dẹp chiếu, gối và đặt đúng nơi quy định.\n\n\nLỆ PHÍ BÁN TRÚ:\n\n\nThiết bị vật tư bán trú: 200.000đ/1 năm.\nPhí phục vụ bán trú: 250.000đ/1 tháng.\nTiền điện máy lạnh bán trú thu theo quy định.\n\nLƯU Ý CHUNG:\n\nHọc sinh tuyệt đối không được ra khỏi cổng trường trong giờ ăn và ngủ trưa.\nKhi di chuyển, giữ trật tự, không đùa giỡn.\nKhi ăn, không đùa giỡn, không làm vương vãi thức ăn, không để thức ăn thừa, không xả rác.\nHọc sinh có thể mang thêm chăn, khăn đắp và tự bảo quản.\nPhải đóng tiền bán trú đúng thời gian quy định.\nHọc sinh trốn hoặc không chấp hành nội quy bán trú sẽ bị xử lý kỷ luật.",
       "images": null,
       "captions": null
     },
     {
-      "question": ["các câu lạc bộ của trường", "CLB", "clb", "hoạt động ngoại khoá", "nhảy", "nhóm nhảy", "các clb của trường","một số clb nổi bật của trường"],
+      "question": [
+        "các câu lạc bộ của trường",
+        "CLB",
+        "clb",
+        "hoạt động ngoại khoá",
+        "nhảy",
+        "nhóm nhảy",
+        "các clb của trường",
+        "một số clb nổi bật của trường"
+      ],
       "answer": "đây là các câu lạc bộ của trường và hoạt động ngoại khoá của trường",
-      "images": ["images/wepd.jpg", "images/sensor.jpg", "images/kich.jpg", "images/stem.jpg", "images/drary.jpg", "images/ta.jpg", "images/phaply.jpg", "images/ai.jpg", "images/team.jpg", "images/dc.jpg", "images/5os.jpg"],
-      "captions": ["CLB Truyền Thông WEPD MEDIA\nWEPD MEDIA là một trong những câu lạc bộ có thâm niên hoạt động dài nhất, luôn xông xáo trong các hoạt động của trường. Bằng những khung hình, góc chụp kỳ diệu, WEPD đã góp phần lưu giữ những khoảnh khắc đáng nhớ của đại gia đình Ten Lơ Man. WEPD là nơi kết nối những người trẻ đầy nhiệt huyết, đam mê và sáng tạo. “Còn trẻ và hoang dại, sao lại không thử?” là câu hỏi thôi thúc các thành viên của WEPD không ngừng đổi mới và phát triển. \n", "CLB Truyền Thông Sensor Media\nVới tôn chỉ “Sensor là một gia đình”, Sensor Media là “tổ ấm” của những bạn trẻ có chung niềm đam mê với lĩnh vực truyền thông – nhiếp ảnh. Phong cách trẻ trung, tinh thần năng động, Sensor là một điểm hẹn khiến cho thanh xuân của các bạn thêm rực rỡ. Đồng hành cùng những hoạt động chung của trường, các thành viên của Sensor không ngừng trao dồi kỹ năng, học tập và hoàn thiện. \n", "CLB Văn Học L&A và nhóm kịch HEART \nLà CLB học thuật có thâm niên hoạt động dài nhất, câu lạc bộ Văn học là nơi chắp cánh đam mê của các bạn học sinh dành cho bộ môn Ngữ văn. Cùng với nhóm kịch HEART, câu lạc bộ Văn học lan tỏa tình yêu dành cho những con chữ và những rung động nghệ thuật tinh tế. Các nhân vật văn học từ trang văn bước ra sân khấu, những bài học trong sách vở được thực tế hóa bằng các hoạt động bổ ích, câu lạc bộ Văn học mang đến cho các họ sinh nhà Ten những trải nghiệm thú vị và những bài học bổ ích. \n", "CLB Khoa Học STEM\n\n“STEM - Tư duy sáng tạo, mở lối tương lai” là câu lạc bộ học thuật tích hợp các bộ môn khoa học tự nhiên. Với những hoạt động ngoại khóa, thí nghiệm, trải nghiệm, ứng dụng các kiến thức khoa học vào thực tiễn, CLB STEM đem đến nhiều bài học bổ ích, khơi dậy đam mê học tập của các bạn học sinh. STEM mở ra chân trời tri thức, sáng tạo, góp phần trang bị hành trang để các thê hệ học sinh trường Ten vươn đến chân trời khoa học tương lai.", "CLB Sử Học - Drary\nVới phương châm “Lan tỏa tinh thần dân tộc Việt”, CLB Sử Học - Drary luôn đi đầu trong các hoạt động lan tỏa những giá trị truyền thống và tình yêu lịch sử đến các bạn học sinh. Lịch sử là cội nguồn, là di sản quý giá của dân tộc, bộ môn Lịch sử cũng là môn học quan trọng trong chương trình giáo dục phổ thông. Ý thức được vai trò của mình, CLB Sử Học không ngừng nỗ lực phát triển, đem những kiến thức lịch sử đến gần hơn với các bạn trẻ nhà Ten. \n", "CLB Tiếng Anh \n“Một ngôn ngữ là một góc nhìn khác về cuộc sống”, CLB tiếng Anh ra đời với mục tiêu kết nối các bạn có niềm đam mê ngôn ngữ dưới mái nhà Ten. Bằng những hoạt động thiết thực, CLB Tiếng Anh đã khẳng định với các bạn trẻ “học ngoại ngữ chưa bao giờ là khó”. CLB hướng đến việc bồi dưỡng những kỹ năng ngôn ngữ, ngoại giao, hội nhập, tạo nền tảng cho các bạn học sinh bắt nhịp cùng xu thế toàn cầu hóa hiện nay. \n", "CLB Pháp Lý\nLà một câu lạc bộ học thuật thú vị và bổ ích, CLB Pháp Lý là nơi gắn kết các bạn học sinh nhà Ten có đam mê với các kiến thức kinh tế - pháp luật. Những kiến “khó học” trở nên vô cùng gần gũi nhờ các hoạt động ngoại khóa thú vị do CLB tổ chức. Với phương châm “Công lý trong tay, sức mạnh trong tim”, CLB Pháp Lý góp phần xây dựng nền tảng giúp các bạn trẻ trở thành những công dân mẫu mực trong tương lai. \n", "CLB AI\n\nCLB AI ra đời nhằm mục đích tạo dựng nền tảng công nghệ thông tin, giúp các bạn học sinh hội nhập với xu thế của thời đại. CLB AI là nơi để các bạn cùng nhau học tập, thực hành, nâng cao kỹ năng công nghệ, rèn luyện tư duy sáng tạo. Thời đại 4.0 hiện nay, công nghệ chính là chìa khóa mở ra thế giới. CLB AI với sứ mệnh trao cho các học sinh nhà Ten những chiếc chìa khóa quý giá, dẫn lối thành công.", "CLB Sáng Tạo TEAM \nCLB Sáng Tạo TEAM là nơi hội tụ các gam màu. Bằng tình yêu với hội họa, thiết kế, các thành viên CLB TEAM góp phần làm cho mái nhà Ten luôn tươi sáng, rực rỡ. TEAM mang đến cho các bạn học sinh cơ hội phát huy năng khiếu hội hòa và sự sáng tạo cùng với hình ảnh, màu sắc. Với sự cá tính và năng động, TEAM là một điểm hẹn lý tưởng cho các bạn đam mê nghệ thuật. \n", "CLB DC Team\n\nLà dàn chào, là bộ mặt thẩm mỹ của nhà Ten, DC là nơi bồi dưỡng những bạn học sinh có năng khiếu và đam mê những vai trò như lễ tân, người mẫu. Ở DC Team, các bạn sẽ được rèn luyện các kỹ năng mềm về giao tiếp, ứng xử, đồng thời có cơ hội tỏa sáng khi góp mặt trong những sự kiện chung của trường. Với phương châm “Đẹp trong từng khoảnh khắc, cuốn hút trong từng lời chào”, DC Team là nơi cái đẹp được tôn vinh, sự thanh lịch được tỏa sáng.", "Nhóm 5.O.S\nNhững vũ điệu bùng cháy, những giây phút tỏa sáng trên sân khấu, 5.O.S là nơi hội tụ niềm đam mê nghệ thuật. Luôn góp phần làm bùng nổ bầu không khí sân trường trong những sự kiện lớn. 5.O.S là một cái tên đầy kiêu hãnh của nhà Ten. Nơi âm nhạc được bay cao, nghệ thuật được thăng hoa, 5.O.S kết nối các bạn có chung niềm đam mê, ươm mầm tình yêu nghệ thuật cho tương lai.\n"]
+      "images": [
+        "images/wepd.jpg",
+        "images/sensor.jpg",
+        "images/kich.jpg",
+        "images/stem.jpg",
+        "images/drary.jpg",
+        "images/ta.jpg",
+        "images/phaply.jpg",
+        "images/ai.jpg",
+        "images/team.jpg",
+        "images/dc.jpg",
+        "images/5os.jpg"
+      ],
+      "captions": [
+        "CLB Truyền Thông WEPD MEDIA\nWEPD MEDIA là một trong những câu lạc bộ có thâm niên hoạt động dài nhất, luôn xông xáo trong các hoạt động của trường. Bằng những khung hình, góc chụp kỳ diệu, WEPD đã góp phần lưu giữ những khoảnh khắc đáng nhớ của đại gia đình Ten Lơ Man. WEPD là nơi kết nối những người trẻ đầy nhiệt huyết, đam mê và sáng tạo. “Còn trẻ và hoang dại, sao lại không thử?” là câu hỏi thôi thúc các thành viên của WEPD không ngừng đổi mới và phát triển. \n",
+        "CLB Truyền Thông Sensor Media\nVới tôn chỉ “Sensor là một gia đình”, Sensor Media là “tổ ấm” của những bạn trẻ có chung niềm đam mê với lĩnh vực truyền thông – nhiếp ảnh. Phong cách trẻ trung, tinh thần năng động, Sensor là một điểm hẹn khiến cho thanh xuân của các bạn thêm rực rỡ. Đồng hành cùng những hoạt động chung của trường, các thành viên của Sensor không ngừng trao dồi kỹ năng, học tập và hoàn thiện. \n",
+        "CLB Văn Học L&A và nhóm kịch HEART \nLà CLB học thuật có thâm niên hoạt động dài nhất, câu lạc bộ Văn học là nơi chắp cánh đam mê của các bạn học sinh dành cho bộ môn Ngữ văn. Cùng với nhóm kịch HEART, câu lạc bộ Văn học lan tỏa tình yêu dành cho những con chữ và những rung động nghệ thuật tinh tế. Các nhân vật văn học từ trang văn bước ra sân khấu, những bài học trong sách vở được thực tế hóa bằng các hoạt động bổ ích, câu lạc bộ Văn học mang đến cho các họ sinh nhà Ten những trải nghiệm thú vị và những bài học bổ ích. \n",
+        "CLB Khoa Học STEM\n\n“STEM - Tư duy sáng tạo, mở lối tương lai” là câu lạc bộ học thuật tích hợp các bộ môn khoa học tự nhiên. Với những hoạt động ngoại khóa, thí nghiệm, trải nghiệm, ứng dụng các kiến thức khoa học vào thực tiễn, CLB STEM đem đến nhiều bài học bổ ích, khơi dậy đam mê học tập của các bạn học sinh. STEM mở ra chân trời tri thức, sáng tạo, góp phần trang bị hành trang để các thê hệ học sinh trường Ten vươn đến chân trời khoa học tương lai.",
+        "CLB Sử Học - Drary\nVới phương châm “Lan tỏa tinh thần dân tộc Việt”, CLB Sử Học - Drary luôn đi đầu trong các hoạt động lan tỏa những giá trị truyền thống và tình yêu lịch sử đến các bạn học sinh. Lịch sử là cội nguồn, là di sản quý giá của dân tộc, bộ môn Lịch sử cũng là môn học quan trọng trong chương trình giáo dục phổ thông. Ý thức được vai trò của mình, CLB Sử Học không ngừng nỗ lực phát triển, đem những kiến thức lịch sử đến gần hơn với các bạn trẻ nhà Ten. \n",
+        "CLB Tiếng Anh \n“Một ngôn ngữ là một góc nhìn khác về cuộc sống”, CLB tiếng Anh ra đời với mục tiêu kết nối các bạn có niềm đam mê ngôn ngữ dưới mái nhà Ten. Bằng những hoạt động thiết thực, CLB Tiếng Anh đã khẳng định với các bạn trẻ “học ngoại ngữ chưa bao giờ là khó”. CLB hướng đến việc bồi dưỡng những kỹ năng ngôn ngữ, ngoại giao, hội nhập, tạo nền tảng cho các bạn học sinh bắt nhịp cùng xu thế toàn cầu hóa hiện nay. \n",
+        "CLB Pháp Lý\nLà một câu lạc bộ học thuật thú vị và bổ ích, CLB Pháp Lý là nơi gắn kết các bạn học sinh nhà Ten có đam mê với các kiến thức kinh tế - pháp luật. Những kiến “khó học” trở nên vô cùng gần gũi nhờ các hoạt động ngoại khóa thú vị do CLB tổ chức. Với phương châm “Công lý trong tay, sức mạnh trong tim”, CLB Pháp Lý góp phần xây dựng nền tảng giúp các bạn trẻ trở thành những công dân mẫu mực trong tương lai. \n",
+        "CLB AI\n\nCLB AI ra đời nhằm mục đích tạo dựng nền tảng công nghệ thông tin, giúp các bạn học sinh hội nhập với xu thế của thời đại. CLB AI là nơi để các bạn cùng nhau học tập, thực hành, nâng cao kỹ năng công nghệ, rèn luyện tư duy sáng tạo. Thời đại 4.0 hiện nay, công nghệ chính là chìa khóa mở ra thế giới. CLB AI với sứ mệnh trao cho các học sinh nhà Ten những chiếc chìa khóa quý giá, dẫn lối thành công.",
+        "CLB Sáng Tạo TEAM \nCLB Sáng Tạo TEAM là nơi hội tụ các gam màu. Bằng tình yêu với hội họa, thiết kế, các thành viên CLB TEAM góp phần làm cho mái nhà Ten luôn tươi sáng, rực rỡ. TEAM mang đến cho các bạn học sinh cơ hội phát huy năng khiếu hội hòa và sự sáng tạo cùng với hình ảnh, màu sắc. Với sự cá tính và năng động, TEAM là một điểm hẹn lý tưởng cho các bạn đam mê nghệ thuật. \n",
+        "CLB DC Team\n\nLà dàn chào, là bộ mặt thẩm mỹ của nhà Ten, DC là nơi bồi dưỡng những bạn học sinh có năng khiếu và đam mê những vai trò như lễ tân, người mẫu. Ở DC Team, các bạn sẽ được rèn luyện các kỹ năng mềm về giao tiếp, ứng xử, đồng thời có cơ hội tỏa sáng khi góp mặt trong những sự kiện chung của trường. Với phương châm “Đẹp trong từng khoảnh khắc, cuốn hút trong từng lời chào”, DC Team là nơi cái đẹp được tôn vinh, sự thanh lịch được tỏa sáng.",
+        "Nhóm 5.O.S\nNhững vũ điệu bùng cháy, những giây phút tỏa sáng trên sân khấu, 5.O.S là nơi hội tụ niềm đam mê nghệ thuật. Luôn góp phần làm bùng nổ bầu không khí sân trường trong những sự kiện lớn. 5.O.S là một cái tên đầy kiêu hãnh của nhà Ten. Nơi âm nhạc được bay cao, nghệ thuật được thăng hoa, 5.O.S kết nối các bạn có chung niềm đam mê, ươm mầm tình yêu nghệ thuật cho tương lai.\n"
+      ]
     },
     {
-      "question": ["nội quy nhà trường", "nội quy học sinh","những nội quy khi đi học","một số nội quy nhà trường"],
+      "question": [
+        "nội quy nhà trường",
+        "nội quy học sinh",
+        "những nội quy khi đi học",
+        "một số nội quy nhà trường"
+      ],
       "answer": "I. NHỮNG QUY ĐỊNH CHUNG\nĐiều 1. Tư tưởng, đạo đức\n\nGiữ gìn truyền thống tốt đẹp và danh dự của trường THPT Ten Lơ Man.\nLễ phép với thầy cô, công nhân viên nhà trường và người lớn tuổi. Khi gặp thầy cô, nhân viên nhà trường, khách lạ, học sinh phải cúi đầu chào, nhường lối đi.\nTích cực học tập, rèn luyện. Trao đổi đạo đức, trung thực, khiêm tốn. Làm sai phải biết nhận lỗi, được sự giúp đỡ phải biết cảm ơn.\nTôn trọng, đoàn kết giúp đỡ nhau cùng tiến bộ, ứng xử hòa nhã với bạn bè trong và ngoài lớp.\nTham gia các phong trào do nhà trường và Đoàn TNCS Hồ Chí Minh phát động.\nThuộc và hát Quốc ca nghiêm túc trong giờ chào cờ, các buổi lễ.\n\nĐiều 2. Học tập\n\nHọc sinh phải có động cơ, thái độ học tập và thi cử đúng đắn.\n\n\nHọc, soạn và làm bài đầy đủ trước khi đến lớp.\nMang theo đầy đủ sách giáo khoa, tài liệu và dụng cụ học tập theo đúng quy định và yêu cầu của thầy cô.\n\n\nĐầu giờ học.\n\n\nCán bộ lớp phải thực hiện nghiêm túc việc điểm danh. Ghi tên học sinh vắng vào sổ đầu bài và góc bảng gần cửa ra vào.\nVào tiết học 10 phút, nếu thầy cô chưa đến lớp, cán bộ lớp phải báo ngay cho phòng Giám thị, đồng thời quản lý lớp, không để ảnh hưởng đến lớp bên cạnh.\n\n\nTrong giờ học.\n\n\nHọc sinh phải nghiêm túc trong giờ học, phát biểu phải giơ tay xin phép.\nChú ý nghe giảng, ghi chép cẩn thận, làm bài đầy đủ.\nNgồi đúng sơ đồ lớp do thầy cô chủ nhiệm sắp xếp.\nKhông được làm việc riêng. Không gây mất trật tự ảnh hưởng đến bài giảng của thầy cô và sự tiếp thu của học sinh khác.\n\n\nTrong giờ đánh giá, kiểm tra và thi cử, học sinh phải tuyệt đối nghiêm túc và trung thực. Không được sử dụng tài liệu. Không gian lận trong việc làm bài.\nHọc sinh không được qua khu vực lớp khác vào đầu giờ học và giờ chơi.\nHọc sinh chỉ được tập luyện thể dục thể thao trong sân trường khi có thầy cô hướng dẫn. Khi tập luyện phải đảm bảo an toàn cho bản thân và những người xung quanh.\n\nĐiều 3. Thời gian học\n\nHọc sinh phải đến trường, điểm danh qua hệ thống Camera và ra về đúng giờ quy định.\n\nBuổi sáng.\n\n\nHọc sinh có mặt ở lớp trước 6h55.\n6h55- đóng cổng.\nHọc sinh đến trường sau 6h55 sẽ được ghi nhận \"Đi trễ\".\n7h00- bắt đầu học tiết 1.\n11h15- hết giờ học buổi sáng.\n\n\nBuổi chiều.\n\n\nHọc sinh có mặt ở lớp trước 13h25.\n13h25- đóng cổng.\nHọc sinh đến trường sau 13h25 sẽ được ghi nhận \"Đi trễ\".\n13h30- bắt đầu học tiết 1.\n16h55- hết giờ học buổi chiều.\n\nĐiều 4. Hàng ngũ\n\nKhi tập trung ở sân trường, học sinh phải nhanh chóng xếp hàng theo sự điều động của thầy cô, giữ trật tự, không tự ý ra khỏi hàng. Lớp trưởng đứng đầu hàng, lớp phó kỷ luật đứng cuối hàng.\n\n\nNếu xếp 2 hàng- nam một hàng bên tay trái, nữ một hàng bên tay phải.\nNếu xếp 1 hàng- nam đứng trước, nữ đứng sau.\n\n\nNghiêm túc trong giờ chào cờ, các buổi lễ.\nTrước và sau giờ tập trung ở sân, học sinh phải xếp và dọn ghế theo phân công của thầy cô chủ nhiệm. Dọn vệ sinh trước khi di chuyển khỏi khu vực sân.\n\nĐiều 5. Chuyên cần\n\nHọc sinh phải đi học đều.\nHọc sinh nghỉ học, nghỉ lao động và các buổi tập trung của trường phải có lý do chính đáng. Cha mẹ học sinh (hoặc người giám hộ) phải vào trường xin phép và ghi vào sổ xin phép ở phòng Giám thị.\nHọc sinh đau ốm trong giờ học, muốn xuống phòng Y tế phải xin phép thầy cô dạy lớp, khi về lớp phải có giấy của thầy cô phụ trách y tế ghi rõ ngày, giờ đến và rời phòng Y tế nộp cho thầy cô dạy lớp.\nHọc sinh ra về giữa giờ, phải có Phụ huynh vào trường đón về, thông qua phòng Giám thị cấp giấy phép.\nHọc sinh chỉ được ra cổng khi có giấy phép của phòng Giám thị và Ban giám hiệu.\n\nĐiều 6. Đồng phục\n\nHọc sinh đến trường.\n\n\nPhải mặc đồng phục học sinh của trường THPT Ten Lơ Man.\nCó phù hiệu đúng quy định.\nMặc đồng phục đúng giới tính.\nMang cặp sách hoặc balo học sinh.\n\n\nTất cả đồng phục học sinh đều phải có phù hiệu và may bên ngực trái.\nĐối với nam sinh- áo sơ mi bỏ trong quần.\nĐối với nữ sinh.\n\n\nVáy phải dài qua đầu gối.\nNhững buổi chào cờ và các buổi lễ, nữ sinh mặc áo dài trắng với quần trắng. Áo dài có cổ, không được quá mỏng.\nKhông được mang giày gót nhọn. Giày cao quá 5 cm.\n\n\nGiờ học Thể dục, Giáo dục Quốc phòng, Kỹ năng sống, lao động- tất cả học sinh đều phải mặc đồng phục Thể dục.\nCả nam và nữ sinh đều phải.\n\n\nMang giày sandal hoặc bata.\nMang giày thể dục trong giờ học Thể dục, Giáo dục Quốc phòng.\n\nĐiều 7. Tác phong\n\nCả nam và nữ sinh đều phải thực hiện.\n\n\nTác phong nghiêm chỉnh.\nKiểu tóc gọn gàng, đồng bộ, phù hợp với học sinh. Không nhuộm tóc. Không xịt keo, dầu bóng.\nKhông trang điểm, không đeo nhiều bông tai.\nKhông để móng tay chân dài, không sơn móng tay chân.\nKhông phanh cúc áo ngực.\n\n\nĐối với nam sinh.\n\n\nChiều dài tóc mái không dài quá chân mày, tóc mai không dài quá 2/3 mang tai, tóc phía sau không được chấm cổ áo.\nKhông để râu.\nKhông được đeo bông tai.\n\n\nĐối với nữ sinh.\n\n\nChỉ được đeo một đôi bông tai truyền thống.\n\nĐiều 8. Tham gia giao thông\n\nHọc sinh phải tuân thủ luật giao thông. Không được đi xe máy trên 50 phân khối khi chưa đủ tuổi, chưa có giấy phép lái xe.\nHọc sinh ra vào trường phải xuống xe dẫn bộ. Không chạy xe trong sân trường.\nTrước và sau giờ học- học sinh không được tụ tập trước cổng và khu vực xung quanh trường, gây cản trở lưu thông, ảnh hưởng mỹ quan môi trường sư phạm.\n\nĐiều 9. Giữ gìn vệ sinh\n\nTích cực xây dựng trường lớp sạch đẹp, bỏ rác đúng nơi quy định, thấy rác nhặt lên bỏ vào thùng rác.\nDọn vệ sinh, sắp xếp bàn ghế trước khi di chuyển ra khỏi khu vực học tập và sinh hoạt.\nKhông mang thức ăn, nước uống vào lớp.\n\nĐiều 10. Sử dụng tài sản nhà trường\n\nGiữ gìn, bảo quản, sử dụng tài sản và các thiết bị của nhà trường đúng quy định. Không viết, vẽ, làm bẩn bàn ghế, tường và các vật dụng trong trường. Không tự ý sử dụng các thiết bị trong phòng học khi chưa có sự cho phép của thầy cô. Không làm hư hại các tài sản khác.\nTiết kiệm điện, nước.\nTắt các thiết bị khi không dùng đến và khi hết giờ học.\nNếu học sinh làm hư hao, mất tài sản của nhà trường sẽ phải bồi thường và chịu kỷ luật.\n\nII. NHỮNG ĐIỀU HỌC SINH KHÔNG ĐƯỢC LÀM\n\nVô lễ, xúc phạm nhân phẩm, danh dự, xâm phạm thân thể giáo viên, công nhân viên nhà trường.\nGian lận trong học tập, kiểm tra, thi.\nĐưa người lạ vào trường, tiếp người lạ trong trường.\nSử dụng điện thoại di động, các thiết bị điện tử, truyền thông trong các giờ học, giờ kiểm tra và giờ sinh hoạt. Học sinh chỉ được sử dụng khi thầy cô cho phép.\nChơi giỡn, tham gia các hoạt động không an toàn. Mang bất kỳ vật dụng nào có khả năng gây thương tích, gây nguy hiểm cho bản thân và người khác (hung khí, vật bén, nhọn, động thực vật).\nMang theo nhiều tiền, tư trang quý giá và những đồ dùng, vật dụng không phục vụ học tập vào trường. Học sinh phải tự bảo quản tài sản cá nhân và chịu trách nhiệm khi xảy ra sự cố thiệt hại. Nhà trường không chịu trách nhiệm và không giải quyết những vấn đề liên quan đến tài sản cá nhân của học sinh.\nCác hành vi ăn cắp tài sản của người khác, của nhà trường và hành vi phá hại tài sản của nhà trường. Nếu vi phạm sẽ phải bồi thường và bị kỷ luật nặng (Cha mẹ học sinh phải cam kết và chịu trách nhiệm bồi thường thiệt hại do con em mình gây ra).\nLưu giữ, tuyên truyền tài liệu, văn hóa phẩm có nội dung thiếu lành mạnh, truyền bá tôn giáo, mê tín dị đoan. Học sinh vi phạm sẽ bị kỷ luật nặng.\nLợi dụng các trang mạng xã hội để gây mất đoàn kết, mâu thuẫn với người khác trong và ngoài trường, ảnh hưởng đến uy tín nhà trường.\nNói tục, chửi thề. Khiêu khích, gây gổ, đánh nhau hoặc kêu người ngoài hăm dọa, đánh bạn. Có điều gì mâu thuẫn, phải báo với thầy cô giải quyết. Nếu đánh nhau sẽ bị đưa ra Hội đồng kỷ luật. Nếu nghiêm trọng hoặc tái phạm sẽ bị đình chỉ học tập.\nCá cược, cờ bạc, cho vay dưới bất cứ hình thức nào.\nXăm, vẽ và dán hình vẽ trên cơ thể.\nHọc sinh tuyệt đối không được tàng trữ, không thử, không sử dụng ma túy, các chất kích thích và các chất gây nghiện (các loại thuốc lá, rượu, bia và nước uống có độ cồn) trong và ngoài khuôn viên nhà trường. Không mang và sử dụng các vật liệu dễ gây cháy nổ, vũ khí.\n\nNếu vi phạm sẽ bị xử lý nghiêm, tùy theo mức độ. Đình chỉ học tập và báo công an địa phương nơi cư trú.\n\nIII. KHEN THƯỞNG, KỶ LUẬT\n\nHọc sinh có thành tích tốt trong học tập, tham gia phong trào do nhà trường, Đoàn TNCS Hồ Chí Minh phát động sẽ được tuyên dương, khen thưởng, ghi tên trên Bảng vàng danh dự của nhà trường.\nHọc sinh vi phạm nội quy sẽ bị kỷ luật tùy mức độ nặng nhẹ.",
       "images": null,
       "captions": null
     },
     {
-      "question": ["phương tiện đi lại", "đi học", "xung quanh trường là khu vực như thế nào", "giao thông xung quanh trường ra sao"],
+      "question": [
+        "phương tiện đi lại",
+        "đi học",
+        "xung quanh trường là khu vực như thế nào",
+        "giao thông xung quanh trường ra sao"
+      ],
       "answer": "Vị trí địa lý dễ tìm, giao thông đến trường thuận tiện (xe bus, tàu điện ngầm, …) , ít kẹt xe.",
       "images": null,
       "captions": null
     },
     {
-      "question": ["mạng", "wifi","trường có wifi không","trường có mạng internet không"],
+      "question": [
+        "mạng",
+        "wifi",
+        "trường có wifi không",
+        "trường có mạng internet không"
+      ],
       "answer": "Wifi mạnh, phủ sóng toàn trường, mức phí thu cho việc sử dụng wifi dự kiến cho 1 HS là 3.000 đồng/tháng.",
       "images": null,
       "captions": null
     },
     {
-      "question": ["ưu điểm", "hạn chế", "ưu điểm và hạn chế","một số ưu điểm và hạn chế của trường"],
+      "question": [
+        "ưu điểm",
+        "hạn chế",
+        "ưu điểm và hạn chế",
+        "một số ưu điểm và hạn chế của trường"
+      ],
       "answer": "Ưu điểm:\n\n- 100 % phòng học đều có máy lạnh, máy chiếu, micro.\n\n- Vị trí địa lý dễ tìm, giao thông đến trường thuận tiện (xe bus, tàu điện ngầm, …) \n\n - Tiện ích xung quanh trường (công viên có nhiều cây xanh, ăn uống, vui chơi …)\n\nHạn chế:\n\n- Phòng học không cố định.\n\n- Khuôn viên trường hơi nhỏ.",
       "images": null,
       "captions": null
     },
     {
-      "question": ["học bổng", "học bổng dành cho học sinh","thông tin về học bổng"],
+      "question": [
+        "học bổng",
+        "học bổng dành cho học sinh",
+        "thông tin về học bổng"
+      ],
       "answer": "- Học bổng dành cho thủ khoa đầu vào\n- Học bổng trái tim yêu thương\n",
       "images": null,
       "captions": null
     },
     {
-      "question": ["nhà vệ sinh", "toilet", "nhà vệ sinh trường như thế nào", "nhà vệ sịnh có sạch không","nhà vệ sinh trường"],
+      "question": [
+        "nhà vệ sinh",
+        "toilet",
+        "nhà vệ sinh trường như thế nào",
+        "nhà vệ sịnh có sạch không",
+        "nhà vệ sinh trường"
+      ],
       "answer": "Nhà vệ sinh sạch sẽ, thoáng mát",
       "images": null,
       "captions": null
     },
     {
-      "question": ["loại hình trường", "trường gì", "trường ten lơ man thuộc loại hình trường gì"],
+      "question": [
+        "loại hình trường",
+        "trường gì",
+        "trường ten lơ man thuộc loại hình trường gì"
+      ],
       "answer": "Trường THPT Ten Lơ Man là cơ sở giáo dục phổ thông của hệ thống giáo dục quốc dân, là đơn vị sự nghiệp công lập trực thuộc Sở Giáo dục và Đào tạo Thành phố Hồ Chí Minh. \nTrường thực hiện chức năng, nhiệm vụ, quyền hạn theo Điều lệ Trường trung học cơ sở, trung học phổ thông và trường phổ thông có nhiều cấp học của Bộ Giáo dục và Đào tạo và các quy định Pháp luật có liên quan. Trường có tư cách pháp nhân, có tài khoản và con dấu riêng hoạt động theo quy định của Pháp luật.\nTrường THPT Ten Lơ Man thực hiện nhiệm vụ và quyền hạn sau đây: \n- Xây dựng kế hoạch chiến lược phát triển nhà trường, gắn với điều kiện kinh tế - xã hội của địa phương; xác định tầm nhìn, sứ mệnh, các giá trị cốt lõi về giáo dục, văn hóa, lịch sử và truyền thống của nhà trường; \n- Xây dựng và tổ chức thực hiện kế hoạch giáo dục của nhà trường, theo chương trình giáo dục phổ thông do Bộ trưởng Bộ Giáo dục và Đào tạo ban hành, cùng Sở Giáo dục và Đào tạo và nhà trường xây dựng. Phối hợp với gia đình học sinh, tổ chức và cá nhân trong việc tổ chức các hoạt động giáo dục\n",
       "images": null,
       "captions": null
     },
     {
-      "question": ["âm thanh", "độ ồn", "âm thanh trong lớp học như thế nào","vấn đề âm thanh và độ ồn"],
+      "question": [
+        "âm thanh",
+        "độ ồn",
+        "âm thanh trong lớp học như thế nào",
+        "vấn đề âm thanh và độ ồn"
+      ],
       "answer": "Cách âm tốt âm thanh giữa các lớp và âm thanh từ ngoài đường.",
       "images": null,
       "captions": null
     },
     {
-      "question": ["tiện ích xung quanh trường", "tiện ích xung quanh", "xung quanh trường có những tiện ích gì","một số tiện ích xung quanh trường"],
+      "question": [
+        "tiện ích xung quanh trường",
+        "tiện ích xung quanh",
+        "xung quanh trường có những tiện ích gì",
+        "một số tiện ích xung quanh trường"
+      ],
       "answer": "Tiện ích xung quanh trường (công viên có nhiều cây xanh, ăn uống, vui chơi, cửa hàng tiện lợi, …)",
       "images": null,
       "captions": null
     },
     {
-      "question": ["môi truờng học tập", "môi trường học", "môi trường học tập như thế nào"],
+      "question": [
+        "môi truờng học tập",
+        "môi trường học",
+        "môi trường học tập như thế nào"
+      ],
       "answer": "Thầy cô giảng bài dễ hiểu, hướng dẫn nhiệt tình theo phương pháp dạy học sáng tạo, bạn bè thân thiện, hòa đồng.",
       "images": null,
       "captions": null
     },
     {
-      "question": ["logo trường", "ý nghĩa logo trường", "logo trường có ý nghĩa gì","logo trường như thế nào"],
+      "question": [
+        "logo trường",
+        "ý nghĩa logo trường",
+        "logo trường có ý nghĩa gì",
+        "logo trường như thế nào"
+      ],
       "answer": "Trong quá trình phát triển, trải qua nhiều biến động, trường THPT Ernst Thälmann đã có rất nhiều tên gọi. Ngày 8/3/1979, theo quyết định số 840/QĐ/UB của Ủy Ban Nhân Dân thành phố Hồ Chí Minh, trường chính thức mang tên vị lãnh tụ của giai cấp vô sản Đức đồng thời là nhà hoạt động lỗi lạc của phong trào cộng sản và công nhân quốc tế ở nửa đầu thế kỷ 20: trường ERNST THÄLMANN, là trường kết nghĩa với trường Hồ Chí Minh của thành phố Leipzig Cộng Hòa Dân Chủ Đức trước đây. Cũng trong quá trình phát triển, truyền thống của trường đã được tô đậm bởi sự kiện mít tinh chống Mỹ vào ngày 19-03-1950. Ngày 19-03-1950  trở thành ngày Truyền thống của Trường. Trước đây, trường cũng nổi tiếng về truyền thống học hành giỏi giang với rất nhiều người thành đạt.\nTuy nhiên, hiện nay rất nhiều người còn mơ hồ về tên gọi của trường (không hiểu đó là tên Pháp hay Đức, tại sao lại có tên đó,…). Và hiện nay, do chất lượng đầu vào thấp nên chất lượng học tập của Nhà trường so với các trường lân cận cũng không mấy khả quan. Nếu ai đó là một thành viên của trường, được nghe kể lại về truyền thống yêu nước, truyền thống học tập của trường ngày trước sẽ cảm thấy nuối tiếc biết bao.\nTất cả những điều ấy đã gợi lên ý tưởng cho tác giả khi thiết kế logo này: Logo phải thể hiện được lịch sử tên gọi hiện nay của Trường, phải nêu bật được truyền thống tốt đẹp và cũng phải cho thấy sự tươi mới, sự năng động trong việc Dạy và Học.\n",
       "images": "images/lg.jpg",
       "captions": null
     },
     {
-      "question": ["quỹ khuyến học", "khuyến khích học sinh", "trường khuyến khích học sinh như thế nào"],
+      "question": [
+        "quỹ khuyến học",
+        "khuyến khích học sinh",
+        "trường khuyến khích học sinh như thế nào"
+      ],
       "answer": "Quỹ khuyến học “Trái tim yêu thương” trường THPT Ten Lơ Man đã được thành lập và duy trì từ nhiều năm nay nhằm tiếp nối truyền thống cao đẹp của dân tộc: khuyến học – khuyến tài; tương thân, tương ái. Với mục tiêu thực hiện nhiệm vụ giáo dục truyền thống hiếu học, giáo dục tinh thần biết yêu thương, chia sẻ cho học sinh; thể hiện sự quan tâm, hỗ trợ những học sinh nghèo vượt khó để không một ai bị bỏ lại phía sau, quỹ đã nhận được sự ủng hộ và đồng hành rất lớn cả về vật chất và tinh thần của nhiều bậc cha mẹ học sinh, các mạnh thường quân, cựu học sinh, cựu giáo viên nhiều thế hệ của nhà trường\n\tHàng năm, bằng nguồn quỹ khuyến học, nhà trường đã thực hiện nhiều hoạt động ý nghĩa như: trao học bổng, trao quà Tết cho học sinh giỏi, học sinh có hoàn cảnh khó khăn; hỗ trợ học phí cho những học sinh nghèo; hỗ trợ công tác bồi dưỡng học sinh giỏi, khen thưởng học sinh giỏi trong năm học, học sinh đỗ thủ khoa, á khoa trong các kỳ thi tuyển sinh 10, tốt nghiệp THPT và tuyển sinh vào các trường đại học... Đặc biệt, với mục tiêu tạo môi trường giáo dục nhân ái, ấm áp nghĩa tình, quỹ “Trái tim yêu thương” đã luôn kịp thời đồng hành, hỗ trợ những học sinh bị bệnh hiểm nghèo, gặp biến cố trong cuộc sống. Trong đại dịch Covid 19, nhà trường đã cùng với các em học sinh vượt qua khó khăn bằng việc “trao tay”các thiết bị điện tử phục vụ học tập trực tuyến; gửi các phần quà hỗ trợ đến những em học sinh khó khăn, mồ côi cha, mẹ vì đại dịch.\n\tQũy khuyến học “Trái tim yêu thương” là biểu hiện của truyền thống giáo dục cao đẹp của nhà trường; là nơi lấp lánh những thương yêu; nơi gửi trao những  điều tử tế để các em học sinh, đặc biệt những học sinh nghèo vượt khó có thêm nhiều động lực, niềm tin vào cuộc sống. Từ đó góp phần nuôi dưỡng và dệt nên những ước mơ.\n",
       "images": null,
       "captions": null
     },
     {
-      "question": ["tổ lý", "lý", "vật lý", "tổ lý như thế nào","tổ vật lý"],
+      "question": [
+        "tổ lý",
+        "lý",
+        "vật lý",
+        "tổ lý như thế nào",
+        "tổ vật lý"
+      ],
       "answer": "Trong hành trình phát triển của trường THPT Ten Lơ Man, tổ Vật lý luôn là một tập thể đoàn kết, sáng tạo và tận tâm trong sự nghiệp trồng người. Đội ngũ giáo viên tổ Vật lý đã không ngừng đổi mới phương pháp giảng dạy, kết hợp lý thuyết với thực hành, thúc đẩy học sinh tham gia các hoạt động sáng tạo như STEM, thí nghiệm ứng dụng và các tiết học tích hợp công nghệ hiện đại luôn khơi dậy tinh thần đam mê khám phá của học sinh.\n\nHướng tới kỷ niệm 75 năm truyền thống trường, tổ Vật lý tiếp tục quyết tâm cống hiến hết sức cho sự nghiệp giáo dục, đồng hành cùng học sinh khám phá những chân trời tri thức mới, góp phần xây dựng một môi trường giáo dục hạnh phúc.\n\nTHÀNH TÍCH:\n\n- Tổ nhiều năm đạt danh hiệu tổ tiên tiến xuất sắc.\n\n- 02 giáo viên đạt danh hiệu chiến sĩ thi đua cấp thành phố.\n\n- 04 giáo viên đạt danh hiệu chiến sĩ thi đua cấp cơ sở.\n\n- Nhiều học sinh đạt giải trong các cuộc thi học sinh giỏi cấp thành phố, giải toán vật lý trên máy tính cầm tay Casio khối 12 và Olympic tháng 4 cấp thành phố dành cho khối 10 và 11, 2 học sinh lớp 11 đạt giải hội thi Khoa học kỷ thuật cấp Thành phố.",
       "images": "images/thaycoly.jpg",
-      "captions": ["Hình ảnh các giáo viên trong tổ hiện nay\nTừ trái sang phải: Thầy Huỳnh Kiều Viết Lãm ( phó CTCĐ và nhóm trưởng K11), Thầy Nguyễn Ngọc Tân, Cô Trần Nguyễn Quỳnh Như (TTCĐ), Cô Huỳnh Thị Thanh Hiền (TPCM), Cô Nguyễn Tuyết Trinh, Cô Lê Thị Thanh Thuỷ (UV), cô Phạm Kim Dung, Thầy Đỗ Đăng Cao (TTCM), Cô Trương Hồng Ngọc, Thầy Phạm Thư Tùng (nhóm trưởng K10)\n"]
+      "captions": [
+        "Hình ảnh các giáo viên trong tổ hiện nay\nTừ trái sang phải: Thầy Huỳnh Kiều Viết Lãm ( phó CTCĐ và nhóm trưởng K11), Thầy Nguyễn Ngọc Tân, Cô Trần Nguyễn Quỳnh Như (TTCĐ), Cô Huỳnh Thị Thanh Hiền (TPCM), Cô Nguyễn Tuyết Trinh, Cô Lê Thị Thanh Thuỷ (UV), cô Phạm Kim Dung, Thầy Đỗ Đăng Cao (TTCM), Cô Trương Hồng Ngọc, Thầy Phạm Thư Tùng (nhóm trưởng K10)\n"
+      ]
     },
     {
-      "question": ["hoá học", "tổ hoá", "tổ hoá như thế nào","tổ hoá học"],
+      "question": [
+        "hoá học",
+        "tổ hoá",
+        "tổ hoá như thế nào",
+        "tổ hoá học"
+      ],
       "answer": "TỔ HÓA HỌC\nKhơi nguồn tri thức, gieo mầm đam mê khoa học.\nCon người tự cho mình là trung tâm của vũ trụ, nhưng khoa học đã chỉ ra rằng vũ trụ không có trung tâm, chúng ta chỉ sống trên một tinh cầu trôi dạt giữa khoảng không vô tận cùng hàng tỉ thiên thể khác.\nGiữa mênh mông vũ trụ đang cần được khám phá và tìm hiểu, HÓA HỌC sẽ đưa chúng ta đến những vô vàn thú vị và giúp chúng ta sống an toàn hơn…\n\tTổ HÓA HỌC trường THPT Ten Lơ Man là nơi hội tụ những trái tim nhiệt huyết, những khối óc sáng tạo và là nơi khơi dậy niềm đam mê khoa học, nơi nuôi dưỡng những khát vọng cho thế hệ trẻ. Với sứ mệnh gieo trồng tri thức, tổ Hóa học không chỉ mang đến những khái niệm, quan điểm về lý thuyết mà còn mở ra cánh cửa bước vào một thế giới khoa học kỳ thú, nơi mọi điều tưởng chừng bí ẩn đều được giải mã qua lăng kính hóa học.\n\tTrong những năm qua, nhiều thế hệ học sinh của tổ Hóa học đã gặt hái thành tích cao trong các kỳ thi học sinh giỏi, khoa học kỹ thuật cấp thành phố.\n\tPhía sau mỗi thành công ấy là sự dẫn dắt tận tâm của đội ngũ giáo viên – những người không chỉ là “người thắp lửa” mà còn là những người bạn đồng hành. Các tiết học được tổ chức sinh động, sáng tạo, kết hợp giữa lý thuyết và thực hành, giúp học sinh không chỉ hiểu sâu kiến thức mà còn biết vận dụng vào thực tiễn. Phòng thí nghiệm của tổ Hóa học luôn rộn ràng tiếng cười và ánh mắt háo hức của học trò khi tự tay khám phá, thử nghiệm và học hỏi.\n\tBao năm tháng đã qua, xin ngỏ lời biết ơn quý thầy cô cùng thế hệ đi trước. Tổ Hóa học đang vững vàng tiến bước, mang theo những giá trị cao đẹp của quá khứ để bồi đắp cho hiện tại và gieo mầm cho tương lai, viết tiếp những chương rực rỡ trong hành trình chinh phục tri thức và khoa học.\nTHÀNH TÍCH\n-\tGiáo viên: 05 Giáo viên đạt danh hiệu Chiến sĩ thi đua cơ sở, 01 GV nhận bằng khen của Chủ tịch UBND dân Thành phố.\n-\tHọc sinh: 04 HS giỏi cấp Thành phố; 11 HS đạt huy chương Olympic; 03 HS đạt giải hội thi Khoa học kỷ thuật cấp Thành phố.\n",
       "images": "images/thaycohoa.jpg",
-      "captions":["Hình ảnh các giáo viên trong tổ hiện nay.\nTừ trái sang: Cô Hoàng Thị Kim Phượng, Cô Đặng Nguyễn Mai Chi (TTCM), Thầy Nguyễn Quốc Bảo, Cô Nguyễn Thị Thanh Nhàn, Cô Trương Thị Hồng Nguyệt, Cô Nguyễn Thị Hạnh.\n"]
+      "captions": [
+        "Hình ảnh các giáo viên trong tổ hiện nay.\nTừ trái sang: Cô Hoàng Thị Kim Phượng, Cô Đặng Nguyễn Mai Chi (TTCM), Thầy Nguyễn Quốc Bảo, Cô Nguyễn Thị Thanh Nhàn, Cô Trương Thị Hồng Nguyệt, Cô Nguyễn Thị Hạnh.\n"
+      ]
     },
     {
-      "question": ["sinh học", "tổ sinh học", "tổ sinh như thế nào","tổ sinh"],
+      "question": [
+        "sinh học",
+        "tổ sinh học",
+        "tổ sinh như thế nào",
+        "tổ sinh"
+      ],
       "answer": "TỔ SINH HỌC\nKhám phá sự sống, chinh phục tri thức\nTổ Sinh học của trường THPT Ten Lơ Man là nơi hội tụ những thầy cô giáo tận tâm, giàu kinh nghiệm và luôn tràn đầy nhiệt huyết trong việc truyền tải kiến thức khoa học đến học sinh. Với phương pháp giảng dạy hiện đại, kết hợp giữa lý thuyết và thực hành, các thầy cô không chỉ giúp học sinh nắm vững kiến thức cơ bản mà còn khơi dậy niềm đam mê học tập và khám phá thế giới tự nhiên.\nTrải qua nhiều thế hệ, tổ Sinh học đã phấn đấu không ngừng để đạt được những thành tích đáng khích lệ. Những thành công này không chỉ minh chứng cho năng lực của học sinh mà còn khẳng định sự dẫn dắt đầy tâm huyết của đội ngũ giáo viên trong tổ Sinh học.\n* Thành tích:\n- Nhiều năm liền đạt danh hiệu Tổ lao động xuất sắc.\n- Giáo viên: 01 giáo viên đạt Chiến sĩ thi đua cấp Thành phố; 01 giáo viên nhận Bằng khen Chủ tịch UBND Thành phố; 04 giáo viên là chiến sĩ thi đua cấp cơ sở; 02 giáo viên là Nhà giáo trẻ tiêu biểu Quận 1; 02 giáo viên là Gương điển hình tiên tiến, 01 giáo viên là Gương điển hình “Người tốt, việc tốt” giai đoạn 2022 – 2024; 01 giáo viên nhận Bằng khen của Chủ tịch Liên đoàn Lao động Thành phố đạt thành tích xuất sắc trong phong trào thi đua lao động giỏi, xây dựng Công đoàn vững mạnh; 01 giáo viên nhận Bằng khen Thành Đoàn về Hoàn thành xuất sắc nhiệm vụ trong Công tác Đoàn và Phong trào thanh niên, Chuyến dịch tình nguyện Hoa Phượng đỏ, Xuân tình nguyện trong năm học 2021 - 2022, 2022 - 2023, 2023 – 2024,…\n- Học sinh: 08 giải Học sinh giỏi cấp Thành phố khối 12; 08 huy chương Olympic khối 10, 11; 01 giải Giải toán trên máy tính cầm tay Casio khối 12; 02 giải ba nghiên cứu khoa học cấp trường, 01 giải khuyến khích hội thi thiết kế sản phẩm STEM trong trường trung học do Trường Đại học Sư phạm TPHCM tổ chức…\n",
       "images": "images/thaycosinh.jpg",
-      "captions": ["Hình ảnh các giáo viên trong tổ hiện nay\nTừ trái sang phải: Thầy Trần Anh Lý, Cô Phan Nguyễn Hương Giang, Cô Phan Thị Phương Trang, Cô Trần Thị Trúc Đào, Thầy Lê Bá Khoa.\n"]
+      "captions": [
+        "Hình ảnh các giáo viên trong tổ hiện nay\nTừ trái sang phải: Thầy Trần Anh Lý, Cô Phan Nguyễn Hương Giang, Cô Phan Thị Phương Trang, Cô Trần Thị Trúc Đào, Thầy Lê Bá Khoa.\n"
+      ]
     },
     {
-      "question": ["ngữ văn", "tổ văn", "tổ ngữ văn như thế nào", "tổ ngữ văn"],
+      "question": [
+        "ngữ văn",
+        "tổ văn",
+        "tổ ngữ văn như thế nào",
+        "tổ ngữ văn"
+      ],
       "answer": "TỔ NGỮ VĂN – TẬN TÂM, YÊU THƯƠNG VÀ TRÁCH NHIỆM\nNhà Ten muôn sắc ngàn hương\nTổ Văn gắn kết yêu thương vững bền\nTổ Ngữ văn trường THPT Ten Lơ Man mang sứ mệnh truyền cảm hứng về vẻ đẹp chân, thiện, mĩ trong văn học nghệ thuật và cuộc sống. \nĐó là nơi giúp học sinh tích lũy tri thức văn học của nhân loại, khơi dậy niềm đam mê với các tác phẩm văn chương; cảm nhận sức mạnh, giá trị của ngôn từ; hình thành cách nhìn, quan điểm sống nhân văn.\nĐó là nơi mỗi thầy, cô giáo luôn tận tâm trong giảng dạy, yêu thương trong giáo dục và có  trách nhiệm cao đối với sự nghiệp trồng người.\nĐó là nơi, dù chứng kiến bao sự đổi thay của nền giáo dục, những biến động của xã hội vẫn vẹn nguyên một mục đích: Dạy văn không chỉ truyền đạt tri thức mà còn xây dựng nền tảng đạo đức và nhân cách cho các thế hệ học sinh.\nĐó là nơi thầy trò đồng hành cùng nhau để gây dựng nên nhiều thành tích xuất sắc: học tập hiệu quả bằng các dự án mới lạ; bồi dưỡng học sinh giỏi, nghiên cứu khoa học đạt kết quả cao; hoạt động ngoại khóa hấp dẫn và giàu tính nhân văn…\nThành tích nổi bật (10 năm gần đây):\n-\t10 năm liền đạt danh hiệu tập thể lao động xuất sắc, tổ Công đoàn xuất sắc và được BCH Công đoàn ngành Giáo dục thành phố Hồ Chí Minh khen thưởng là tổ đạt thành tích tiêu biểu trong “Học tập và làm theo tư tưởng, đạo đức, phong cách Hồ Chí Minh giai đoạn 2022-2024”.\n-\tGiáo viên: 01 giáo viên dạy giỏi, 01 giáo viên chủ nhiệm giỏi cấp thành phố; 03 giáo viên hướng dẫn nghiên cứu khoa học đạt giải cao cấp trường, 01 giáo viên đạt danh hiệu Chiến sĩ thi đua cấp Thành phố, 03 giáo viên đạt danh hiệu Chiến sĩ thi đua cấp cơ sở nhiều năm liền.\n-\tHọc sinh: 05 năm liền tổ có học sinh đạt giải học sinh giỏi cấp Thành phố (khối 12) và giải Olympic tháng 4 (khối 10 và 11).\n",
       "images": "images/thaycovan.jpg",
-      "captions": ["HÌNH 1:   Tổ Ngữ văn năm học 2024-2025\n(Từ trái qua: Cô Hà Ngân Trang, cô Nguyễn Thị Hoài Thương, cô Nguyễn Thị Huê Vân, cô Nguyễn Thị Phương Thảo- TPCM, cô Trần Thị Thu Hiền- TTCM, cô Phạm Đặng Thùy Dương-TTCĐ, cô Ngô Thị Ánh Hồng, cô Lê Phan Thanh Nhàn, cô Nguyễn Thị Lệ Thu).\n"]
+      "captions": [
+        "HÌNH 1:   Tổ Ngữ văn năm học 2024-2025\n(Từ trái qua: Cô Hà Ngân Trang, cô Nguyễn Thị Hoài Thương, cô Nguyễn Thị Huê Vân, cô Nguyễn Thị Phương Thảo- TPCM, cô Trần Thị Thu Hiền- TTCM, cô Phạm Đặng Thùy Dương-TTCĐ, cô Ngô Thị Ánh Hồng, cô Lê Phan Thanh Nhàn, cô Nguyễn Thị Lệ Thu).\n"
+      ]
     },
     {
-      "question": ["sử học", "tổ sử", "tổ lịch sử như thế nào", "tổ lịch sử"],
+      "question": [
+        "tổ sử",
+        "tổ lịch sử như thế nào",
+        "tổ lịch sử"
+      ],
       "answer": "TỔ LỊCH SỬ\n“Tiếp nối quá khứ, tô thắm tương lai”\nChủ tịch Hồ Chí Minh từng nói: “Dân ta phải biết sử ta; cho tường gốc tích nước nhà Việt Nam”. Câu nói đó của Người cho thấy, việc học và dạy lịch sử không chỉ để cho mọi người dân Việt Nam nhận biết rõ cội nguồn của mình, mà còn để bồi bổ, giáo dục tinh thần yêu nước, ý chí tự tôn, tự hào dân tộc. Cùng với bề dày lịch sử 75 năm truyền thống phát triển trường THPT Ten Lơ Man, tổ Lịch sử không chỉ là nơi lưu giữ và truyền tải những giá trị lịch sử sâu sắc, mà còn là mái nhà chung của những thầy cô đầy tâm huyết và sáng tạo. Với vai trò là những giáo viên dạy lịch sử, các thầy cô trong tổ Lịch sử luôn ý thức rất rõ về vai trò và trách nhiệm của mình trong việc dạy học. Trong suốt quá trình công tác, dù còn nhiều khó khăn nhưng tổ Lịch Sử đã vượt qua bằng sự đoàn kết và sáng tạo, để không ngừng mang lại những giá trị giáo dục ý nghĩa bền vững.\nTiếp nối truyền thống mà các thầy cô đi trước đã gầy dựng, giáo viên tổ Lịch sử hôm nay vẫn không ngừng nỗ lực trong giảng dạy và các hoạt động, bước đầu gặt hái được những thành tích nhất định như:\n- Tổ được tuyên dương Tập thể có thành tích tốt trong việc học tập và làm theo tấm gương đạo đức, phong cách Hồ Chí Minh năm 2018 do Quận ủy Quận 1 tổ chức.\n- Nhiều năm liền tổ đạt danh hiệu Tổ lao động xuất sắc.\n- Kết quả thi Tốt nghiệp THPT Quốc gia hàng năm luôn vượt tỉ lệ Thành phố.\n- Nhiều năm liền có học sinh tham gia và đạt giải trong kì thi học sinh giỏi cấp thành phố, bao gồm 12 giải Học sinh giỏi khối 12 (hạng Nhất, Nhì, Ba) và 10 huy chương kỳ thi Olympic 30/4 khối 10, 11 (hạng Vàng, Bạc, Đồng).\n- Có 01 cá nhân (Cô Nguyễn Thị Xuân Hương) được: Bằng khen của UBND Thành phố; nhiều năm liền là Chiến sĩ thi đua cơ sở; được nhận giấy khen của Ban Tuyên giáo Thành ủy TP. Hồ Chí Minh: Đạt giải Ba Hội thi Báo cáo viên giỏi TP. Hồ Chí Minh năm 2021 và nhiều giấy khen của Ban thường vụ Quận ủy Quận 1, giấy khen của BCH Công đoàn ngành giáo dục TP.HCM, giấy khen của Khối thi đua THPT công lập 01, …\n",
       "images": "images/thaycosu.jpg",
-      "captions": ["Hình ảnh: Tổ lịch sử trong Lễ khai giảng năm học 2024 – 2025\n(Từ phải qua: cô Nguyễn Thị Xuân Hương – Tổ trưởng chuyên môn, cô Nguyễn Thị Hà – Tổ trưởng Công đoàn, cô Dương Thị Thu, thầy Nguyễn Trí Thuận)\n"]
+      "captions": [
+        "Hình ảnh: Tổ lịch sử trong Lễ khai giảng năm học 2024 – 2025\n(Từ phải qua: cô Nguyễn Thị Xuân Hương – Tổ trưởng chuyên môn, cô Nguyễn Thị Hà – Tổ trưởng Công đoàn, cô Dương Thị Thu, thầy Nguyễn Trí Thuận)\n"
+      ]
     },
     {
-      "question": ["tổ địa", "địa lí", "tổ địa lí như thế nào", "tổ địa lí"],
+      "question": [
+        "tổ địa",
+        "địa lí",
+        "tổ địa lí như thế nào",
+        "tổ địa lí"
+      ],
       "answer": "Tổ Địa lí với phạm vi kiến thức chuyên môn đan xen giữa bộ môn khoa học tự nhiên (từ vũ trụ, khoa học Trái Đất đến các thành phần của thế giới tự nhiên) và bộ môn khoa học xã hội (dân cư, kinh tế, xã hội), trải qua những sự đổi thay của đất nước và chương trình dạy học, tuy không phải bộ môn quan trọng hàng đầu nhưng đã có những bước chuyển mình vô cùng ăn khớp với sự thay đổi của xã hội và thời đại. Từ bộ môn “học gạo”, “học tủ” rất “khô khan” của nhiều bạn học sinh, tổ bộ môn Địa lí đã không ngừng thay đổi, đưa nhiều chất liệu mới vào bài giảng và chương trình học, đưa các em học sinh đến với cánh cửa tri thức đa dạng mà gần gũi.\nTập thể giáo viên của tổ Địa lí cũng không ngừng phấn đấu đi lên, liên tục trong nhiều năm liền là Tổ lao động tiên tiến xuất sắc cùng các danh hiệu thi đua cá nhân như “Chiến sĩ thi đua cấp cơ sở”, “Phụ nữ giỏi việc nước đảm việc nhà”, “Nhà giáo trẻ tiêu biểu Quận 1”… cùng những chương trình ngoại khóa đậm nét chuyên môn Địa lí như: “Chợ nổi”, “Về đất phương nam - Chợ quê”, “Hiệp hội các nước Đông Nam Á”\nVới sự nỗi lực không ngừng, sự đoàn kết chặt chẽ và tấm lòng nhiệt huyết cùng công việc, tổ bộ môn Địa lí sẽ tiếp tục vươn lên, thực hiện ngày càng tốt hơn các nhiệm vụ, mục tiêu trong giảng dạy; tiếp tục truyền cảm hứng học tập và khám phá cho các thế hệ học sinh tiếp theo.\n",
       "images": "images/thaycodia.jpg",
-      "captions": ["Tập thể giáo viên tổ Địa lí hiện tại (Từ trái sang phải:Cô Nguyễn Thị Ngọc Ánh-Tổ trưởng chuyên môn; Thầy Võ Minh Nhàn; Cô Lê Thị Thành Lê)"]
+      "captions": [
+        "Tập thể giáo viên tổ Địa lí hiện tại (Từ trái sang phải:Cô Nguyễn Thị Ngọc Ánh-Tổ trưởng chuyên môn; Thầy Võ Minh Nhàn; Cô Lê Thị Thành Lê)"
+      ]
     },
     {
-      "question": ["tổ anh văn", "anh văn", "tổ anh văn như thế nào", "tổ anh"],
+      "question": [
+        "tổ anh văn",
+        "anh văn",
+        "tổ anh văn như thế nào",
+        "tổ anh"
+      ],
       "answer": "TỔ NGOẠI NGỮ - HÀNH TRÌNH NHỮNG NGƯỜI MANG LỬA\nKhông chỉ dừng lại ở việc giảng dạy lý thuyết, tổ Ngoại ngữ luôn tổ chức các hoạt động ngoại khóa đầy sáng tạo và sôi nổi, từ Câu lạc bộ tiếng Anh đến các cuộc thi thú vị, như “English and Joys”, “I Can Compose”, “Spread the World”, “Ring the Golden Bell”, “International Culture Festival”. Đặc biệt là cuộc thi review sách với chủ đề “Cultivating knowledge through reading”, được tổ chức phối hợp với thư viện nhà trường. Đây là một hoạt động không chỉ giúp học sinh phát triển khả năng viết và nói tiếng Anh mà còn khuyến khích các em khám phá các cuốn sách, mở rộng vốn hiểu biết và nuôi dưỡng thói quen đọc sách. Qua đó, các em không chỉ được rèn luyện khả năng ngôn ngữ mà còn học hỏi, trải nghiệm những giá trị văn hóa đa dạng từ các quốc gia khác nhau. Đây chính là cầu nối giúp học sinh không chỉ nắm vững kiến thức mà còn hiểu và cảm nhận được vẻ đẹp của thế giới đa ngữ, đa văn hóa.\nChúng tôi tự hào với những thành tích nổi bật mà Tổ Ngoại ngữ đã đạt được trong suốt các năm qua:\n • Liên tục đạt danh hiệu Tổ Lao động tiên tiến xuất sắc.\n • Gặt hái nhiều huy chương trong Cuộc thi Olympic Tháng 4 TP.HCM khối 10 và khối 11 nhiều năm liền. Ngoài ra, mỗi năm đội tuyển HSG môn Tiếng Anh lớp 12 đều xuất sắc giành được nhiều giải thưởng, đặc biệt trong năm học 2020-2021, đội tuyển đã mang về 8 giải cho trường.\n • Trung bình điểm thi TN THPT đều vượt tỉ lệ thành phố mỗi năm, điều này đã khẳng định chất lượng đào tạo của tổ Ngoại Ngữ.\n• Tổ chức thành công các hoạt động ngoại khóa “English and Joys”, “I Can Compose”, “Spread the World”, “Ring the Golden Bell” và “International Culture Festival”.\n • Nhiều giáo viên đạt danh hiệu Chiến sĩ Thi đua cấp cơ sở, với các tiết thao giảng hấp dẫn và sáng tạo, trong đó tiết dạy liên môn Anh - Lý năm học 2023-2024 đã để lại ấn tượng sâu sắc.\nVới sự đoàn kết, sáng tạo và nỗ lực không ngừng, chúng tôi tin rằng Tổ Ngoại Ngữ sẽ tiếp tục vươn lên, gặt hái nhiều thành công lớn, truyền cảm hứng học tập và khám phá cho các thế hệ học sinh tiếp theo.\n\n",
       "images": "images/thaycoanh.jpg",
-      "captions": ["Các thành viên tổ Ngoại Ngữ trong lễ khai giảng năm học 2024-2025\n(Từ trái sang: cô Trần Thị Kim Huệ, cô Trần Thị Quỳnh Như, cô Lê Quỳnh Tiên Đan, cô Lê Tường Cảnh Hân, cô Lê Nguyễn Lan Hương, cô Trang Đinh Đan, cô Nguyễn Thị Thanh Trà, cô Lê Thị Thu Hiền, cô Trần Lý Giao Nguyên)\n"]
+      "captions": [
+        "Các thành viên tổ Ngoại Ngữ trong lễ khai giảng năm học 2024-2025\n(Từ trái sang: cô Trần Thị Kim Huệ, cô Trần Thị Quỳnh Như, cô Lê Quỳnh Tiên Đan, cô Lê Tường Cảnh Hân, cô Lê Nguyễn Lan Hương, cô Trang Đinh Đan, cô Nguyễn Thị Thanh Trà, cô Lê Thị Thu Hiền, cô Trần Lý Giao Nguyên)\n"
+      ]
     },
     {
-      "question": ["tổ GDKTPL", "giáo dục kinh tế pháp luật", "tổ GDKTPL như thế nào", "GDKTPL"],
+      "question": [
+        "tổ GDKTPL",
+        "giáo dục kinh tế pháp luật",
+        "tổ GDKTPL như thế nào",
+        "GDKTPL"
+      ],
       "answer": "TỔ GIÁO DỤC KINH TẾ VÀ PHÁP LUẬT\nTổ bộ môn Giáo dục Kinh tế và Pháp luật, trước đây là tổ Giáo dục công dân, có vai trò quan trọng trong việc định hướng giáo dục toàn diện, góp phần xây dựng thế hệ công dân có trách nhiệm và nhận thức sâu sắc về kinh tế và pháp luật trong xã hội hiện đại, góp phần phát triển ý thức công dân và trách nhiệm xã hội. Đồng thời giúp học sinh hiểu và tuân thủ các quy định của pháp luật, nâng cao ý thức về quyền lợi và nghĩa vụ trong các lĩnh vực như lao động, sở hữu trí tuệ, bảo vệ môi trường, ... Bên cạnh đó, các hoạt động giảng dạy của tổ còn giúp phát triển năng lực công dân toàn cầu, chuẩn bị cho học sinh khả năng thích nghi với nền kinh tế toàn cầu hóa và xã hội pháp quyền hiện đại, cung cấp thêm hiểu biết về thương mại quốc tế, pháp luật quốc tế và kinh tế thị trường. \n\tThành tích: \n- Nhiều năm liền đạt thành tích xuất sắc trong công tác ôn thi tốt nghiệp. \n- Giáo viên: 01 GV đạt giải “Người tuyên truyền pháp luật giỏi” cấp thành phố, 01 GV hướng dẫn 05 HS đạt giải khuyến khích cuộc thi “Học sinh, sinh viên với ý tưởng khởi nghiệp” cấp thành phố, 03 GV là Chiến sĩ thi đua cấp cơ sở, 01 GV là Nhà giáo trẻ tiêu biểu Quận 1. \n- Hoc sinh: 02 HS đạt giải 3 cuộc thi “An toàn giao thông vì nụ cười ngày mai” cấp thành phố, 05 HS đạt giải khuyến khích cuộc thi “Học sinh, sinh viên với ý tưởng khởi nghiệp” cấp thành phố. \n",
       "images": "images/thaycoktpl.jpg",
-      "captions": ["Hình ảnh các giáo viên trong tổ hiện nay:\nTừ trái sang phải: cô Phạm Ngọc Lý, cô Đỗ Thị Thanh Xuân (Tổ trưởng công đoàn),\ncô Võ Thị Mỹ Trang (Tổ trưởng chuyên môn).\n"]
+      "captions": [
+        "Hình ảnh các giáo viên trong tổ hiện nay:\nTừ trái sang phải: cô Phạm Ngọc Lý, cô Đỗ Thị Thanh Xuân (Tổ trưởng công đoàn),\ncô Võ Thị Mỹ Trang (Tổ trưởng chuyên môn).\n"
+      ]
     },
     {
-      "question": ["tổ GDTC", "giáo dục thể chất", "tổ giáo dục thể chất như thế nào"],
+      "question": [
+        "tổ GDTC",
+        "giáo dục thể chất",
+        "tổ giáo dục thể chất như thế nào"
+      ],
       "answer": "TỔ GIÁO DỤC THỂ CHẤT \nI.\tQuá trình hình thành\n\tTổ Giáo dục Thể chất (GDTC) hiện nay từng là tổ ghép với các bộ môn khác với tên gọi tổ Sinh – Thể dục – Giáo dục công dân, tổ Sinh – Thể dục, và tổ Thể dục – Giáo dục Quốc phòng và an ninh (GDQP&AN).\nVào năm học 2022 – 2023, khi Chương trình giáo dục phổ thông 2018 chính thức được triển khai cho khối trung học phổ thông, môn Thể dục đã được chuyển tên thành môn Giáo dục Thể chất theo yêu cầu của chương trình mới. \nKể từ tháng 9 năm 2022, tổ Thể dục – GDQP&AN đã được tách ra thành tổ Giáo cục Thể chất.\nII.\t Một số thành tích tiêu biểu của tổ\nNhờ sự quan tâm và hỗ trợ từ Ban lãnh đạo, cùng sự nỗ lực không ngừng của các thầy cô trong tổ, công tác giáo dục thể chất tại trường ngày càng phát triển mạnh mẽ. Phong trào thể thao không chỉ phát triển mạnh mẽ ở cấp quận mà còn đạt nhiều thành tích cao tại các giải đấu cấp thành phố. Những thành công này là minh chứng rõ nét cho sự trưởng thành và phát triển bền vững của tổ Giáo dục Thể chất trong suốt 75 năm qua.\nTổ Giáo dục Thể chất sẽ tiếp tục phát huy những thành tích đạt được, không ngừng nâng cao chất lượng giảng dạy và huấn luyện, góp phần xây dựng một môi trường học tập năng động, lành mạnh, khuyến khích học sinh rèn luyện thể chất và phát triển toàn diện.\n",
       "images": "images/thaycogdtc.jpg",
-      "captions": ["Thầy Lê Xuân Huy (TTCM), Thầy Di Minh Trí, Cô Võ Thị Ngọc Hạnh, Cô Nguyễn Thị Giao, Thầy Bạch Văn Gân (TTCM Tổ GDQP&AN, dạy kiêm nhiệm môn GDTC).\n"]
+      "captions": [
+        "Thầy Lê Xuân Huy (TTCM), Thầy Di Minh Trí, Cô Võ Thị Ngọc Hạnh, Cô Nguyễn Thị Giao, Thầy Bạch Văn Gân (TTCM Tổ GDQP&AN, dạy kiêm nhiệm môn GDTC).\n"
+      ]
     },
     {
-      "question": ["tổ GDQPAN", "giáo dục quốc phòng an ninh", "tổ GDQPAN như thế nào"],
+      "question": [
+        "tổ GDQPAN",
+        "giáo dục quốc phòng an ninh",
+        "tổ GDQPAN như thế nào"
+      ],
       "answer": "TỔ GIÁO DỤC QUỐC PHÒNG – AN NINH\n* Phương châm của Tổ GDQP - AN: \nChia sẻ - Đoàn kết - Vững bước - Phát triển\n*Thành tích nổi bật của Tổ GDQP - AN: \n- Tập thể Lao động xuất sắc.\n- Tổ Công đoàn xuất sắc.\n- 1 giáo viên đạt giải Nhất hội thi giáo viên dạy Giỏi cấp Thành phố.\n- 1 giáo viên nhận bằng khen của Liên đoàn lao động Thành phố.\n- 3 giáo viên đạt chiến sĩ thi đua cấp Cơ sở.\n- 2 giáo viên đạt danh hiệu Công đoàn viên xuất sắc.\n- Các thành viên trong Tổ đã từng đạt các giải cao trong hội thao Công đoàn Ngành giáo dục: Vô địch môn Kéo co; Giải ba hội thi Đua xuồng hơi cao su.\n*  Trước năm 2022 có tên là Tổ Thể dục – Quốc phòng gồm:\n+ Thầy Lê Xuân Huy\n+ Thầy Di Minh Trí\n+ Cô Võ Thị Ngọc Hạnh\n+ Cô Nguyễn Thị Giao\n+ Thầy Bạch Văn Gân\n* Đến 01/09/2022 thành lập Tổ Giáo dục Quốc phòng – An ninh và các thành viên tổ hiện nay:\n+ Thầy Bạch Văn Gân\n+ Cô Nguyễn Thị Huỳnh Như \n+ Thầy Trương Ngọc Đại\n",
       "images": null,
       "captions": null
     },
     {
-      "question": ["tổ văn phòng", "to van phong", "tổ văn phòng như thế nào"],
+      "question": [
+        "tổ văn phòng",
+        "to van phong",
+        "tổ văn phòng như thế nào"
+      ],
       "answer": "TỔ VĂN PHÒNG ĐỒNG HÀNH CÙNG SỰ PHÁT TRIỂN\nTuy không trực tiếp giảng dạy, nhưng 75 năm qua tổ Văn phòng đã đồng hành cùng kề vai, sát cánh, chung sức gánh vác sự nghiệp trồng người của nhà trường với những nhiệm vụ thầm lặng và chức năng đặc thù thực hiện các công việc hành chính và phục vụ công tác giảng dạy của trường. \n\tTổ có 17 thành viên gồm các bộ phận kế toán, thủ quỹ, thư viện, văn thư, y tế, học vụ, giám thị, bảo vệ và phục vụ. Những công việc thầm lặng đó có liên quan đến điều hành chung hoạt động của nhà trường về đảm bảo điều kiện vật chất, tài chính và tài liệu tham khảo cho học sinh và cán bộ giáo viên, công tác văn thư và hồ sơ sổ sách học tập của học sinh. Các bộ phận luôn chấp hành nghiêm túc công việc của mình nhằm thực hiện tốt nhất kế hoạch của nhà trường đề ra.\nTuy mỗi bộ phận đảm nhiệm một công việc khác nhau nhưng tất cả đều hướng về một mục đích là phục vụ tốt cho giảng dạy và học tập, đều cùng nhau cố gắng hoàn thành tốt công việc được phân công. Vai trò của tổ Văn phòng không thể thiếu được trong các hoạt động chung của nhà trường. Dù công việc thầm lặng nhưng tổ đã góp phần không nhỏ vào thành tích chung của nhà trường. \n\tThành tích:\n\t+ Nhiều năm liền đạt thành tích xuất sắc trong hoạt động Công đoàn Ngành.\n\t+ Nhiều nhân viên vinh dự nhận được Giấy khen Công đoàn Ngành Giáo dục Thành phố Hồ Chí Minh;\n\t+ Tổ vinh dự nhận được Giấy khen của Sở Giáo dục và Đào tạo Thành phố Hồ Chí Minh và Khối thi đua 01 – THPT về tập thể điển hình có thành tích xuất sắc trong phong trào thi đua;\n\t+ Nhiều nhân viên đã vinh dự nhận được Giấy khen của Sở Giáo dục và Đào tạo Thành phố Hồ Chí Minh và Khối thi đua về gương cá nhân điển hình có thành tích xuất sắc trong phong trào thi đua năm học 2022 – 2023 và 2023 – 2024;\n\n",
       "images": "images/thaycovanphong.jpg",
-      "captions": ["Hình ảnh các giáo viên trong tổ hiện nay\n\tTừ trái sang phải cô Nguyễn Thị Thanh Yến, cô Nguyễn Thị Ngọc Giàu, cô Nguyễn Thị Ngọc Hương, cô Vương Lệ Chi, thầy Lê Nam Thái, cô Hoàng Thị Ngọc Hoa, thầy Trần Hải Bình, thầy Nguyễn Hùng Khương, cô Phan Thị Phương Trang, cô Trần Anh Thư, thầy Vũ Minh Bằng, cô Nguyễn Hồng Diễm, thầy Bùi Đoàn Trọng Nguyên, cô Nguyễn Nguyễn Thương Thương.\n"]
+      "captions": [
+        "Hình ảnh các giáo viên trong tổ hiện nay\n\tTừ trái sang phải cô Nguyễn Thị Thanh Yến, cô Nguyễn Thị Ngọc Giàu, cô Nguyễn Thị Ngọc Hương, cô Vương Lệ Chi, thầy Lê Nam Thái, cô Hoàng Thị Ngọc Hoa, thầy Trần Hải Bình, thầy Nguyễn Hùng Khương, cô Phan Thị Phương Trang, cô Trần Anh Thư, thầy Vũ Minh Bằng, cô Nguyễn Hồng Diễm, thầy Bùi Đoàn Trọng Nguyên, cô Nguyễn Nguyễn Thương Thương.\n"
+      ]
     },
     {
-      "question": ["các hoạt động phong trào", "hoạt động phong trào","một số hoạt động phong trào"],
+      "question": [
+        "các hoạt động phong trào",
+        "hoạt động phong trào",
+        "một số hoạt động phong trào"
+      ],
       "answer": "đây là tất cả các hoạt động phong trào của truờng",
-      "images": ["images/bvg.jpg", "images/bvg1.jpg", "images/cuocdua.jpg", "images/hssvkn.jpg", "images/hungquang.jpg", "images/noel.jpg", "images/kichnv.jpg", "images/xuan.jpg", "images/banhchung.jpg", "images/flmob.jpg", "images/gheda.jpg", "images/tdt.jpg", "images/haohao.jpg", "images/tnhk.jpg", "images/dailoan.jpg", "images/heodat.jpg", "images/hanquoc.jpg", "images/tlgn.jpg", "images/keelung.jpg"],
-      "captions": ["(Thầy Bạch Văn Gân – TTCM Tổ GDTC cùng \nhọc sinh tham dự kì thi bắn súng do Quận 1 tổ chức)\n\n", "(Thầy Bạch Văn Gân – TTCM Tổ GDTC đạt giải Nhì nội dung cá nhân tính điểm súng trường 10m do CLB bắn súng SAIGON SPINNER tổ chức)", "(Thầy cô trường THPT Ten Lơ Man\ntham dự cuộc thi Đua thuyền rồng do Công đoàn giáo dục thành phố tổ chức)\n\n", "(Học sinh Ten Lơ Man đạt giải khuyến khích tại cuộc thi “Học sinh, sinh viên khởi nghiệp” cấp thành phố năm học 2024 – 2025)", "(Em Nguyễn Hùng Quang – 12A1 – đạt giải khuyến khích trong cuộc thi hùng biện tiếng Nhật do Sở GDĐT tổ chức)", "(Học sinh Ten Lơ Man hoá thân thành các nhân vật và tạo điệu nhảy tự do nhân dịp Noel vào giờ ra chơi)", "(Hoạt động xem kịch do tổ Ngữ Văn tổ chức)", "(Các bạn học sinh tô thêm ‘‘xuân’’ trong\nhội thi “Trang Trí Mai Đào Ngày Tết’’)\n", "(Học sinh cùng các thầy cô tham gia \nhoạt động “Gói Bánh Chưng” đầy ý nghĩa Xuân Ất Tỵ 2025)\n", "(Các tiết mục flashmob được trình diễn\ntrong không khí Hội Xuân sôi động)\n", "(Những chiếc ghế đã cũ được \nCLB Sáng Tạo TEAM \"khoác áo mới\")\n", "(Học sinh trường Ten Lơ Man tham gia tham quan tại tư vấn hướng nghiệp tại ĐH Tôn Đức Thắng)", "(Học sinh trường Ten Lơ Man tham quan học tập tại nhà máy ACECOOK)", "(Thầy Nguyễn Hùng Khương - Hiệu trưởng ký kết ghi nhớ hợp tác với các trường đại học)", "(Giao lưu văn hoá với trường THPT Cơ Long, Đài Loan)", "(Học sinh Ten Lơ Man cùng HS Cơ Long sáng tạo hình vẽ trên chiếc nón lá và heo đất)", "(Thầy Nguyễn Hùng Khương - Hiệu trưởng -  tham dự Hội nghị tiếng Hàn tại Incheon Hàn Quốc)", "(Cô Trần Lý Giao Nguyên – TPCM Tổ Ngoại Ngữ cùng học sinh Ten Lơ Man tham dự Hội nghị thượng đỉnh thanh thiếu niên APEC mô phỏng tại Hàn Quốc)", "(Trường THPT Ten Lơ Man giao lưu văn hoá với trường THPT Keelung tại Đài Loan)"]
+      "images": [
+        "images/bvg.jpg",
+        "images/bvg1.jpg",
+        "images/cuocdua.jpg",
+        "images/hssvkn.jpg",
+        "images/hungquang.jpg",
+        "images/noel.jpg",
+        "images/kichnv.jpg",
+        "images/xuan.jpg",
+        "images/banhchung.jpg",
+        "images/flmob.jpg",
+        "images/gheda.jpg",
+        "images/tdt.jpg",
+        "images/haohao.jpg",
+        "images/tnhk.jpg",
+        "images/dailoan.jpg",
+        "images/heodat.jpg",
+        "images/hanquoc.jpg",
+        "images/tlgn.jpg",
+        "images/keelung.jpg"
+      ],
+      "captions": [
+        "(Thầy Bạch Văn Gân – TTCM Tổ GDTC cùng \nhọc sinh tham dự kì thi bắn súng do Quận 1 tổ chức)\n\n",
+        "(Thầy Bạch Văn Gân – TTCM Tổ GDTC đạt giải Nhì nội dung cá nhân tính điểm súng trường 10m do CLB bắn súng SAIGON SPINNER tổ chức)",
+        "(Thầy cô trường THPT Ten Lơ Man\ntham dự cuộc thi Đua thuyền rồng do Công đoàn giáo dục thành phố tổ chức)\n\n",
+        "(Học sinh Ten Lơ Man đạt giải khuyến khích tại cuộc thi “Học sinh, sinh viên khởi nghiệp” cấp thành phố năm học 2024 – 2025)",
+        "(Em Nguyễn Hùng Quang – 12A1 – đạt giải khuyến khích trong cuộc thi hùng biện tiếng Nhật do Sở GDĐT tổ chức)",
+        "(Học sinh Ten Lơ Man hoá thân thành các nhân vật và tạo điệu nhảy tự do nhân dịp Noel vào giờ ra chơi)",
+        "(Hoạt động xem kịch do tổ Ngữ Văn tổ chức)",
+        "(Các bạn học sinh tô thêm ‘‘xuân’’ trong\nhội thi “Trang Trí Mai Đào Ngày Tết’’)\n",
+        "(Học sinh cùng các thầy cô tham gia \nhoạt động “Gói Bánh Chưng” đầy ý nghĩa Xuân Ất Tỵ 2025)\n",
+        "(Các tiết mục flashmob được trình diễn\ntrong không khí Hội Xuân sôi động)\n",
+        "(Những chiếc ghế đã cũ được \nCLB Sáng Tạo TEAM \"khoác áo mới\")\n",
+        "(Học sinh trường Ten Lơ Man tham gia tham quan tại tư vấn hướng nghiệp tại ĐH Tôn Đức Thắng)",
+        "(Học sinh trường Ten Lơ Man tham quan học tập tại nhà máy ACECOOK)",
+        "(Thầy Nguyễn Hùng Khương - Hiệu trưởng ký kết ghi nhớ hợp tác với các trường đại học)",
+        "(Giao lưu văn hoá với trường THPT Cơ Long, Đài Loan)",
+        "(Học sinh Ten Lơ Man cùng HS Cơ Long sáng tạo hình vẽ trên chiếc nón lá và heo đất)",
+        "(Thầy Nguyễn Hùng Khương - Hiệu trưởng -  tham dự Hội nghị tiếng Hàn tại Incheon Hàn Quốc)",
+        "(Cô Trần Lý Giao Nguyên – TPCM Tổ Ngoại Ngữ cùng học sinh Ten Lơ Man tham dự Hội nghị thượng đỉnh thanh thiếu niên APEC mô phỏng tại Hàn Quốc)",
+        "(Trường THPT Ten Lơ Man giao lưu văn hoá với trường THPT Keelung tại Đài Loan)"
+      ]
     },
     {
-      "question": ["video","clip","vid","phim"],
+      "question": [
+        "video",
+        "clip",
+        "vid",
+        "phim"
+      ],
       "answer": "Đây là video giới thiệu về trường của chúng tôi:",
       "video_url": "https://www.youtube.com/watch?v=HzvZVAvBkto",
       "images": null,
       "captions": null
     },
     {
-      "question":["vắng có phép buổi 1","vắng có phép buổi 2","vắng có phép sáng","vănng có phép chiều"],
+      "question": [
+        "vắng có phép buổi 1",
+        "vắng có phép buổi 2",
+        "vắng có phép sáng",
+        "vắng có phép chiều"
+      ],
       "answer": "học sinh sẽ không bị trừ điểm hạnh kiểm nếu nghỉ học có minh chứng(giấy khám bệnh của phòng khám, bệnh viện, giấy ra viện, lệnh triệu tập nghĩa vụ quân sự)",
       "images": null,
       "captions": null
     },
     {
-      "question":["các lỗi liên quan đến học tập được ghi nhận trong sổ đầu bài","bị ghi sổ đầu bài"],
+      "question": [
+        "các lỗi liên quan đến học tập được ghi nhận trong sổ đầu bài",
+        "bị ghi sổ đầu bài"
+      ],
       "answer": "học sinh sẽ không bị trừ điểm hạnh kiểm nếu không học bài, không làm bài, không mang sách, không mang đề cương những có thể sẽ nhận hình phạt từ giáo viên chủ nhiệm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["các lỗi liên quan đến bán trú","các lỗi về bán trú"],
+      "question": [
+        "các lỗi liên quan đến bán trú",
+        "các lỗi về bán trú"
+      ],
       "answer": "học sinh sẽ không bị trừ điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["đi trễ sáng","đi trễ chiều","đi trễ buổi 1","đi trễ buổi 2"],
+      "question": [
+        "đi trễ sáng",
+        "đi trễ chiều",
+        "đi trễ buổi 1",
+        "đi trễ buổi 2"
+      ],
       "answer": "học sinh đi trễ 2 lần đầu sẽ không bị trừ điểm hạnh kiểm và từ lần thứ 3 sẽ bị trừ 0.25 điểm hạnh kiểm(bao gồm trễ có phép)",
       "images": null,
       "captions": null
     },
     {
-      "question": ["quên điểm danh qua camera buổi 1","quên điểm danh qua camera buổi 2","quên điểm danh qua camera sáng","quên điểm danh qua camera chiều"],
+      "question": [
+        "quên điểm danh qua camera buổi 1",
+        "quên điểm danh qua camera buổi 2",
+        "quên điểm danh qua camera sáng",
+        "quên điểm danh qua camera chiều"
+      ],
       "answer": "học sinh vi phạm sẽ bị trừ 0.25 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["chạy xe trong sân truờng","chạy xe trong trường"],
+      "question": [
+        "chạy xe trong sân truờng",
+        "chạy xe trong trường"
+      ],
       "answer": "học sinh không được phép chạy xe trong sân trường, nếu vị phạm học sinh sẽ bị trừ 0.5 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["ăn trong giờ học","ăn vụng","ăn trong tiết","áo dài sai quy định","áo khoác sai quy định","bảng tên sai quy định","bỏ áo ngoài quân","chơi trong giờ học","chơi trong tiết học","để móng tay dài","để móng chân dài","giày sai quy định","giỡn trong giờ học","đùa giỡn trong giờ học","học bài môn khác","không bảng tên","không giày thể dục","không nghiêm túc giờ sinh hoạt ở sân","không nghiêm túc trong giờ học","mang balo, cặp sách sai quy định","nằm úp mặt lên bàn","ngủ trong giờ học","qua khu vực lớp khác","quần tây sai quy định","quần thể dục sai quy định","ra hành lang giờ truy bài","sai đồng phục chiều","sai đồng phục sáng","sơn móng tay móng chân","tóc có màu","tóc dài","tóc mái dài","tóc sai quy định","trang điểm đi học","tự ý đổi chỗ","tự ý ra khỏi lớp","vào lớp sau thầy cô","vô căn tin vào giờ học","chọi phấn","xả rác"],
+      "question": [
+        "ăn trong giờ học",
+        "ăn vụng",
+        "ăn trong tiết",
+        "áo dài sai quy định",
+        "áo khoác sai quy định",
+        "bảng tên sai quy định",
+        "bỏ áo ngoài quân",
+        "chơi trong giờ học",
+        "chơi trong tiết học",
+        "để móng tay dài",
+        "để móng chân dài",
+        "giày sai quy định",
+        "giỡn trong giờ học",
+        "đùa giỡn trong giờ học",
+        "học bài môn khác",
+        "không bảng tên",
+        "không giày thể dục",
+        "không nghiêm túc giờ sinh hoạt ở sân",
+        "không nghiêm túc trong giờ học",
+        "mang balo, cặp sách sai quy định",
+        "nằm úp mặt lên bàn",
+        "ngủ trong giờ học",
+        "qua khu vực lớp khác",
+        "quần tây sai quy định",
+        "quần thể dục sai quy định",
+        "ra hành lang giờ truy bài",
+        "sai đồng phục chiều",
+        "sai đồng phục sáng",
+        "sơn móng tay móng chân",
+        "tóc có màu",
+        "tóc dài",
+        "tóc mái dài",
+        "tóc sai quy định",
+        "trang điểm đi học",
+        "tự ý đổi chỗ",
+        "tự ý ra khỏi lớp",
+        "vào lớp sau thầy cô",
+        "vô căn tin vào giờ học",
+        "chọi phấn",
+        "xả rác"
+      ],
       "answer": "học sinh vi phạm sẽ bị trừ 1 điểm hạnh kiểm ",
       "images": null,
       "captions": null
     },
     {
-      "question": ["bông tai sai quy định","bông tai không đúng quy định"],
+      "question": [
+        "bông tai sai quy định",
+        "bông tai không đúng quy định"
+      ],
       "answer": "bông tai sai quy định đối với học sinh nữ sẽ bị trừu 1 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["đeo bông tai","đeo khuyên tai"],
+      "question": [
+        "đeo bông tai",
+        "đeo khuyên tai"
+      ],
       "answer": "đeo bông tai ở học sinh nam sẽ bị trừ 1 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["chơi thể thao ở hành lang","chơi thể thao trong giờ học"],
+      "question": [
+        "chơi thể thao ở hành lang",
+        "chơi thể thao trong giờ học"
+      ],
       "answer": "học sinh chơi đá cầu, đá banh ở hành lang hoặc chơi thể thao ở sân, trong lớp giữa các tiết học sẽ bị trừ 1 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["đi dép","mang dép"],
+      "question": [
+        "đi dép",
+        "mang dép"
+      ],
       "answer": "học sinh mang dép sục, crocs đi học sẽ bị trừ 1 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["làm mất trật tự trong giờ học","làm ồn trong giờ học"],
+      "question": [
+        "làm mất trật tự trong giờ học",
+        "làm ồn trong giờ học"
+      ],
       "answer": "học sinh nói chuyển, phát biểu linh tinh, nói leo, hát, la hét hay ném đồ đạc trong gờ học sẽ bị trừ 1 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["làm việc riêng trong giờ học","làm việc riêng trong tiết học"],
+      "question": [
+        "làm việc riêng trong giờ học",
+        "làm việc riêng trong tiết học"
+      ],
       "answer": "học sinh đọc báo, truyện, soi gương hay làm bất cứ việc riêng nào trong giờ học sẽ bị trừ 1 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["váy sai quy định","váy ngắn"],
+      "question": [
+        "váy sai quy định",
+        "váy ngắn"
+      ],
       "answer": "học sinh nữ nếu váy ngắn trên đầu gối sẽ bị trừ 1 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["vắng buổi 1","vắng buổi 2","vắng buổi sáng","vắng buổi chiều"],
+      "question": [
+        "vắng buổi 1",
+        "vắng buổi 2",
+        "vắng buổi sáng",
+        "vắng buổi chiều"
+      ],
       "answer": "học sinh nếu vắng buổi sáng hoặc chiều không có phép sẽ bị trừ 1.5 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["chặn cầu thang","thiếu trung thực với thầy cô","trốn sinh hoạt ở sân","đem tài liệu giờ kiểm tra","sửu dng tài liệu giờ kiểm tra"],
+      "question": [
+        "chặn cầu thang",
+        "thiếu trung thực với thầy cô",
+        "trốn sinh hoạt ở sân",
+        "đem tài liệu giờ kiểm tra",
+        "sửu dng tài liệu giờ kiểm tra"
+      ],
       "answer": "học sinh vi phạm sẽ bị trừ 2 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["không vào lớp học","trốn tiết","trốn học","cúp học"],
+      "question": [
+        "không vào lớp học",
+        "trốn tiết",
+        "trốn học",
+        "cúp học"
+      ],
       "answer": "bất cứ mọi hành vi trốn tiết, trốn học hay cúp học đều sẽ bị trừ 2 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["sử dụng thiết bị điện tử lần 1","sử dụng thiết bị điện tử lần 2","sử dụng thiết bị điện tử lần 3"],
+      "question": [
+        "sử dụng thiết bị điện tử lần 1",
+        "sử dụng thiết bị điện tử lần 2",
+        "sử dụng thiết bị điện tử lần 3"
+      ],
       "answer": "học sinh sử dụng thiết bị điện tử như điện thoại, tai nghe, máy nghe nhạc lần 1 sẽ bị trừ 2 điểm hạnh kiểm, lần 2 sẽ bị trừ 4 điểm hạnh kiểm, lần 3 sẽ bị trừ 8 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["không nghiêm túc trong giờ kiểm tra","đùa giỡn trong giờ kiểm tra"],
+      "question": [
+        "không nghiêm túc trong giờ kiểm tra",
+        "đùa giỡn trong giờ kiểm tra"
+      ],
       "answer": "học sinh quay cóp, trao đổi bài trong giờ kiểm tra s bị trừ 2 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["sử dụng thiết bị không cho phép","sử dụng thiết bị của nhà trường"],
+      "question": [
+        "sử dụng thiết bị không cho phép",
+        "sử dụng thiết bị của nhà trường"
+      ],
       "answer": "học sinh tự ý sử dụng các thiết bị tropg phòng học, tự ý tắt mở máy lạnh sẽ bị trừ 2 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["chơi giỡn mạnh bạo nguy hiểm","chơi giỡn nguy hiểm"],
+      "question": [
+        "chơi giỡn mạnh bạo nguy hiểm",
+        "chơi giỡn nguy hiểm"
+      ],
       "answer": "học sinh chơi bắn bi, chơi tạt nước, đùa giỡn mạnh bạo sẽ bị trừ 2 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["có thái độ  thiếu chuẩn mực với bạn bè","giấu đồ của bạn","đồng phạm hành vi xấu của bạn","mang hột quẹt","mang VHP không cho phép"],
+      "question": [
+        "có thái độ  thiếu chuẩn mực với bạn bè",
+        "giấu đồ của bạn",
+        "đồng phạm hành vi xấu của bạn",
+        "mang hột quẹt",
+        "mang VHP không cho phép"
+      ],
       "answer": "học sinh sẽ bị trừ 3 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["phát ngôn thiếu chuẩn mực","phát ngôn sai lệch"],
+      "question": [
+        "phát ngôn thiếu chuẩn mực",
+        "phát ngôn sai lệch"
+      ],
       "answer": "học sinh nói tục, chửi thề sẽ bị trừ 3 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["không thực hiện theo yêu cầu của thầy cô","không nghe hiệu lệnh của giáo viên"],
+      "question": [
+        "không thực hiện theo yêu cầu của thầy cô",
+        "không nghe hiệu lệnh của giáo viên"
+      ],
       "answer": "học sinh không nghe lời thầy cô sẽ bị trừ 3 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["làm hư hỏng tài sản của người khác","phá hoại tài sản của người khác"],
+      "question": [
+        "làm hư hỏng tài sản của người khác",
+        "phá hoại tài sản của người khác"
+      ],
       "answer": "học sinh sẽ bị trừ 4 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["xăm mình","có thái độ thiếu chuẩn mực với thầy cô","tự ý ra cổng trường"],
+      "question": [
+        "xăm mình",
+        "có thái độ thiếu chuẩn mực với thầy cô",
+        "tự ý ra cổng trường"
+      ],
       "answer": "học sinh sẽ bị trừ 5 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["vị phạm kiểm tra tập trung","vi phạm trong các kỳ thi"],
+      "question": [
+        "vị phạm kiểm tra tập trung",
+        "vi phạm trong các kỳ thi"
+      ],
       "answer": "học sinh bị trừ 5 điểm hạnh kiểm, chưa bị lập biên bản, BGH quyết định",
       "images": null,
       "captions": null
     },
     {
-      "question": ["bao che cho bạn","bao che hành vi sai trái của bạn"],
+      "question": [
+        "bao che cho bạn",
+        "bao che hành vi sai trái của bạn"
+      ],
       "answer": "học sinh sẽ bị trừ 6 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["có mùi rượu bia","mang vật nguy hiểm vào trường"],
+      "question": [
+        "có mùi rượu bia",
+        "mang vật nguy hiểm vào trường"
+      ],
       "answer": "học sinh sẽ bị trừ 7 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["ép buộc bạn thực hiện hành vi xấu","không tôn trọng thầy cô","mang và đánh bài trong trường","đổ lỗi cho bạn","giỡn vô văn hoá","lấy cắp","phi tang tang vật","xúi bạn đánh nhau"],
+      "question": [
+        "ép buộc bạn thực hiện hành vi xấu",
+        "không tôn trọng thầy cô",
+        "mang và đánh bài trong trường",
+        "đổ lỗi cho bạn",
+        "giỡn vô văn hoá",
+        "lấy cắp",
+        "phi tang tang vật",
+        "xúi bạn đánh nhau"
+      ],
       "answer": "học sinh sẽ bị trừ 10 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["gây gổ, xích mích với bạn","gây gổ với bạn"],
+      "question": [
+        "gây gổ, xích mích với bạn",
+        "gây gổ với bạn"
+      ],
       "answer": "học sinh nếu cãi nhau, hăm doạ hoặc gây mất đoàn kết sẽ bị từ 10 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["bị lập biên bản kiểm tra tập trung","lập biên bản kiểm tra tập trung"],
+      "question": [
+        "bị lập biên bản kiểm tra tập trung",
+        "lập biên bản kiểm tra tập trung"
+      ],
       "answer": "học sinh sẽ bị trừ 12 điểm hạnh kiểm, BGH quyết định",
       "images": null,
       "captions": null
     },
     {
-      "question": ["mang và sử dụng đồ uống có cồn trong trường","đem đồ uống có cồn vào trường"],
+      "question": [
+        "mang và sử dụng đồ uống có cồn trong trường",
+        "đem đồ uống có cồn vào trường"
+      ],
       "answer": "học sinh mang hoặc sử dụng đồ uống có cồn trong trường sẽ bị trừ 12 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["mang, hút thuốc","sử dụng thuốc lá"],
+      "question": [
+        "mang, hút thuốc",
+        "sử dụng thuốc lá"
+      ],
       "answer": "học sinh sử dụng thuốc lá truyền thống, thuốc lá điện tử sẽ bị trừ 12 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["mang, sử dụng chất gây nghiện","sử dụng chất gây nghiện"],
+      "question": [
+        "mang, sử dụng chất gây nghiện",
+        "sử dụng chất gây nghiện"
+      ],
       "answer": "học sinh mang tinh dầu thuốc lá điện tử hay các chất gây nghiện khác sẽ bị trừ 12 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["đánh bạn","phá hoại tài sản nhà trường","kêu người ngoài đánh bạn","mang chất gây nổ","mang hung khí","vô lễ","xúc phạm nhân viên nhà trường","vi phạm luật giao thông"],
+      "question": [
+        "đánh bạn",
+        "phá hoại tài sản nhà trường",
+        "kêu người ngoài đánh bạn",
+        "mang chất gây nổ",
+        "mang hung khí",
+        "vô lễ",
+        "xúc phạm nhân viên nhà trường",
+        "vi phạm luật giao thông"
+      ],
       "answer": "học sinh sẽ bị trừ 14 điểm hạnh kiểm",
       "images": null,
       "captions": null
     },
     {
-      "question": ["máy lạnh","điều hoà","trường có máy lạnh không","lớp học có máy lạnh không","căn tin có máy lạnh không"],
+      "question": [
+        "máy lạnh",
+        "điều hoà",
+        "trường có máy lạnh không",
+        "lớp học có máy lạnh không",
+        "căn tin có máy lạnh không"
+      ],
       "answer": "100% lớp học, thư viện đều được trang bị 2 máy lạnh và căn tin cũng có máy lạnh(thông tin thử nghiệm)",
       "images": null,
       "captions": null
     },
     {
-      "question": ["văn phòng đoàn","đoàn viên"],
+      "question": [
+        "văn phòng đoàn",
+        "đoàn viên"
+      ],
       "answer": "Đoàn trường THPT Ten Lơ Man trực thuộc Quận đoàn 1, tọa lạc tại số 8 Trần Hưng Đạo, Phường Phạm Ngũ Lão, Quận 1. Với bề dày truyền thống hơn 74 năm gắn liền sự kiện “Ngày Toàn quốc Chống Mỹ” 19/3/1950, Đoàn trường THPT Ten Lơ Man luôn chú trọng việc nâng cao chất lượng hoạt động Đoàn thông qua việc đổi mới hình thức, phát huy vai trò, năng lực, phẩm chất của đoàn viên, học sinh. Đặc biệt, công tác Đoàn và phong trào thanh niên trong nhà trường luôn là điểm sáng và là nơi để đoàn viên, thanh niên nhà trường không ngừng rèn luyện, trau dồi và phát huy tinh thần của tuổi trẻ năng động, bản lĩnh và xung kích.\n\tNhiều năm liền Đoàn trường THPT Ten Lơ Man là đơn vị xuất sắc, dẫn đầu trong các hoạt động thi đua của Cụm và Quận 1. Với sự quan tâm sâu sát từ phía Ban lãnh đạo nhà trường, Ban thường vụ Quận đoàn 1, sự hỗ trợ và đồng hành của cha mẹ học sinh là cơ sở quyết định cho Đoàn trường có thể phát triển toàn diện, chất lượng cho đội ngũ cán bộ đoàn, thanh niên của nhà trường.\nĐoàn trường với tỉ lệ đoàn viên hàng năm từ 50 - 65% luôn đảm bảo về số lượng và chất lượng đoàn viên trong nhà trường. Với gần 40 chi đoàn trực thuộc, đây là những vệ tinh quan trọng trong việc triển khai các nội dung, hoạt động trọng điểm trong các năm học. Trên cơ sở đó, nhiều năm qua Đoàn trường THPT Ten Lơ Man đạt nhiều kết quả khả quan, tiêu biểu trong cụm thi đua, Quận 1 và toàn Thành phố.\n-Tập thể Đoàn TNCS Hồ Chí Minh Trường THPT Ten Lơ Man vinh dự nhận Bằng khen TW Đoàn trong năm học 2018 – 2019 và năm học 2023 – 2024.\n-Đồng chí Đỗ Toàn nguyên Bí thư và đồng chí Nguyễn Phạm Mỹ Ngân nguyên Phó Bí thư Đoàn Trường THPT Ten Lơ Man vinh dự nhận Bằng khen TW Đoàn do có thành tích xuất sắc trong Công tác Đoàn và phong trào thanh niên.\n-Trong năm học 2023 – 2024, Đoàn trường đã ghi dấu một cột mốc đáng tự hào khi lần đầu tiên bồi dưỡng và giới thiệu đồng chí Trần Ngọc Thủy Tiên – Ủy viên Ban Chấp hành Đoàn trường, Bí thư Chi đoàn 12A3 – vinh dự được kết nạp vào Đảng Cộng sản Việt Nam. \nBên cạnh đó, Đoàn trường THPT Ten Lơ Man tự hào được ghi nhận bằng loạt Bằng khen từ Thành đoàn Thành phố Hồ Chí Minh, Giấy khen của Chủ tịch UBND Quận 1 và Giấy khen Quận đoàn 1. Đây là minh chứng rõ nét cho những nỗ lực không ngừng và những kết quả tiêu biểu mà Đoàn trường đã đạt được trong năm học vừa qua. \nHiện nay, các hoạt động Đoàn Thanh niên tại Trường THPT Ten Lơ Man đã và đang trở thành một phần không thể thiếu trong các hoạt động của nhà trường, mang lại những giá trị tinh thần và thực tiễn to lớn cho học sinh. Đây không chỉ là sân chơi lành mạnh giúp các em rèn luyện kỹ năng, phát huy tài năng mà còn là nơi xây dựng tinh thần đoàn kết, trách nhiệm và tình yêu quê hương, đất nước, đẩy mạnh giao lưu quốc tế.\n",
       "images": "images/vpd.jpg",
-      "captions": ["Đây là tập thể văn phòng đoàn"]
+      "captions": [
+        "Đây là tập thể văn phòng đoàn"
+      ]
     },
     {
-      "question": ["Thầy Hùng Khương","Thầy Nguyễn Hùng Khương","Thầy Hiệu Trưởng Nguyễn Hùng Khương","Hiệu trưởng nhà trường"],
+      "question": [
+        "Thầy Hùng Khương",
+        "Thầy Nguyễn Hùng Khương",
+        "Thầy Hiệu Trưởng Nguyễn Hùng Khương",
+        "Hiệu trưởng nhà trường"
+      ],
       "answer": "Thầy Nguyễn Hùng Khương - Người thắp sáng tầm nhìn chiến lược\nVới vai trò là Bí thư chi bộ và Hiệu trưởng nhà trường, thầy Nguyễn Hùng Khương đã góp phần quan trọng trong việc định hình phong cách giáo dục hiện đại, gắn kết truyền thống với sự đổi mới. Thầy luôn là một người lãnh đạo vui vẻ, thân thiện nhưng quyết đoán, tận tâm và sáng tạo trong việc xây dựng những chính sách giáo dục toàn diện. Nhờ có sự dẫn dắt của thầy, trường THPT Ten Lơ Man không chỉ là nơi đào tạo những thế hệ học sinh tài năng, mà còn là một ngôi nhà chung đầy yêu thương và khích lệ sáng tạo.\n",
-      "images": ["images/tht.jpg","images/tht1.jpg"],
-      "captions": ["Thầy Nguyễn Hùng Khương – Hiệu trưởng phát biểu trong Lễ Khai giảng năm học 2024 - 2025","Thầy Nguyễn Hùng Khương – Hiệu trưởng"]
+      "images": [
+        "images/tht.jpg",
+        "images/tht1.jpg"
+      ],
+      "captions": [
+        "Thầy Nguyễn Hùng Khương – Hiệu trưởng phát biểu trong Lễ Khai giảng năm học 2024 - 2025",
+        "Thầy Nguyễn Hùng Khương – Hiệu trưởng"
+      ]
     },
     {
-      "question": ["Thầy Bình","Thầy Trần Hải Bình","Trần Hải Bình","Thầy hiệu phó Trần Hải Bình"],
+      "question": [
+        "Thầy Bình",
+        "Thầy Trần Hải Bình",
+        "Trần Hải Bình",
+        "Thầy hiệu phó Trần Hải Bình"
+      ],
       "answer": "Thầy Trần Hải Bình - Trái tim của chân chính nghiêm minh và kỷ luật\nVới vai trò Phó Hiệu trưởng phụ trách chuyên môn và kỷ luật học sinh, thầy đã mang đến những đóng góp thiết thực trong việc duy trì nề nếp kỷ cương và kỷ luật nghiêm minh của nhà trường. Thầy luôn đặt lợi ích của học sinh lên hàng đầu, đề cao tinh thần giáo dục nhân cách song hành cùng việc rèn luyện tri thức. Nhờ vào những nguyên tắc quản lý kỷ luật hiệu quả của thầy, nhà trường luôn đảm bảo môi trường học tập an toàn, kỷ cương và lành mạnh.\n",
       "images": "images/thp.jpg",
-      "captions": ["Thầy Trần Hải Bình – Phó Hiệu trưởng"]
+      "captions": [
+        "Thầy Trần Hải Bình – Phó Hiệu trưởng"
+      ]
     },
     {
-      "question": ["Cô Trang","Cô Phan Thị Phương Trang","Phan Thị Phương Trang","Cô hiệu phó Phan Thị Phương Trang"],
+      "question": [
+        "Cô Trang",
+        "Cô Phan Thị Phương Trang",
+        "Phan Thị Phương Trang",
+        "Cô hiệu phó Phan Thị Phương Trang"
+      ],
       "answer": "Cô Phan Thị Phương Trang - Hiện thân của sự dẫn dắt và tận tâm\nGiữ vai trò Phó Bí thư chi bộ và Phó Hiệu trưởng nhà trường, cô Phan Thị Phương Trang là một nhân tố lãnh đạo tận tâm và luôn sát cánh cùng thầy trò trong nhiều hoạt động, chăm lo, bảo quản các trang thiết bị, cơ sở vật chất phục vụ các hoạt động dạy học. Cô chú trọng việc kết nối giữa các thành viên trong nhà trường, góp phần tạo nên sự gắn kết chặt chẽ giữa giáo viên và học sinh. Bên cạnh đó cô còn phụ công tác tổ chức bán trú, quan tâm các hoạt động ngoại khóa, các phong trào thi đua đã mang lại những kỷ niệm đẹp và ấn tượng cho nhiều thế hệ học sinh. \n",
       "images": "images/chp.jpg",
-      "captions": ["Cô Phan Thị Phương Trang – Phó Hiệu trưởng"]
+      "captions": [
+        "Cô Phan Thị Phương Trang – Phó Hiệu trưởng"
+      ]
     },
     {
-      "question": ["bài hát của trường","bài hát","hành khúc thpt ten lơ man"],
-      "answer":"đây là bài hát của trường",
+      "question": [
+        "bài hát của trường",
+        "bài hát",
+        "hành khúc thpt ten lơ man"
+      ],
+      "answer": "đây là bài hát của trường",
       "video_url": "https://www.youtube.com/watch?v=tgECMlXzSU4",
       "images": null,
       "captions": null
     },
     {
-      "question": ["đội ngũ giáo viên","đội ngũ giáo viên nhà trường","đội ngũ giáo viên của trường"],
+      "question": [
+        "đội ngũ giáo viên",
+        "đội ngũ giáo viên nhà trường",
+        "đội ngũ giáo viên của trường"
+      ],
       "answer": "Đây là hình ảnh đội ngũ giáo viên của trường ",
       "images": "images/dngv.jpg",
       "captions": null
+    },
+    {
+      "question": [
+        "Tổ hợp môn",
+        "Chương trình đào tạo"
+      ],
+      "answer": "Đây là các tổ hợp môn của trường",
+      "images": [
+        "images/thm1.jpg",
+        "images/thm2.jpg",
+        "images/thm3.jpg"
+      ],
+      "captions": null
+    },
+    {
+      "question": [
+        "Ngoai ngữ",
+        "Ngôn ngữ",
+        "Tiếng Pháp",
+        "Tiếng Hàn",
+        "Tiếng Trung",
+        "Tiếng Nhật",
+        "Tiếng nước ngoài"
+      ],
+      "answer": "Nhằm giúp học sinh trường THPT Ten Lơ Man tăng thêm cơ hội việc làm, khả năng hội nhập quốc tế, trường đã phối hợp với các trung tâm bồi dưỡng ngoại ngữ giảng dạy thêm ngoại ngữ 2 trong trường ngoài giờ học chính khóa. Học sinh được chọn học thêm 1 trong 4 ngoại ngữ sau: Tiếng Pháp, tiếng Trung, tiếng Nhật, tiếng Hàn.",
+      "images": null,
+      "captions": null
+    },
+    {
+      "question": [
+        "Mos",
+        "Tin học"
+      ],
+      "answer": "Nhằm giúp học sinh trường THPT Ten Lơ Man tăng thêm kỹ năng tin học, trường đã lồng ghép thêm trong giờ học chính khóa môn Tin học MOS.",
+      "images": null,
+      "captions": null
+    },
+    {
+      "question": [
+        "Hoạt động trải nghiệm",
+        "Hướng nghiệp"
+      ],
+      "answer": "Hoạt động trải nghiệm hướng nghiệp định kỳ hàng năm:\n\n+Tour Đà Lạt: Sau khi thi HK1\n\n+ Tour Phan Thiết : Sau khi thi giữa HK2"
+    },
+    {
+      "question": "Tuyển thẳng",
+      "answer": "Trường ưu tiên xét tuyển thẳng đối với đối tượng học sinh hòa nhập, học sinh giỏi quốc gia ở lĩnh vực thể thao, học tập"
+    },
+    {
+      "question": "Thời gian biểu",
+      "answer": "Đây là thời gian biểu của trường",
+      "images": "images/thoigianbieu.jpg"
+    },
+    {
+      "question": "Chất lượng đầu ra",
+      "answer": "Nhiều năm liền đạt tỉ lệ 100% học sinh đậu tốt nghiệp THPT, tỉ lệ học sinh đậu đại học cao."
+    },
+    {
+      "question": "Trường đại học liên kết",
+      "answer": "Đại học Hoa Sen, Đại học Văn Lang, Đại học Tôn Đức Thắng, Đại học Quốc Tế Hồng Bàng, …"
+    },
+    {
+      "question": "Phòng Giám Thị",
+      "answer": "- Học sinh đi trễ cần phải xuống phòng giám thị xin giấy vào lớp.\n\n- Học sinh nghỉ học, PH có thể vào phòng giám thị để xin phép nghỉ học cho con. Trừ những trường hợp đặc biệt, PH có thể xin phép thông qua GVCN."
     }
   ]
 }

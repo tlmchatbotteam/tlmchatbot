@@ -210,6 +210,12 @@ def strip_leadin_phrases(text: str) -> str:
 
 def split_subquestions(text):
     norm_text = normalize_and_unaccent(text)
+    # NEW GUARD: nếu toàn bộ chuỗi khớp 1 từ khóa đã biết, không tách
+    try:
+        if KEYWORD_TO_ITEM_MAP and norm_text in KEYWORD_TO_ITEM_MAP:
+            return [norm_text]
+    except Exception:
+        pass
     # Chỉ tách theo các liên từ rõ ràng, dùng non-capturing group để không giữ lại từ nối
     conjunctions = [
         r'va', r'và', r'hoac', r'hay',
@@ -256,7 +262,8 @@ def split_subquestions(text):
     # NEW: nếu vẫn không tách được, thử tách theo các từ khóa đã biết trong kho dữ liệu (khớp liên tiếp)
     if len(subqs) <= 1:
         try:
-            tokens = norm_text.split()
+            # Sanitize punctuation to avoid breaking keyword spans (e.g., hoc phi' diem chuan)
+            tokens = [t for t in re.split(r'\s+', re.sub(r'[^\w]+', ' ', norm_text)) if t]
             n = len(tokens)
             if n >= 2 and KEYWORD_TO_ITEM_MAP:
                 # Tính độ dài cụm từ khóa lớn nhất
@@ -298,10 +305,10 @@ def split_subquestions(text):
         except Exception:
             pass
 
-    # NEW: nếu vẫn không tách được, thử bỏ từ đệm (gap-tolerant) rồi quét từ khóa
+    # NEW: nếu vẫn không tách được, thử bỏ từ đệm (gap-tolerant) rồi quét từ khóa (bỏ dấu câu)
     if len(subqs) <= 1:
         try:
-            tokens = norm_text.split()
+            tokens = [t for t in re.split(r'\s+', re.sub(r'[^\w]+', ' ', norm_text)) if t]
             if tokens and KEYWORD_TO_ITEM_MAP:
                 FILLERS = {
                     'la', 'thi', 'thoi', 'nhe', 'nha', 'voi', 'va', 'và', 'vs', 'lai', 'nua', 'cai', 'cua', 've', 'la',
@@ -339,7 +346,81 @@ def split_subquestions(text):
         except Exception:
             pass
 
+    # NEW: nếu vẫn không tách được, thử nhận diện "đầu từ khóa" (keyword heads) 2 từ
+    # Ví dụ: 'diem chuan' là tiền tố của nhiều key như 'diem chuan nam nay', 'diem chuan cua truong', ...
+    if len(subqs) <= 1 and KEYWORD_TO_ITEM_MAP:
+        try:
+            tokens = [t for t in re.split(r'\s+', re.sub(r'[^\w]+', ' ', norm_text)) if t]
+            if len(tokens) >= 2:
+                # Xây dựng tập các đầu-key 2 từ từ dữ liệu câu hỏi
+                heads = set()
+                for key in KEYWORD_TO_ITEM_MAP.keys():
+                    ks = key.split()
+                    if len(ks) >= 2:
+                        heads.add(' '.join(ks[:2]))
+                # Quét theo cửa sổ 2 từ để tìm các đầu-key xuất hiện theo thứ tự
+                i = 0
+                found_heads = []
+                while i <= len(tokens) - 2:
+                    candidate = ' '.join(tokens[i:i+2])
+                    if candidate in heads:
+                        if not found_heads or found_heads[-1] != candidate:
+                            found_heads.append(candidate)
+                        i += 2
+                    else:
+                        i += 1
+                if len(found_heads) > 1:
+                    return found_heads
+        except Exception:
+            pass
+
     return subqs
+
+def find_multi_keyword_spans(norm_text: str):
+    """Return a list of non-overlapping keyword phrases found in norm_text using KEYWORD_TO_ITEM_MAP.
+    Greedy left-to-right longest-match; phrases are normalized (unaccented, lower).
+    """
+    try:
+        if not norm_text or not KEYWORD_TO_ITEM_MAP:
+            return []
+        # sanitize punctuation, split to tokens
+        tokens = [t for t in re.split(r"\s+", re.sub(r"[^\w]+", " ", norm_text)) if t]
+        if not tokens:
+            return []
+        try:
+            max_key_len = max(len(k.split()) for k in KEYWORD_TO_ITEM_MAP.keys())
+        except Exception:
+            max_key_len = 6
+        i = 0
+        n = len(tokens)
+        spans = []
+        while i < n:
+            matched = False
+            Lmax = min(max_key_len, n - i)
+            for L in range(Lmax, 0, -1):
+                phrase = ' '.join(tokens[i:i+L])
+                if phrase in KEYWORD_TO_ITEM_MAP:
+                    # Avoid extremely weak matches consisting solely of common stop tokens
+                    toks = phrase.split()
+                    STOP_TOKENS = {"truong", "co", "cua", "ve", "la", "nao", "gi", "cai", "cac", "nhung", "o", "dau"}
+                    if len(toks) == 1 and toks[0] in STOP_TOKENS:
+                        continue
+                    if len(toks) == 2 and all(t in STOP_TOKENS for t in toks):
+                        continue
+                    spans.append(phrase)
+                    i += L
+                    matched = True
+                    break
+            if not matched:
+                i += 1
+        # Dedup consecutive
+        dedup = []
+        for p in spans:
+            if not dedup or dedup[-1] != p:
+                dedup.append(p)
+        return dedup
+    except Exception:
+        return []
 
 def get_answer(question):
     norm_question = normalize_text(question)
@@ -406,6 +487,83 @@ def get_answer(question):
     # TÁCH Ý NHỎ
     core_question = strip_leadin_phrases(core_question)
     sub_questions = split_subquestions(core_question)
+
+    # EARLY: robust multi-intent detection without connectors (e.g., "hoc phi diem chuan")
+    try:
+        nq_early = normalize_and_unaccent(core_question)
+        multi_spans = find_multi_keyword_spans(nq_early)
+        if len(multi_spans) > 1:
+            results = []
+            for ph in multi_spans:
+                item = KEYWORD_TO_ITEM_MAP.get(ph)
+                if not item:
+                    continue
+                ans = item.get('answer', "Không có câu trả lời.")
+                images = item.get('images')
+                captions = item.get('captions')
+                video_url = item.get('video_url')
+                media_type = "text"; media_content = None
+                if images and isinstance(images, str):
+                    images = [images]
+                if video_url:
+                    media_type = "video"; media_content = video_url
+                elif images:
+                    media_type = "image"; media_content = (images, captions)
+                results.append({"text": ans, "media_type": media_type, "media_content": media_content})
+            # Deduplicate identical results just in case
+            if results:
+                try:
+                    seen = set(); unique = []
+                    for r in results:
+                        key = (
+                            (r.get("text") or "").strip(),
+                            r.get("media_type"),
+                            json.dumps(r.get("media_content"), ensure_ascii=False, sort_keys=True)
+                            if isinstance(r.get("media_content"), (dict, list, tuple)) else str(r.get("media_content"))
+                        )
+                        if key not in seen:
+                            seen.add(key)
+                            unique.append(r)
+                    if unique:
+                        return unique
+                except Exception:
+                    return results
+    except Exception:
+        pass
+
+    # EXTRA: robust multi-keyword span detection even without connectors
+    try:
+        nq_tmp = normalize_and_unaccent(core_question)
+        tokens_tmp = [t for t in re.split(r'\s+', re.sub(r'[^\w]+', ' ', nq_tmp)) if t]
+        if tokens_tmp and KEYWORD_TO_ITEM_MAP:
+            try:
+                max_key_len_tmp = max(len(k.split()) for k in KEYWORD_TO_ITEM_MAP.keys())
+            except Exception:
+                max_key_len_tmp = 6
+            i_tmp = 0
+            n_tmp = len(tokens_tmp)
+            spans_tmp = []
+            while i_tmp < n_tmp:
+                matched_tmp = False
+                Lmax_tmp = min(max_key_len_tmp, n_tmp - i_tmp)
+                for L in range(Lmax_tmp, 0, -1):
+                    ph = ' '.join(tokens_tmp[i_tmp:i_tmp+L])
+                    if ph in KEYWORD_TO_ITEM_MAP:
+                        spans_tmp.append(ph)
+                        i_tmp += L
+                        matched_tmp = True
+                        break
+                if not matched_tmp:
+                    i_tmp += 1
+            # Dedup consecutive
+            dedup_tmp = []
+            for p in spans_tmp:
+                if not dedup_tmp or dedup_tmp[-1] != p:
+                    dedup_tmp.append(p)
+            if len(dedup_tmp) > 1:
+                sub_questions = dedup_tmp
+    except Exception:
+        pass
     # If single sub-question, try multi-hit return via map before falling back
     if len(sub_questions) <= 1:
         norm_core = normalize_and_unaccent(core_question)
@@ -448,6 +606,60 @@ def get_answer(question):
                             media_type = "image"; media_content = (images, captions)
                         results.append({"text": ans, "media_type": media_type, "media_content": media_content})
                     return results
+
+        # NEW: If the query contains multiple known keyword spans (without connectors), answer each separately
+        try:
+            nq = normalize_and_unaccent(core_question)
+            # sanitize punctuation and tokenize
+            tokens = [t for t in re.split(r'\s+', re.sub(r'[^\w]+', ' ', nq)) if t]
+            if tokens and KEYWORD_TO_ITEM_MAP:
+                try:
+                    max_key_len = max(len(k.split()) for k in KEYWORD_TO_ITEM_MAP.keys())
+                except Exception:
+                    max_key_len = 6
+                i = 0
+                n = len(tokens)
+                spans = []
+                while i < n:
+                    matched = False
+                    Lmax = min(max_key_len, n - i)
+                    for L in range(Lmax, 0, -1):
+                        phrase = ' '.join(tokens[i:i+L])
+                        if phrase in KEYWORD_TO_ITEM_MAP:
+                            spans.append(phrase)
+                            i += L
+                            matched = True
+                            break
+                    if not matched:
+                        i += 1
+                # dedup consecutive spans
+                dedup_spans = []
+                for p in spans:
+                    if not dedup_spans or dedup_spans[-1] != p:
+                        dedup_spans.append(p)
+                if len(dedup_spans) > 1:
+                    results = []
+                    for ph in dedup_spans:
+                        item = KEYWORD_TO_ITEM_MAP.get(ph)
+                        if not item:
+                            continue
+                        ans = item.get('answer', "Không có câu trả lời.")
+                        images = item.get('images')
+                        captions = item.get('captions')
+                        video_url = item.get('video_url')
+                        media_type = "text"; media_content = None
+                        if images and isinstance(images, str):
+                            images = [images]
+                        if video_url:
+                            media_type = "video"; media_content = video_url
+                        elif images:
+                            media_type = "image"; media_content = (images, captions)
+                        results.append({"text": ans, "media_type": media_type, "media_content": media_content})
+                    if results:
+                        return results
+        except Exception:
+            pass
+
         # Prefer original text for semantic/fuzzy, then fallback to normalized
         ans, media_type, media_content = find_answer_and_media(core_question)
         if ans and ans.strip() and ans != "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.":
