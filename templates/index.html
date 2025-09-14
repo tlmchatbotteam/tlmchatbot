@@ -148,6 +148,29 @@
         .choice-btn { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-size: 0.95rem; }
         .choice-btn:hover { background: rgba(0,0,0,0.04); }
         .choice-btn:disabled { opacity: 0.6; cursor: default; }
+
+        /* Contact modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1200; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #fff; border: 1px solid var(--border); border-radius: 12px; width: min(1100px, 96vw); max-height: 92vh; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.25); display: flex; flex-direction: column; }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+        .modal-title { margin: 0; font-size: 1.1rem; font-weight: 700; }
+        .modal-body { padding: 16px; overflow: auto; }
+        .modal-footer { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
+        .close-btn { border: 1px solid var(--border); background: #fff; border-radius: 10px; padding: 8px 12px; cursor: pointer; }
+        .close-btn:hover { background: #f5f5f5; }
+
+        .contact-intro { color: var(--muted); margin: 0 0 10px; }
+        .hotline { margin: 0 0 16px; }
+        .hotline a { color: var(--brand); text-decoration: none; }
+        .hotline a:hover { text-decoration: underline; }
+        .contact-table { width: 100%; border-collapse: collapse; background: #fff; }
+        .contact-table th, .contact-table td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; }
+        .contact-table thead th { background: #f8fafc; font-weight: 600; }
+        .contact-table tbody tr:nth-child(even) { background: #fafafa; }
+        .center { text-align: center; }
+        .muted { color: var(--muted); }
+
     </style>
 </head>
 <body>
@@ -156,6 +179,8 @@
             <div class="logo"><img src="/images/lg.jpg" alt="Logo"></div>
             <div class="nav">
                 <button class="primary" onclick="startNewChat()">Cuộc trò chuyện mới</button>
+                <!-- New: contact info button -->
+                <button onclick="openContactModal()">Thông tin liên hệ</button>
             </div>
         </aside>
 
@@ -195,6 +220,49 @@
             <button class="lightbox-close" aria-label="Đóng">×</button>
             <img class="lightbox-image" src="" alt="Hình ảnh" />
             <div class="lightbox-caption"></div>
+        </div>
+    </div>
+
+    <!-- New: Contact modal -->
+    <div id="contact-modal" class="modal-overlay" aria-hidden="true" tabindex="-1">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+            <div class="modal-header">
+                <h2 id="contact-title" class="modal-title">Thông tin liên hệ</h2>
+                <button class="close-btn" aria-label="Đóng" onclick="closeContactModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="contact-intro">Tư vấn hướng nghiệp và tuyển sinh đóng vai trò quan trọng trong việc hỗ trợ thí sinh hiểu rõ về quy trình tuyển sinh, các cơ hội học tập và đưa ra lựa chọn phù hợp.</p>
+                <p class="hotline"><strong>Tổng đài:</strong>
+                    <a href="tel:02838299702">02838299702</a>
+                    –
+                    <a href="tel:02838218020">02838218020</a>
+                </p>
+
+                <p class="muted"><strong>Hotline tư vấn hướng nghiệp tuyển sinh chung:</strong></p>
+                <div style="overflow:auto;">
+                    <table class="contact-table" aria-label="Danh bạ tư vấn tuyển sinh">
+                        <thead>
+                            <tr>
+                                <th class="center" style="width: 56px;">TT</th>
+                                <th>Họ và tên tư vấn viên</th>
+                                <th>Chức vụ</th>
+                                <th>Điện thoại</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="center">1</td>
+                                <td>Thầy Nguyễn Ngọc Tân</td>
+                                <td>Chuyên viên tư vấn tuyển sinh</td>
+                                <td><a href="tel:0778274282">0778274282</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="close-btn" onclick="closeContactModal()">Trở về</button>
+            </div>
         </div>
     </div>
 
@@ -581,6 +649,23 @@
             } catch (_) { /* noop */ }
         }
 
+        // --- Contact modal logic ---
+        function openContactModal() {
+            const overlay = document.getElementById('contact-modal');
+            if (!overlay) return;
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+            // prevent background scroll
+            document.body.style.overflow = 'hidden';
+        }
+        function closeContactModal() {
+            const overlay = document.getElementById('contact-modal');
+            if (!overlay) return;
+            overlay.classList.remove('show');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
         // Init basic events
         (function initUI() {
             try {
@@ -605,6 +690,15 @@
                     document.addEventListener('keydown', (e) => {
                         if (e.key === 'Escape') closeLightbox();
                     });
+                }
+            } catch (_) { /* noop */ }
+
+            // Wire contact modal close interactions
+            try {
+                const cm = document.getElementById('contact-modal');
+                if (cm) {
+                    cm.addEventListener('click', (e) => { if (e.target === cm) closeContactModal(); });
+                    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeContactModal(); });
                 }
             } catch (_) { /* noop */ }
         })();
