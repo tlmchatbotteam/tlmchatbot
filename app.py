@@ -1330,6 +1330,8 @@ def ask():
 def serve_image(filename):
     return send_from_directory('images', filename)
 
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
