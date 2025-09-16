@@ -422,6 +422,41 @@ def find_multi_keyword_spans(norm_text: str):
     except Exception:
         return []
 
+# NEW: helper to detect whether a user query contains any keyword/phrase from the dataset
+# Uses normalized (lower, unaccented) matching with span scan and boundary-based contains
+
+def contains_dataset_keyword(text: str) -> bool:
+    try:
+        if not text or not KEYWORD_TO_ITEM_MAP:
+            return False
+        nq = normalize_and_unaccent(text)
+        # Direct key
+        if nq in KEYWORD_TO_ITEM_MAP:
+            return True
+        # Span scan
+        spans = find_multi_keyword_spans(nq)
+        if spans:
+            return True
+        # Boundary-based contains check (both directions), punctuation-stripped variants
+        def _wb_contains(hay: str, needle: str) -> bool:
+            if not hay or not needle:
+                return False
+            H = f" {hay.strip()} ".replace("  ", " ")
+            N = f" {needle.strip()} ".replace("  ", " ")
+            return N in H
+        np = re.sub(r"\W+", " ", nq).strip()
+        for key in KEYWORD_TO_ITEM_MAP.keys():
+            if len(key) < 3:
+                continue
+            if _wb_contains(nq, key) or _wb_contains(key, nq):
+                return True
+            kp = re.sub(r"\W+", " ", key).strip()
+            if (kp and np) and (_wb_contains(np, kp) or _wb_contains(kp, np)):
+                return True
+        return False
+    except Exception:
+        return False
+
 def get_answer(question):
     norm_question = normalize_text(question)
     norm_unaccent_question = normalize_and_unaccent(question)
@@ -659,6 +694,10 @@ def get_answer(question):
                         return results
         except Exception:
             pass
+
+        # NEW: Gate fuzzy/semantic fallback if no known keyword from dataset is present
+        if not contains_dataset_keyword(core_question):
+            return [{"text": "Xin lỗi, tôi không có thông tin về nội dung này.", "media_type": "text", "media_content": None}]
 
         # Prefer original text for semantic/fuzzy, then fallback to normalized
         ans, media_type, media_content = find_answer_and_media(core_question)
@@ -1215,6 +1254,10 @@ def find_answer_and_media(question):
             return answer, "text", None
 
     # 5 & 6) Adaptive routing giữa fuzzy và embeddings (+ cross-encoder rerank nếu sẵn)
+    # NEW: If no dataset keyword is present at all, stop here with default unknown instead of fuzzy/semantic guesses
+    if not contains_dataset_keyword(question):
+        return "Xin lỗi, tôi không có thông tin về nội dung này.", "text", None
+
     FUZZY_STRONG = 0.88
     EMBED_STRONG = 0.72
     FUZZY_MIN = 0.60
