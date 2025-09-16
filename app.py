@@ -8,6 +8,12 @@ import unicodedata
 from difflib import SequenceMatcher
 from types import SimpleNamespace
 from flask import Flask, request, jsonify, send_from_directory, render_template
+# NEW: fast fuzzy matching with graceful fallback
+try:
+    from rapidfuzz import fuzz, process  # type: ignore
+except Exception:
+    fuzz = None  # type: ignore
+    process = None  # type: ignore
 
 # --- KHỞI TẠO FLASK APP ---
 app = Flask(__name__)
@@ -266,17 +272,14 @@ def split_subquestions(text):
             tokens = [t for t in re.split(r'\s+', re.sub(r'[^\w]+', ' ', norm_text)) if t]
             n = len(tokens)
             if n >= 2 and KEYWORD_TO_ITEM_MAP:
-                # Tính độ dài cụm từ khóa lớn nhất
-                try:
-                    max_key_len = max(len(k.split()) for k in KEYWORD_TO_ITEM_MAP.keys())
-                except Exception:
-                    max_key_len = 6
-                STOP_TOKENS = {"truong", "co", "cua", "ve", "la", "nao", "gi", "cai", "cac", "nhung", "o", "dau"}
+                # Dùng giá trị cache MAX_KEY_LEN
+                LMAX = MAX_KEY_LEN if 'MAX_KEY_LEN' in globals() else 6
+                STOP_TOKENS = COMMON_STOP_TOKENS if 'COMMON_STOP_TOKENS' in globals() else {"truong", "co", "cua", "ve", "la", "nao", "gi", "cai", "cac", "nhung", "o", "dau"}
                 i = 0
                 found_spans = []
                 while i < n:
                     matched = False
-                    Lmax = min(max_key_len, n - i)
+                    Lmax = min(LMAX, n - i)
                     for L in range(Lmax, 0, -1):
                         phrase = ' '.join(tokens[i:i+L])
                         if phrase in KEYWORD_TO_ITEM_MAP:
@@ -316,16 +319,13 @@ def split_subquestions(text):
                 }
                 filtered = [t for t in tokens if t not in FILLERS]
                 if len(filtered) >= 2:
-                    try:
-                        max_key_len = max(len(k.split()) for k in KEYWORD_TO_ITEM_MAP.keys())
-                    except Exception:
-                        max_key_len = 6
+                    LMAX = MAX_KEY_LEN if 'MAX_KEY_LEN' in globals() else 6
                     i = 0
                     n = len(filtered)
                     spans = []
                     while i < n:
                         matched = False
-                        Lmax = min(max_key_len, n - i)
+                        Lmax = min(LMAX, n - i)
                         for L in range(Lmax, 0, -1):
                             phrase = ' '.join(filtered[i:i+L])
                             if phrase in KEYWORD_TO_ITEM_MAP:
@@ -352,12 +352,8 @@ def split_subquestions(text):
         try:
             tokens = [t for t in re.split(r'\s+', re.sub(r'[^\w]+', ' ', norm_text)) if t]
             if len(tokens) >= 2:
-                # Xây dựng tập các đầu-key 2 từ từ dữ liệu câu hỏi
-                heads = set()
-                for key in KEYWORD_TO_ITEM_MAP.keys():
-                    ks = key.split()
-                    if len(ks) >= 2:
-                        heads.add(' '.join(ks[:2]))
+                # Sử dụng cache KEY_HEADS_2
+                heads = KEY_HEADS_2 if 'KEY_HEADS_2' in globals() else set()
                 # Quét theo cửa sổ 2 từ để tìm các đầu-key xuất hiện theo thứ tự
                 i = 0
                 found_heads = []
@@ -387,22 +383,19 @@ def find_multi_keyword_spans(norm_text: str):
         tokens = [t for t in re.split(r"\s+", re.sub(r"[^\w]+", " ", norm_text)) if t]
         if not tokens:
             return []
-        try:
-            max_key_len = max(len(k.split()) for k in KEYWORD_TO_ITEM_MAP.keys())
-        except Exception:
-            max_key_len = 6
+        LMAX = MAX_KEY_LEN if 'MAX_KEY_LEN' in globals() else 6
         i = 0
         n = len(tokens)
         spans = []
         while i < n:
             matched = False
-            Lmax = min(max_key_len, n - i)
+            Lmax = min(LMAX, n - i)
             for L in range(Lmax, 0, -1):
                 phrase = ' '.join(tokens[i:i+L])
                 if phrase in KEYWORD_TO_ITEM_MAP:
                     # Avoid extremely weak matches consisting solely of common stop tokens
                     toks = phrase.split()
-                    STOP_TOKENS = {"truong", "co", "cua", "ve", "la", "nao", "gi", "cai", "cac", "nhung", "o", "dau"}
+                    STOP_TOKENS = COMMON_STOP_TOKENS if 'COMMON_STOP_TOKENS' in globals() else {"truong", "co", "cua", "ve", "la", "nao", "gi", "cai", "cac", "nhung", "o", "dau"}
                     if len(toks) == 1 and toks[0] in STOP_TOKENS:
                         continue
                     if len(toks) == 2 and all(t in STOP_TOKENS for t in toks):
@@ -768,13 +761,6 @@ def split_sticky_words(text):
 # --- CẤU HÌNH VÀ TẢI DỮ LIỆU ---
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-try:
-    with open(os.path.join(os.path.dirname(__file__), 'admissions_data.json'), 'r', encoding='utf-8') as f:
-        admissions_data = json.load(f)
-except Exception as e:
-    print(f"Lỗi khi tải admissions_data.json: {e}")
-    admissions_data = {"questions": []}
-
 QUESTION_KEYWORDS = get_all_question_keywords()
 
 # Tạo từ điển tra cứu cho so khớp từ khóa trực tiếp và n-gram
@@ -796,7 +782,19 @@ for item in admissions_data.get('questions', []):
         if item not in lst:
             lst.append(item)
 
-# Lazy-load cross-encoder cho rerank (đa ngôn ngữ dựa trên XLM-R)
+# NEW: Cached constants for performance-sensitive scans
+try:
+    MAX_KEY_LEN = max((len(k.split()) for k in KEYWORD_TO_ITEM_MAP.keys()), default=6)
+except Exception:
+    MAX_KEY_LEN = 6
+COMMON_STOP_TOKENS = {"truong", "co", "cua", "ve", "la", "nao", "gi", "cai", "cac", "nhung", "o", "dau", "ai"}
+KEY_HEADS_2 = set()
+for _k in KEYWORD_TO_ITEM_MAP.keys():
+    _ks = _k.split()
+    if len(_ks) >= 2:
+        KEY_HEADS_2.add(' '.join(_ks[:2]))
+# NEW: Lazy-load models
+
 def load_cross_encoder_model():
     try:
         from sentence_transformers import CrossEncoder
@@ -806,7 +804,7 @@ def load_cross_encoder_model():
 
 cross_encoder_model = load_cross_encoder_model()
 
-# Lazy-load SBERT/E5 bi-encoder (ưu tiên cho tiếng Việt)
+
 def load_sentence_transformer_model():
     try:
         from sentence_transformers import SentenceTransformer
@@ -839,6 +837,22 @@ def initialize_semantic_resources():
         except Exception as e:
             # Keep running even if KNN init fails
             print(f"Khởi tạo KNN index thất bại: {e}")
+        # NEW: Build FAISS index for faster top-K retrieval (cosine via inner product)
+        try:
+            if embeddings is not None and embeddings.shape[0] > 0:
+                import faiss  # type: ignore
+                emb_np = embeddings.detach().cpu().numpy().astype('float32')
+                try:
+                    faiss.normalize_L2(emb_np)
+                except Exception:
+                    pass
+                d = emb_np.shape[1]
+                index = faiss.IndexFlatIP(d)
+                index.add(emb_np)
+                app.session_state.faiss_index = index
+        except Exception as e:
+            # Optional; continue gracefully if FAISS not available
+            print(f"Khởi tạo FAISS index thất bại: {e}")
     except Exception as e:
         print(f"Lỗi khởi tạo embeddings: {e}")
 
@@ -891,18 +905,28 @@ def fuzzy_best_item(question_text: str):
     """Trả về (item_tốt_nhất, tỷ_lệ_fuzzy). Nếu không có, trả (None, 0)."""
     # Normalize both user question and dataset questions to unaccented lowercase
     user_q = normalize_and_unaccent(question_text)
-    best_item = None
-    best_ratio = 0.0
-    for item in admissions_data.get('questions', []):
-        questions = item.get('question', [])
-        if isinstance(questions, str):
-            questions = [questions]
-        for q in questions:
-            ratio = SequenceMatcher(None, user_q, normalize_and_unaccent(q)).ratio()
+    try:
+        keys = list(KEYWORD_TO_ITEM_MAP.keys())
+        if not keys:
+            return None, 0.0
+        # Prefer RapidFuzz if available
+        if process is not None and fuzz is not None:
+            match = process.extractOne(user_q, keys, scorer=fuzz.ratio)
+            if not match:
+                return None, 0.0
+            best_key, score, _ = match
+            return KEYWORD_TO_ITEM_MAP.get(best_key), float(score) / 100.0
+        # Fallback: difflib scan
+        best_item = None
+        best_ratio = 0.0
+        for k in keys:
+            ratio = SequenceMatcher(None, user_q, k).ratio()
             if ratio > best_ratio:
                 best_ratio = ratio
-                best_item = item
-    return best_item, best_ratio
+                best_item = KEYWORD_TO_ITEM_MAP.get(k)
+        return best_item, float(best_ratio)
+    except Exception:
+        return None, 0.0
 
 def retrieve_topk_embeddings(query_text: str, top_k: int = 10):
     """Trả về danh sách [(index, cosine)] giảm dần theo cosine, tối đa top_k. Nếu không sẵn sàng, trả []."""
@@ -962,6 +986,9 @@ def rerank_with_cross_encoder(query_text: str, candidate_indices):
     if cross_encoder_model is None or not candidate_indices:
         return None, 0.0
     try:
+        # NEW: cap number of candidates for latency
+        max_candidates = 8
+        candidate_indices = list(candidate_indices)[:max_candidates]
         pairs = []
         qt = normalize_text(query_text)
         for idx in candidate_indices:
@@ -1039,7 +1066,7 @@ def find_answer_and_media(question):
             N = f" {needle.strip()} ".replace("  ", " ")
             return N in H
         np = _pun(nq)
-        STOP_TOKENS = {"truong", "co", "cua", "ve", "la", "nao", "gi", "cai", "nhung", "o", "dau", "ai"}
+        STOP_TOKENS = COMMON_STOP_TOKENS if 'COMMON_STOP_TOKENS' in globals() else {"truong", "co", "cua", "ve", "la", "nao", "gi", "cai", "nhung", "o", "dau", "ai"}
         for key, it in KEYWORD_TO_ITEM_MAP.items():
             # Skip trivially short or stop-only keys
             if len(key) < 3:
@@ -1208,7 +1235,7 @@ def find_answer_and_media(question):
                 return answer, "image", (images, captions)
             return answer, "text", None
         # NEW: ignore stopword/short tokens to avoid mapping "co" (có/cô), etc.
-        STOP_TOKENS = {"truong", "co", "cua", "ve", "la", "nao", "gi", "cai", "cac", "nhung", "o", "dau"}
+        STOP_TOKENS = COMMON_STOP_TOKENS if 'COMMON_STOP_TOKENS' in globals() else {"truong", "co", "cua", "ve", "la", "nao", "gi", "cai", "cac", "nhung", "o", "dau"}
         for token in tokens:
             if len(token) < 3 or token in STOP_TOKENS:
                 continue
@@ -1314,23 +1341,43 @@ def find_answer_and_media(question):
 def fuzzy_match_question(question, admissions_data, min_ratio=0.6):
     # Normalize both sides for robust Vietnamese fuzzy matching
     user_q = normalize_and_unaccent(question)
-    best_match = None
-    best_ratio = 0
-    for item in admissions_data.get('questions', []):
-        questions = item.get('question', [])
-        if isinstance(questions, str):
-            questions = [questions]
-        for q in questions:
-            ratio = SequenceMatcher(None, user_q, normalize_and_unaccent(q)).ratio()
-            if ratio > best_ratio and ratio >= min_ratio:
+    try:
+        keys = list(KEYWORD_TO_ITEM_MAP.keys())
+        if not keys:
+            return None
+        if process is not None and fuzz is not None:
+            match = process.extractOne(user_q, keys, scorer=fuzz.ratio)
+            if not match:
+                return None
+            key, score, _ = match
+            if float(score) / 100.0 >= float(min_ratio):
+                item = KEYWORD_TO_ITEM_MAP.get(key)
+                if not item:
+                    return None
+                answer = item.get('answer', "Không có câu trả lời.")
+                images = item.get('images')
+                captions = item.get('captions')
+                return answer, images, captions
+            return None
+        # Fallback difflib
+        best_key = None
+        best_ratio = 0.0
+        for k in keys:
+            ratio = SequenceMatcher(None, user_q, k).ratio()
+            if ratio > best_ratio:
                 best_ratio = ratio
-                best_match = item
-    if best_match:
-        answer = best_match.get('answer', "Không có câu trả lời.")
-        images = best_match.get('images')
-        captions = best_match.get('captions')
-        return answer, images, captions
-    return None
+                best_key = k
+        if best_key is not None and best_ratio >= float(min_ratio):
+            item = KEYWORD_TO_ITEM_MAP.get(best_key)
+            if not item:
+                return None
+            answer = item.get('answer', "Không có câu trả lời.")
+            images = item.get('images')
+            captions = item.get('captions')
+            return answer, images, captions
+        return None
+    except Exception:
+        return None
 
 # --- FLASK ENDPOINTS ---
 @app.route('/ask', methods=['POST'])
@@ -1403,12 +1450,14 @@ def status():
         n_texts = len(getattr(app.session_state, 'question_texts', []) or [])
         has_emb = app.session_state.question_embeddings is not None
         has_knn = getattr(app.session_state, 'knn_index', None) is not None
+        has_faiss = getattr(app.session_state, 'faiss_index', None) is not None
         has_ce = cross_encoder_model is not None
         has_sbert = sbert_model is not None
         return jsonify({
             "items": n_items,
             "questions_indexed": n_texts,
             "embeddings": bool(has_emb),
+            "faiss_index": bool(has_faiss),
             "knn_index": bool(has_knn),
             "cross_encoder": bool(has_ce),
             "sbert": bool(has_sbert)
