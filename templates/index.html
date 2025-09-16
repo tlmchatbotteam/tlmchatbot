@@ -179,10 +179,10 @@
             <div class="logo"><img src="/images/lg.jpg" alt="Logo"></div>
             <div class="nav">
                 <button class="primary" onclick="startNewChat()">Cuộc trò chuyện mới</button>
-                <!-- New: contact info button -->
                 <button onclick="openContactModal()">Thông tin liên hệ</button>
-                <!-- NEW: feedback button -->
                 <button onclick="openFeedbackModal()">Góp ý cho chatbot</button>
+                <!-- NEW: admin viewer -->
+                <button onclick="openFeedbackList()">Xem góp ý (admin)</button>
             </div>
         </aside>
 
@@ -286,6 +286,37 @@
             <div class="modal-footer" style="gap:8px;">
                 <button class="close-btn" onclick="closeFeedbackModal()">Hủy</button>
                 <button id="fb-submit" class="close-btn" style="background: var(--brand); color:#fff; border-color: var(--brand);" onclick="submitFeedback()">Gửi góp ý</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Feedback list modal -->
+    <div id="fb-list-modal" class="modal-overlay" aria-hidden="true" tabindex="-1">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="fb-list-title">
+            <div class="modal-header">
+                <h2 id="fb-list-title" class="modal-title">Danh sách góp ý</h2>
+                <button class="close-btn" aria-label="Đóng" onclick="closeFeedbackList()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="fb-list-wrap" style="overflow:auto;">
+                    <table class="contact-table" aria-label="Danh sách góp ý">
+                        <thead>
+                            <tr>
+                                <th style="width: 180px;">Thời gian (UTC)</th>
+                                <th style="width: 160px;">Email</th>
+                                <th style="width: 140px;">IP</th>
+                                <th>Nội dung</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fb-list-body">
+                            <!-- filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <p class="muted" id="fb-list-note" style="display:none; margin-top:8px;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="close-btn" onclick="closeFeedbackList()">Đóng</button>
             </div>
         </div>
     </div>
@@ -749,6 +780,63 @@
             }
         }
 
+        // --- Admin feedback list (NEW) ---
+        function openFeedbackList() {
+            const token = prompt('Nhập FEEDBACK_TOKEN (liên hệ admin để lấy):', '');
+            if (token === null) return;
+            loadFeedbackList(token);
+        }
+        function closeFeedbackList() {
+            const overlay = document.getElementById('fb-list-modal');
+            if (!overlay) return;
+            overlay.classList.remove('show');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+        async function loadFeedbackList(token) {
+            const overlay = document.getElementById('fb-list-modal');
+            const tbody = document.getElementById('fb-list-body');
+            const note = document.getElementById('fb-list-note');
+            if (!overlay || !tbody) return;
+            tbody.innerHTML = '<tr><td colspan="4" class="center">Đang tải...</td></tr>';
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            try {
+                const url = `/feedback/list?limit=200&token=${encodeURIComponent(token || '')}`;
+                const res = await fetch(url, { headers: { 'X-Admin-Token': token || '' } });
+                const data = await res.json();
+                if (!data || !data.ok) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="center">Không thể tải góp ý (kiểm tra token và server).</td></tr>';
+                    if (note) { note.style.display = 'block'; note.textContent = data && data.error ? data.error : ''; }
+                    return;
+                }
+                const items = Array.isArray(data.items) ? data.items : [];
+                if (!items.length) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="center">Chưa có góp ý nào.</td></tr>';
+                    return;
+                }
+                const rows = items.map(r => {
+                    const ts = r.ts || '';
+                    const email = r.email || '';
+                    const ip = r.ip || '';
+                    const msg = (r.message || '').replace(/\s+/g, ' ').trim();
+                    return `<tr><td>${ts}</td><td>${escapeHtml(email)}</td><td>${escapeHtml(ip)}</td><td>${escapeHtml(msg)}</td></tr>`;
+                }).join('');
+                tbody.innerHTML = rows;
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="4" class="center">Lỗi tải dữ liệu.</td></tr>';
+            }
+        }
+        function escapeHtml(s) {
+            return String(s || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         // Init basic events
         (function initUI() {
             try {
@@ -795,6 +883,15 @@
                     });
                 }
             } catch (_) { /* noop */ }
+
+            // Wire feedback list modal close interactions
+            try {
+                const ml = document.getElementById('fb-list-modal');
+                if (ml) {
+                    ml.addEventListener('click', (e) => { if (e.target === ml) closeFeedbackList(); });
+                    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFeedbackList(); });
+                }
+            } catch (_) {}
         })();
     </script>
 </body>
