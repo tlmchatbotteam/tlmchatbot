@@ -982,6 +982,7 @@ def find_answer_and_media(question):
         return answer, "text", None
 
     # 1b) Prefix/contains fallback to catch partial phrases (e.g., 'tien ich' -> 'tien ich xung quanh truong')
+    phrase_matches = []  # keep earlier variable name context
     contains_candidates = []
     nq = norm_question
     if len(nq) >= 3:
@@ -991,13 +992,29 @@ def find_answer_and_media(question):
                 return re.sub(r"\W+", " ", s).strip()
             except Exception:
                 return s
+        def _wb_contains(hay: str, needle: str) -> bool:
+            # word-boundary containment: sequence of tokens, not substring of a token
+            if not hay or not needle:
+                return False
+            H = f" {hay.strip()} ".replace("  ", " ")
+            N = f" {needle.strip()} ".replace("  ", " ")
+            return N in H
         np = _pun(nq)
+        STOP_TOKENS = {"truong", "co", "cua", "ve", "la", "nao", "gi", "cai", "nhung", "o", "dau", "ai"}
         for key, it in KEYWORD_TO_ITEM_MAP.items():
-            if key.startswith(nq) or nq.startswith(key) or (nq in key) or (key in nq):
+            # Skip trivially short or stop-only keys
+            if len(key) < 3:
+                continue
+            key_tokens = key.split()
+            if key_tokens and all((t in STOP_TOKENS or len(t) <= 2) for t in key_tokens):
+                continue
+            # Direct boundary-based checks on normalized strings
+            if _wb_contains(key, nq) or _wb_contains(nq, key):
                 contains_candidates.append((key, it))
                 continue
+            # Also compare punctuation-stripped versions
             kp = _pun(key)
-            if kp and np and (kp.startswith(np) or np.startswith(kp) or (np in kp) or (kp in np)):
+            if kp and np and (_wb_contains(kp, np) or _wb_contains(np, kp)):
                 contains_candidates.append((key, it))
     if contains_candidates:
         best_key, best_item = max(contains_candidates, key=lambda x: len(x[0]))
