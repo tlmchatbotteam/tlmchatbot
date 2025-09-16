@@ -8,7 +8,6 @@ import unicodedata
 from difflib import SequenceMatcher
 from types import SimpleNamespace
 from flask import Flask, request, jsonify, send_from_directory, render_template
-from datetime import datetime  # NEW
 
 # --- KHỞI TẠO FLASK APP ---
 app = Flask(__name__)
@@ -1356,76 +1355,6 @@ def status():
         }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-# NEW: receive user feedback and persist to a local JSONL file
-@app.route('/feedback', methods=['POST'])
-def feedback():
-    try:
-        data = request.get_json(silent=True) or {}
-        message = (data.get('message') or '').strip()
-        email = (data.get('email') or '').strip()
-        session_id = data.get('session_id') or ''
-        if len(message) < 5:
-            return jsonify({"ok": False, "error": "Message too short"}), 400
-
-        record = {
-            "ts": datetime.utcnow().isoformat() + "Z",
-            "ip": request.headers.get('X-Forwarded-For', request.remote_addr),
-            "ua": request.headers.get('User-Agent', ''),
-            "session_id": session_id,
-            "email": email[:200],
-            "message": message[:4000]
-        }
-        out_path = os.path.join(os.path.dirname(__file__), 'feedback.jsonl')
-        with open(out_path, 'a', encoding='utf-8') as f:
-            f.write(json.dumps(record, ensure_ascii=False) + "\n")
-        # NEW: log to server console for quick verification
-        try:
-            print(f"[FEEDBACK] {record['ts']} {record['ip']} {record['email']}: {record['message'][:120]}")
-        except Exception:
-            pass
-        return jsonify({"ok": True}), 200
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
-
-# NEW: admin list feedback (protected)
-@app.route('/feedback/list', methods=['GET'])
-def feedback_list():
-    try:
-        # Simple protection: token or localhost-only if no token is set
-        token = request.args.get('token') or request.headers.get('X-Admin-Token')
-        expected = os.getenv('FEEDBACK_TOKEN', '').strip()
-        remote_ip = request.headers.get('X-Forwarded-For', request.remote_addr) or ''
-        if expected:
-            if token != expected:
-                return jsonify({"ok": False, "error": "Forbidden"}), 403
-        else:
-            # No token configured: allow only localhost
-            if remote_ip not in ('127.0.0.1', '::1', 'localhost'):
-                return jsonify({"ok": False, "error": "Forbidden"}), 403
-
-        limit = max(1, min(500, int(request.args.get('limit', '100'))))
-        out_path = os.path.join(os.path.dirname(__file__), 'feedback.jsonl')
-        items = []
-        if os.path.exists(out_path):
-            with open(out_path, 'r', encoding='utf-8') as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        items.append(json.loads(line))
-                    except Exception:
-                        continue
-        # Sort by ts desc and trim
-        try:
-            items.sort(key=lambda r: r.get('ts', ''), reverse=True)
-        except Exception:
-            pass
-        items = items[:limit]
-        return jsonify({"ok": True, "items": items}), 200
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
 
 if __name__ == "__main__":
     # Warm up semantic resources on startup to reduce first-request latency
