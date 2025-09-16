@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot Tuyển Sinh thử nghiệm(chỉ hỏi bằng keyword)</title>
+    <title>Chatbot Tuyển Sinh</title>
     <style>
         :root {
             --bg-start: #f6f9fc;
@@ -181,20 +181,21 @@
                 <button class="primary" onclick="startNewChat()">Cuộc trò chuyện mới</button>
                 <!-- New: contact info button -->
                 <button onclick="openContactModal()">Thông tin liên hệ</button>
+                <!-- NEW: feedback button -->
+                <button onclick="openFeedbackModal()">Góp ý cho chatbot</button>
             </div>
         </aside>
 
         <section class="main">
             <header class="topbar">
-                <div class="brand">Chatbot Tuyển Sinh</div>
+                <div class="brand">Chatbot Tuyển Sinh thử nghiệm</div>
                 <!-- Removed top-right action buttons -->
             </header>
 
             <div class="content">
                 <div id="empty-state">
                     <div class="greeting">
-                        <h1>Chào bạn</h1>
-                        <p>Mình có thể giúp gì cho bạn?</p>
+                        <h1>Xin chào, bạn vừa ghé vào chatbot tuyển sinh Ten Lơ Man! Muốn tư vấn chuẩn không cần chỉnh thì hãy đặt câu hỏi bằng từ khóa (keyword) nhé. Hệ thống hứa sẽ bật mí nhanh hơn cả crush seen tin nhắn!</h1>
                     </div>
                     <div class="prompts">
                         <button class="prompt-chip" onclick="sendQuick('Khái quát về trường')">Khái quát về trường</button>
@@ -223,7 +224,7 @@
         </div>
     </div>
 
-    <!-- New: Contact modal -->
+    <!-- Contact modal -->
     <div id="contact-modal" class="modal-overlay" aria-hidden="true" tabindex="-1">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
             <div class="modal-header">
@@ -262,6 +263,29 @@
             </div>
             <div class="modal-footer">
                 <button class="close-btn" onclick="closeContactModal()">Trở về</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Feedback modal -->
+    <div id="feedback-modal" class="modal-overlay" aria-hidden="true" tabindex="-1">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="feedback-title">
+            <div class="modal-header">
+                <h2 id="feedback-title" class="modal-title">Góp ý cho chatbot</h2>
+                <button class="close-btn" aria-label="Đóng" onclick="closeFeedbackModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p class="contact-intro">Hãy chia sẻ góp ý để chatbot phục vụ bạn tốt hơn.</p>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <label for="fb-message">Nội dung góp ý</label>
+                    <textarea id="fb-message" rows="5" style="width:100%; padding:10px; border:1px solid #e5e7eb; border-radius:8px;" placeholder="Nhập góp ý của bạn..."></textarea>
+                    <label for="fb-email">Email (không bắt buộc)</label>
+                    <input id="fb-email" type="email" style="width:100%; padding:10px; border:1px solid #e5e7eb; border-radius:8px;" placeholder="you@example.com">
+                </div>
+            </div>
+            <div class="modal-footer" style="gap:8px;">
+                <button class="close-btn" onclick="closeFeedbackModal()">Hủy</button>
+                <button id="fb-submit" class="close-btn" style="background: var(--brand); color:#fff; border-color: var(--brand);" onclick="submitFeedback()">Gửi góp ý</button>
             </div>
         </div>
     </div>
@@ -666,6 +690,65 @@
             document.body.style.overflow = '';
         }
 
+        // --- Feedback modal logic (NEW) ---
+        function openFeedbackModal() {
+            try {
+                const overlay = document.getElementById('feedback-modal');
+                if (!overlay) return;
+                document.getElementById('fb-message').value = '';
+                document.getElementById('fb-email').value = '';
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            } catch (_) {}
+        }
+        function closeFeedbackModal() {
+            try {
+                const overlay = document.getElementById('feedback-modal');
+                if (!overlay) return;
+                overlay.classList.remove('show');
+                overlay.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            } catch (_) {}
+        }
+        async function submitFeedback() {
+            const btn = document.getElementById('fb-submit');
+            const msg = (document.getElementById('fb-message').value || '').trim();
+            const email = (document.getElementById('fb-email').value || '').trim();
+            if (msg.length < 5) {
+                alert('Vui lòng nhập góp ý (tối thiểu 5 ký tự).');
+                return;
+            }
+            btn.disabled = true;
+            const oldText = btn.textContent;
+            btn.textContent = 'Đang gửi...';
+            try {
+                const res = await fetch('/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg, email, session_id: SESSION_ID })
+                });
+                const data = await res.json();
+                if (!data || !data.ok) throw new Error(data && data.error ? data.error : 'Send failed');
+                closeFeedbackModal();
+                // Show a short thank-you message in chat
+                const chatContainer = document.getElementById('chat-container');
+                const wrap = document.createElement('div');
+                wrap.className = 'message bot';
+                const p = document.createElement('p');
+                p.textContent = 'Cảm ơn bạn đã gửi góp ý.';
+                wrap.appendChild(p);
+                chatContainer.appendChild(wrap);
+                updateEmptyStateVisibility();
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            } catch (e) {
+                alert('Gửi góp ý thất bại. Vui lòng thử lại.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = oldText;
+            }
+        }
+
         // Init basic events
         (function initUI() {
             try {
@@ -699,6 +782,17 @@
                 if (cm) {
                     cm.addEventListener('click', (e) => { if (e.target === cm) closeContactModal(); });
                     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeContactModal(); });
+                }
+            } catch (_) { /* noop */ }
+
+            // Wire feedback modal close interactions
+            try {
+                const fm = document.getElementById('feedback-modal');
+                if (fm) {
+                    fm.addEventListener('click', (e) => { if (e.target === fm) closeFeedbackModal(); });
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape') closeFeedbackModal();
+                    });
                 }
             } catch (_) { /* noop */ }
         })();
