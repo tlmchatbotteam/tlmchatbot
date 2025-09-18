@@ -13,15 +13,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set envvar
-      
+
         env:
           VM_USER: ubuntu
           VM_IP:   35.240.138.116
         run: |
           echo "VM_USER=$VM_USER" >> $GITHUB_ENV
           echo "VM_IP=$VM_IP"     >> $GITHUB_ENV
-          
-          
+
+      - name: Set OpenAI API Key
+        run: echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
 
       - name: Set up SSH
         run: |
@@ -68,5 +69,3 @@ jobs:
             echo "Recent application logs:"
             docker-compose logs --tail=10
           EOT
-          - name: Set OpenAI API Key
-            run: echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
