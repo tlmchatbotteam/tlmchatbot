@@ -23,12 +23,12 @@ if not api_key:
 
 client = OpenAI(api_key=api_key)
 
-@app.route("/chat", methods=["POST"])
-def chat():
-    data = request.get_json()
-    user_input = data.get("message", "")
 
-    # Bước 1: Nhờ GPT chọn câu trả lời
+def gpt_select_and_rewrite(user_input: str):
+    """Chạy GPT để chọn câu trả lời phù hợp và viết lại.
+    Trả về: (final_answer: str, selected_answer: str)
+    """
+    # Bước 1: chọn câu trả lời
     selection_prompt = f"""
 Bạn là chatbot tuyển sinh.
 Dưới đây là dữ liệu hỏi–đáp:
@@ -51,21 +51,9 @@ Nhiệm vụ:
     selected_answer = selection_response.choices[0].message.content.strip()
 
     if selected_answer == "NOT_FOUND":
-        return jsonify({"answer": "Xin lỗi, tôi không có thông tin về câu hỏi này."})
+        return ("Xin lỗi, tôi không có thông tin về câu hỏi này.", selected_answer)
 
-    # Bước 2: Tìm media (ảnh/video) kèm theo
-    media = {}
-    for item in admissions_data:
-        if str(item.get("answer")).strip() == selected_answer:
-            if item.get("images"):
-                media["images"] = item.get("images")
-            if item.get("captions"):
-                media["captions"] = item.get("captions")
-            if item.get("video_url"):
-                media["video_url"] = item.get("video_url")
-            break
-
-    # Bước 3: Nhờ GPT viết lại câu trả lời
+    # Bước 2: viết lại tự nhiên
     rewrite_prompt = f"""
 Dữ liệu gốc (answer): "{selected_answer}"
 
@@ -81,11 +69,70 @@ Nhiệm vụ:
         temperature=0.5
     )
     final_answer = rewrite_response.choices[0].message.content.strip()
+    return (final_answer, selected_answer)
 
-    return jsonify({
-        "answer": final_answer,
-        "media": media if media else None
-    })
+
+def find_media_for_answer(selected_answer: str):
+    """Tìm media gắn với câu trả lời gốc trong admissions_data."""
+    try:
+        for item in admissions_data:
+            if str(item.get("answer")).strip() == selected_answer:
+                media = {}
+                if item.get("images"):
+                    media["images"] = item.get("images")
+                if item.get("captions"):
+                    media["captions"] = item.get("captions")
+                if item.get("video_url"):
+                    media["video_url"] = item.get("video_url")
+                return media
+    except Exception:
+        pass
+    return {}
+
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.get_json() or {}
+    user_input = data.get("message", "")
+
+    final_answer, selected_answer = gpt_select_and_rewrite(user_input)
+
+    # Nếu NOT_FOUND thì selected_answer == "NOT_FOUND" và final_answer đã là câu xin lỗi
+    media = {}
+    if selected_answer != "NOT_FOUND":
+        media = find_media_for_answer(selected_answer)
+
+    return jsonify({"answer": final_answer, "media": media or None})
+
+
+@app.route("/ask", methods=["POST"])
+def ask():
+    """Bridge cho UI cũ: nhận {question, session_id?} và trả về định dạng frontend mong đợi."""
+    data = request.get_json() or {}
+    user_input = data.get("question", "")
+
+    final_answer, selected_answer = gpt_select_and_rewrite(user_input)
+
+    media = {}
+    if selected_answer != "NOT_FOUND":
+        media = find_media_for_answer(selected_answer)
+
+    entry = {"text": final_answer}
+    if media.get("video_url"):
+        entry.update({
+            "media_type": "video",
+            "video_url": media.get("video_url")
+        })
+    elif media.get("images"):
+        entry.update({
+            "media_type": "image",
+            "images": media.get("images", []),
+            "captions": media.get("captions", [])
+        })
+
+    # Frontend chấp nhận mảng các entry hoặc 1 object đơn
+    return jsonify([entry])
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
