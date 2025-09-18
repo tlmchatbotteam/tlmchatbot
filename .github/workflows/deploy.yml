@@ -19,6 +19,7 @@ jobs:
         run: |
           echo "VM_USER=$VM_USER" >> $GITHUB_ENV
           echo "VM_IP=$VM_IP"     >> $GITHUB_ENV
+          echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> $GITHUB_ENV
 
       - name: Set up SSH
         run: |
