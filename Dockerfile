@@ -12,4 +12,4 @@ COPY . .
 EXPOSE 8080
 
 # Start the app
-CMD ["python", "LLM.py"]
+CMD ["python", "rule-based.py"]
