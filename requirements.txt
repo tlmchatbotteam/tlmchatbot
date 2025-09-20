@@ -8,3 +8,4 @@ pyvi==0.1.1
 underthesea==6.8.0
 rapidfuzz==3.9.6
 faiss-cpu==1.8.0.post1
+openai==1.44.0

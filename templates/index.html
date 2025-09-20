@@ -617,11 +617,103 @@
                     renderHieuTruongButtons(wrap);
                 }
 
+                try {
+                    // Support structured action object returned from server: { clarify_choices: [...], candidates: [...] }
+                    if (e.action && typeof e.action === 'object' && Array.isArray(e.action.clarify_choices)) {
+                        const bar = document.createElement('div');
+                        bar.className = 'choice-bar';
+                        e.action.clarify_choices.forEach((opt) => {
+                            const btn = document.createElement('button');
+                            btn.className = 'choice-btn';
+                            btn.textContent = opt;
+                            btn.onclick = () => {
+                                disableChoices(bar);
+                                // Send the chosen option back to the server as a new query
+                                askAndRender(opt);
+                            };
+                            bar.appendChild(btn);
+                        });
+                        // Show short candidate labels as a hint if provided
+                        if (Array.isArray(e.action.candidates) && e.action.candidates.length) {
+                            const hint = document.createElement('div');
+                            hint.style.marginTop = '8px';
+                            hint.style.fontSize = '0.95rem';
+                            hint.style.color = 'var(--muted)';
+                            hint.textContent = 'Gợi ý: ' + e.action.candidates.join(' · ');
+                            wrap.appendChild(hint);
+                        }
+                        wrap.appendChild(bar);
+                    } else if (e.action === 'clarification' && Array.isArray(e.options)) {
+                        // Backwards-compatible format: action='clarification', options: []
+                        const bar = document.createElement('div');
+                        bar.className = 'choice-bar';
+                        e.options.forEach((opt) => {
+                            const btn = document.createElement('button');
+                            btn.className = 'choice-btn';
+                            btn.textContent = opt;
+                            btn.onclick = () => {
+                                disableChoices(bar);
+                                askAndRender(opt);
+                            };
+                            bar.appendChild(btn);
+                        });
+                        wrap.appendChild(bar);
+                    }
+                    // New: support id-based options from backend: options = [{id,label}, ...]
+                    else if (Array.isArray(e.options) && e.options.length && typeof e.options[0] === 'object' && e.options[0].id) {
+                        const bar = document.createElement('div');
+                        bar.className = 'choice-bar';
+                        e.options.forEach((opt) => {
+                            const btn = document.createElement('button');
+                            btn.className = 'choice-btn';
+                            btn.textContent = opt.label || opt.name || opt;
+                            btn.onclick = () => {
+                                disableChoices(bar);
+                                // POST the choice id to backend
+                                sendChoice(opt.id);
+                            };
+                            bar.appendChild(btn);
+                        });
+                        wrap.appendChild(bar);
+                    }
+                } catch (_) { /* noop */ }
+
                 chatContainer.appendChild(wrap);
             });
 
             chatContainer.scrollTop = chatContainer.scrollHeight;
             updateEmptyStateVisibility();
+        }
+
+        async function sendChoice(choiceId) {
+            const chatContainer = document.getElementById('chat-container');
+            // show a small user bubble indicating selection
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = 'Chọn lựa...';
+            chatContainer.appendChild(userMessage);
+            updateEmptyStateVisibility();
+            const typingEl = showTyping();
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ choice_id: choiceId, session_id: SESSION_ID })
+                });
+                const data = await response.json();
+                hideTyping(typingEl);
+                renderEntries(data);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            } catch (error) {
+                console.error('Error:', error);
+                hideTyping(typingEl);
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'message bot';
+                errorMessage.textContent = 'Có lỗi xảy ra khi gửi lựa chọn. Vui lòng thử lại!';
+                chatContainer.appendChild(errorMessage);
+            } finally {
+                updateEmptyStateVisibility();
+            }
         }
 
         // --- Lightbox logic ---
