@@ -345,6 +345,25 @@
             updateEmptyStateVisibility();
             return typing;
         }
+        // Smoothly scroll a given element into view inside the chat container.
+        function scrollToElement(el, block = 'center') {
+            try {
+                if (!el) return;
+                const container = document.getElementById('chat-container');
+                if (!container) return;
+                // Prefer element.scrollIntoView for smooth behavior; fall back to manual scrollTop.
+                if (typeof el.scrollIntoView === 'function') {
+                    el.scrollIntoView({ behavior: 'smooth', block });
+                } else {
+                    // Manual calculation: place element roughly centered.
+                    const rect = el.getBoundingClientRect();
+                    const containerRect = container.getBoundingClientRect();
+                    const offset = (rect.top - containerRect.top) - (container.clientHeight / 2) + (rect.height / 2);
+                    container.scrollTop += offset;
+                }
+            } catch (_) { /* noop */ }
+        }
+
         function hideTyping(typingEl) {
             try {
                 if (typingEl && typingEl.parentNode) typingEl.parentNode.removeChild(typingEl);
@@ -367,6 +386,8 @@
             userMessage.className = 'message user';
             userMessage.textContent = question;
             chatContainer.appendChild(userMessage);
++            // Ensure the view scrolls to the newly added user question
++            scrollToElement(userMessage);
             updateEmptyStateVisibility();
 
             const typingEl = showTyping();
@@ -400,6 +421,7 @@
             userMessage.className = 'message user';
             userMessage.textContent = 'Giới thiệu về trường';
             chatContainer.appendChild(userMessage);
++            scrollToElement(userMessage);
             updateEmptyStateVisibility();
 
             const typingEl = showTyping();
@@ -432,6 +454,8 @@
             userMessage.textContent = 'Hiệu trưởng';
             chatContainer.appendChild(userMessage);
 
++            // Scroll to the user's question so it's visible immediately
++            scrollToElement(userMessage);
             renderHieuTruongChoices();
             chatContainer.scrollTop = chatContainer.scrollHeight;
             updateEmptyStateVisibility();
@@ -660,7 +684,7 @@
                         wrap.appendChild(bar);
                     }
                     // New: support id-based options from backend: options = [{id,label}, ...]
-                    else if (Array.isArray(e.options) && e.options.length && typeof e.options[0] === 'object' && e.options[0].id) {
+                    else if (Array.isArray(e.options) && e.options.length && typeof e.options[0] === 'object' && Object.prototype.hasOwnProperty.call(e.options[0], 'id')) {
                         const bar = document.createElement('div');
                         bar.className = 'choice-bar';
                         e.options.forEach((opt) => {
@@ -692,6 +716,7 @@
             userMessage.className = 'message user';
             userMessage.textContent = 'Chọn lựa...';
             chatContainer.appendChild(userMessage);
++            scrollToElement(userMessage);
             updateEmptyStateVisibility();
             const typingEl = showTyping();
             try {
