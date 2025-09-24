@@ -87,14 +87,37 @@ def looks_context_dependent(q: str) -> bool:
 
 
 def augment_with_context(session_id: str, q: str) -> str:
-    """If query looks context-dependent and there is a previous user turn, prepend it."""
+    """Nếu câu hỏi là keyword exact match thì giữ nguyên,
+    nếu có từ nghi vấn thì ghép với ngữ cảnh trước, còn lại trả nguyên văn."""
     try:
-        # ===== START: FIX LOGIC LOOP =====
-        # If the user's input is a direct, known keyword (likely from a button click),
-        # do not augment it with context. Return it immediately for a direct answer.
         norm_q_unaccented = normalize_and_unaccent(q)
+
+        # 1. Nếu là keyword exact match trong dataset -> giữ nguyên
         if norm_q_unaccented in KEYWORD_TO_ITEM_MAP:
             return q
+
+        # 2. Nếu là trường hợp đặc biệt 'hiệu trưởng' -> giữ nguyên
+        if re.fullmatch(r"hieu\s*truong", norm_q_unaccented):
+            return q
+
+        prev = last_user_turn(session_id)
+        if not prev:
+            return q
+
+        # 3. Nếu câu hỏi chứa từ nghi vấn -> ghép với câu trước
+        interrogatives = [
+            r"\bai\b", r"\bgi\b", r"\bgi\s*\?", r"o\s*dau", r"khi\s*nao",
+            r"bao\s*gio", r"bao\s*nhieu", r"the\s*nao", r"nao", r"khong", r"sao"
+        ]
+        for pat in interrogatives:
+            if re.search(pat, norm_q_unaccented):
+                return f"{prev} ; {q}"
+
+        # 4. Mặc định: trả về nguyên văn (không ghép)
+        return q
+    except Exception:
+        return q
+
         # ===== END: FIX LOGIC LOOP =====
 
         # Don't augment the canonical trigger so UI buttons can render
