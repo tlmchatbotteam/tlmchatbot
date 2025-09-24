@@ -684,7 +684,6 @@
                         wrap.appendChild(bar);
                     }
                     // New: support id-based options from backend: options = [{id,label}, ...]
-                    else if (Array.isArray(e.options) && e.options.length && typeof e.options[0] === 'object' && Object.prototype.hasOwnProperty.call(e.options[0], 'id')) {
                         const bar = document.createElement('div');
                         bar.className = 'choice-bar';
                         e.options.forEach((opt) => {
