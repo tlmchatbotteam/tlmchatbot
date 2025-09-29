@@ -384,11 +384,22 @@
             // New: intercept exact keyword 'hoạt động' and render local choice buttons
             try {
                 const normalized = question.toLowerCase().normalize('NFC');
-                if (normalized === 'hoạt động' || normalized === 'hoạt động?') {
+                if (normalized.includes('hoạt động')) {
                     // render choices locally without calling backend
                     renderHoatDongChoices();
                     // clear input and stop further processing
                     questionInput.value = '';
+                    // move view to input / placeholder
+                    const inp = document.getElementById('question'); if (inp) inp.focus();
+                    return;
+                }
+
+                // New: intercept teacher-related keywords and render teacher team choices
+                const teacherKeywords = ['giáo viên', 'thầy cô giáo', 'thầy cô'];
+                if (teacherKeywords.some(k => normalized.includes(k))) {
+                    renderGiaoVienChoices();
+                    questionInput.value = '';
+                    const inp = document.getElementById('question'); if (inp) inp.focus();
                     return;
                 }
             } catch (_) { /* noop */ }
@@ -473,32 +484,80 @@
             const bar = document.createElement('div');
             bar.className = 'choice-bar';
 
+            const responseHolder = document.createElement('div');
+            responseHolder.className = 'choice-response';
+
             const btnCurrent = document.createElement('button');
             btnCurrent.className = 'choice-btn';
             btnCurrent.textContent = 'Hiệu trưởng hiện tại';
             btnCurrent.onclick = () => {
-                disableChoices(bar);
-                askHieuTruongCurrent();
+                // render into the shared placeholder so subsequent clicks replace results
+                askHieuTruongCurrent(responseHolder);
+                try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){}
+                const inp = document.getElementById('question'); if (inp) inp.focus();
             };
 
             const btnHistory = document.createElement('button');
             btnHistory.className = 'choice-btn';
             btnHistory.textContent = 'Hiệu trưởng qua từng thời kỳ';
             btnHistory.onclick = () => {
-                disableChoices(bar);
-                askHieuTruongHistory();
+                askHieuTruongHistory(responseHolder);
+                try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){}
+                const inp = document.getElementById('question'); if (inp) inp.focus();
             };
 
             bar.appendChild(btnCurrent);
             bar.appendChild(btnHistory);
+
             bot.appendChild(bar);
             chatContainer.appendChild(bot);
+            chatContainer.appendChild(responseHolder);
+            // ensure view moves down to show the placeholder and input
+            try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){}
+            const inp = document.getElementById('question'); if (inp) inp.focus();
+            updateEmptyStateVisibility();
         }
 
-        function disableChoices(container) {
-            // Intentionally left as a no-op so buttons remain clickable per user's request.
-            // Previously this function disabled buttons to prevent multiple clicks;
-            // now we allow repeated clicks and instead replace the previous response.
+        // New: render teacher-team choices for queries like "giáo viên" or "thầy cô"
+        function renderGiaoVienChoices() {
+            const chatContainer = document.getElementById('chat-container');
+            const bot = document.createElement('div');
+            bot.className = 'message bot';
+
+            const p = document.createElement('p');
+            p.textContent = 'Bạn muốn xem thông tin về tổ nào?';
+            bot.appendChild(p);
+
+            const bar = document.createElement('div');
+            bar.className = 'choice-bar';
+
+            const teams = [
+                'Tổ ngoại ngữ','Tổ địa lý','Tổ giáo dục kinh tế và pháp luật','Tổ giáo dục quốc phòng và an ninh',
+                'Tổ giáo dục thể chất','Tổ hóa học','Tổ vật lí','Tổ sinh học','Tổ lịch sử','Tổ văn phòng','Tổ ngữ văn','Đội ngũ giáo viên'
+            ];
+
+            chatContainer.appendChild(bot);
+            const responseHolder = document.createElement('div');
+            responseHolder.className = 'choice-response';
+            chatContainer.appendChild(responseHolder);
+
+            teams.forEach((label) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = label;
+                btn.onclick = () => {
+                    // send the chosen team name to the backend and render into placeholder
+                    askAndRender(label, responseHolder);
+                    const inp = document.getElementById('question'); if (inp) inp.focus();
+                };
+                bar.appendChild(btn);
+            });
+
+            bot.appendChild(bar);
+            // ensure view moves down to show the placeholder and input
+            responseHolder.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const inp = document.getElementById('question'); if (inp) inp.focus();
+            updateEmptyStateVisibility();
         }
 
         async function askAndRender(question, intoEl) {
@@ -513,7 +572,11 @@
                 const data = await response.json();
                 hideTyping(typingEl);
                 renderEntries(data, intoEl);
-                if (!intoEl) chatContainer.scrollTop = chatContainer.scrollHeight;
+                // If rendering into a placeholder, scroll that placeholder into view and focus input
+                if (intoEl) {
+                    try { intoEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){}
+                    const inp = document.getElementById('question'); if (inp) inp.focus();
+                } else chatContainer.scrollTop = chatContainer.scrollHeight;
             } catch (error) {
                 console.error('Error:', error);
                 hideTyping(typingEl);
@@ -545,7 +608,8 @@
                 const data = await response.json();
                 hideTyping(typingEl);
                 renderEntries(data, intoEl);
-                if (!intoEl) chatContainer.scrollTop = chatContainer.scrollHeight;
+                if (intoEl) { try { intoEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){}; const inp = document.getElementById('question'); if (inp) inp.focus(); }
+                else chatContainer.scrollTop = chatContainer.scrollHeight;
             } catch (error) {
                 console.error('Error:', error);
                 hideTyping(typingEl);
@@ -573,12 +637,11 @@
             bar.className = 'choice-bar';
 
             const opts = [
-                'hoạt động trải nghiệm',
-                'hoạt động đoàn',
-                'hoạt động thư viện',
-                'hoạt động ngoại khóa',
-                'hoạt động câu lạc bộ',
-                'hoạt động phong trào'
+                'Hoạt động trải nghiệm hướng nghiệp',
+                'Hoạt động đoàn',
+                'Hoạt động thư viện',
+                'Hoạt động câu lạc bộ và hoạt động ngoại khóa',
+                'Hoạt động phong trào'
             ];
 
             // Append the choice message and a dedicated placeholder for the response
@@ -849,9 +912,9 @@
                 if (input) {
                     input.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            const q = input.value && input.value.trim();
-                            if (q) sendQuestion();
+                          e.preventDefault();
+                          const q = input.value && input.value.trim();
+                          if (q) sendQuestion();
                         }
                     });
                     // initial focus for accessibility
