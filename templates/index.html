@@ -319,8 +319,14 @@
             sendQuestion();
         }
 
-        function showTyping() {
-            const chatContainer = document.getElementById('chat-container');
+        function disableChoices(container) {
+            // Intentionally left as a no-op so buttons remain clickable per user's request.
+            // Previously this function disabled buttons to prevent multiple clicks;
+            // now we allow repeated clicks and instead replace the previous response.
+        }
+
+        function showTyping(targetContainer) {
+            const chatContainer = targetContainer || document.getElementById('chat-container');
             const typing = document.createElement('div');
             typing.className = 'message bot';
             typing.dataset.typing = 'true';
@@ -340,8 +346,14 @@
             wrap.appendChild(text);
             p.appendChild(wrap);
             typing.appendChild(p);
-            chatContainer.appendChild(typing);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            // If target is a placeholder (not the main chat container) we clear it first
+            if (chatContainer !== document.getElementById('chat-container')) {
+                chatContainer.innerHTML = '';
+                chatContainer.appendChild(typing);
+            } else {
+                chatContainer.appendChild(typing);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
             updateEmptyStateVisibility();
             return typing;
         }
@@ -484,21 +496,14 @@
         }
 
         function disableChoices(container) {
-            const buttons = container.querySelectorAll('button');
-            buttons.forEach(b => b.disabled = true);
+            // Intentionally left as a no-op so buttons remain clickable per user's request.
+            // Previously this function disabled buttons to prevent multiple clicks;
+            // now we allow repeated clicks and instead replace the previous response.
         }
 
-        async function askHieuTruongCurrent() {
-            await askAndRender('Hiệu trưởng nhà trường');
-        }
-
-        async function askHieuTruongHistory() {
-            await askAndRender('các thầy cô hiệu trưởng qua từng thời kỳ');
-        }
-
-        async function askAndRender(question) {
+        async function askAndRender(question, intoEl) {
             const chatContainer = document.getElementById('chat-container');
-            const typingEl = showTyping();
+            const typingEl = showTyping(intoEl);
             try {
                 const response = await fetch('/ask', {
                     method: 'POST',
@@ -507,39 +512,51 @@
                 });
                 const data = await response.json();
                 hideTyping(typingEl);
-                renderEntries(data);
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                renderEntries(data, intoEl);
+                if (!intoEl) chatContainer.scrollTop = chatContainer.scrollHeight;
             } catch (error) {
                 console.error('Error:', error);
                 hideTyping(typingEl);
                 const errorMessage = document.createElement('div');
                 errorMessage.className = 'message bot';
                 errorMessage.textContent = 'Có lỗi xảy ra. Vui lòng thử lại!';
-                chatContainer.appendChild(errorMessage);
+                if (intoEl) { intoEl.innerHTML = ''; intoEl.appendChild(errorMessage); }
+                else chatContainer.appendChild(errorMessage);
             } finally {
                 updateEmptyStateVisibility();
             }
         }
 
-        function renderHieuTruongButtons(intoEl) {
+        async function sendChoice(choiceId, intoEl) {
+            const chatContainer = document.getElementById('chat-container');
+            // show a small user bubble indicating selection
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = 'Chọn lựa...';
+            chatContainer.appendChild(userMessage);
+            updateEmptyStateVisibility();
+            const typingEl = showTyping(intoEl);
             try {
-                const bar = document.createElement('div');
-                bar.className = 'choice-bar';
-
-                const btnCurrent = document.createElement('button');
-                btnCurrent.className = 'choice-btn';
-                btnCurrent.textContent = 'Hiệu trưởng hiện tại';
-                btnCurrent.onclick = () => { disableChoices(bar); askHieuTruongCurrent(); };
-
-                const btnHistory = document.createElement('button');
-                btnHistory.className = 'choice-btn';
-                btnHistory.textContent = 'Hiệu trưởng qua từng thời kỳ';
-                btnHistory.onclick = () => { disableChoices(bar); askHieuTruongHistory(); };
-
-                bar.appendChild(btnCurrent);
-                bar.appendChild(btnHistory);
-                intoEl.appendChild(bar);
-            } catch (_) { /* no-op */ }
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ choice_id: choiceId, session_id: SESSION_ID })
+                });
+                const data = await response.json();
+                hideTyping(typingEl);
+                renderEntries(data, intoEl);
+                if (!intoEl) chatContainer.scrollTop = chatContainer.scrollHeight;
+            } catch (error) {
+                console.error('Error:', error);
+                hideTyping(typingEl);
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'message bot';
+                errorMessage.textContent = 'Có lỗi xảy ra khi gửi lựa chọn. Vui lòng thử lại!';
+                if (intoEl) { intoEl.innerHTML = ''; intoEl.appendChild(errorMessage); }
+                else chatContainer.appendChild(errorMessage);
+            } finally {
+                updateEmptyStateVisibility();
+            }
         }
 
         // New: render choices for "hoạt động" keyword
@@ -564,32 +581,41 @@
                 'hoạt động phong trào'
             ];
 
+            // Append the choice message and a dedicated placeholder for the response
+            chatContainer.appendChild(bot);
+            const responseHolder = document.createElement('div');
+            responseHolder.className = 'choice-response';
+            chatContainer.appendChild(responseHolder);
+
             opts.forEach((label) => {
                 const btn = document.createElement('button');
                 btn.className = 'choice-btn';
                 btn.textContent = label;
                 btn.onclick = () => {
-                    disableChoices(bar);
                     // send the chosen label as a new question to the backend
-                    askAndRender(label);
+                    askAndRender(label, responseHolder);
                 };
                 bar.appendChild(btn);
             });
 
             bot.appendChild(bar);
-            chatContainer.appendChild(bot);
             chatContainer.scrollTop = chatContainer.scrollHeight;
             updateEmptyStateVisibility();
         }
 
-        function renderEntries(data) {
+        function renderEntries(data, intoEl) {
             const chatContainer = document.getElementById('chat-container');
+            const target = intoEl || chatContainer;
+
             const entries = Array.isArray(data) ? data : (data ? [data] : []);
 
             if (!entries.length) {
                 updateEmptyStateVisibility();
                 return;
             }
+
+            // When rendering into a placeholder, clear it first so clicks replace previous answer
+            if (intoEl) target.innerHTML = '';
 
             const createParagraphs = (text) => {
                 const frag = document.createDocumentFragment();
@@ -666,11 +692,23 @@
 
                 // Optional action hooks from backend (e.g., choice buttons)
                 if (e.action === 'hieutruong_choices') {
-                    renderHieuTruongButtons(wrap);
+                    // append the wrap first into the target (if target is main chat it will show normally)
+                    // then create a sibling response placeholder so subsequent clicks can replace the response
+                    if (target === chatContainer) {
+                        target.appendChild(wrap);
+                        const responseHolder = document.createElement('div');
+                        responseHolder.className = 'choice-response';
+                        target.appendChild(responseHolder);
+                        renderHieuTruongButtons(wrap, responseHolder);
+                        return; // we've already appended the wrap and handled buttons
+                    } else {
+                        // If rendering into a placeholder, just attach buttons inside
+                        wrap.appendChild(document.createElement('div'));
+                        renderHieuTruongButtons(wrap, target);
+                    }
                 }
 
                 try {
-                    // Support structured action object returned from server: { clarify_choices: [...], candidates: [...] }
                     if (e.action && typeof e.action === 'object' && Array.isArray(e.action.clarify_choices)) {
                         const bar = document.createElement('div');
                         bar.className = 'choice-bar';
@@ -679,9 +717,8 @@
                             btn.className = 'choice-btn';
                             btn.textContent = opt;
                             btn.onclick = () => {
-                                disableChoices(bar);
                                 // Send the chosen option back to the server as a new query
-                                askAndRender(opt);
+                                askAndRender(opt, target === chatContainer ? null : target);
                             };
                             bar.appendChild(btn);
                         });
@@ -704,15 +741,12 @@
                             btn.className = 'choice-btn';
                             btn.textContent = opt;
                             btn.onclick = () => {
-                                disableChoices(bar);
-                                askAndRender(opt);
+                                askAndRender(opt, target === chatContainer ? null : target);
                             };
                             bar.appendChild(btn);
                         });
                         wrap.appendChild(bar);
-                    }
-                    // New: support id-based options from backend: options = [{id,label}, ...]
-                    else if (Array.isArray(e.options) && e.options.length && typeof e.options[0] === 'object' && e.options[0].id) {
+                    } else if (Array.isArray(e.options) && e.options.length && typeof e.options[0] === 'object' && e.options[0].id) {
                         const bar = document.createElement('div');
                         bar.className = 'choice-bar';
                         e.options.forEach((opt) => {
@@ -720,9 +754,8 @@
                             btn.className = 'choice-btn';
                             btn.textContent = opt.label || opt.name || opt;
                             btn.onclick = () => {
-                                disableChoices(bar);
-                                // POST the choice id to backend
-                                sendChoice(opt.id);
+                                // POST the choice id to backend; if we have a placeholder use it
+                                sendChoice(opt.id, target === chatContainer ? null : target);
                             };
                             bar.appendChild(btn);
                         });
@@ -730,42 +763,41 @@
                     }
                 } catch (_) { /* noop */ }
 
-                chatContainer.appendChild(wrap);
+                target.appendChild(wrap);
             });
 
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            if (!intoEl) chatContainer.scrollTop = chatContainer.scrollHeight;
             updateEmptyStateVisibility();
         }
 
-        async function sendChoice(choiceId) {
-            const chatContainer = document.getElementById('chat-container');
-            // show a small user bubble indicating selection
-            const userMessage = document.createElement('div');
-            userMessage.className = 'message user';
-            userMessage.textContent = 'Chọn lựa...';
-            chatContainer.appendChild(userMessage);
-            updateEmptyStateVisibility();
-            const typingEl = showTyping();
+        function renderHieuTruongButtons(intoEl, responseHolder) {
             try {
-                const response = await fetch('/ask', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ choice_id: choiceId, session_id: SESSION_ID })
-                });
-                const data = await response.json();
-                hideTyping(typingEl);
-                renderEntries(data);
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            } catch (error) {
-                console.error('Error:', error);
-                hideTyping(typingEl);
-                const errorMessage = document.createElement('div');
-                errorMessage.className = 'message bot';
-                errorMessage.textContent = 'Có lỗi xảy ra khi gửi lựa chọn. Vui lòng thử lại!';
-                chatContainer.appendChild(errorMessage);
-            } finally {
-                updateEmptyStateVisibility();
-            }
+                // intoEl is the wrap (message bot) element that sits in the chat
+                const bar = document.createElement('div');
+                bar.className = 'choice-bar';
+
+                const btnCurrent = document.createElement('button');
+                btnCurrent.className = 'choice-btn';
+                btnCurrent.textContent = 'Hiệu trưởng hiện tại';
+                btnCurrent.onclick = () => { askHieuTruongCurrent(responseHolder); };
+
+                const btnHistory = document.createElement('button');
+                btnHistory.className = 'choice-btn';
+                btnHistory.textContent = 'Hiệu trưởng qua từng thời kỳ';
+                btnHistory.onclick = () => { askHieuTruongHistory(responseHolder); };
+
+                bar.appendChild(btnCurrent);
+                bar.appendChild(btnHistory);
+                intoEl.appendChild(bar);
+            } catch (_) { /* no-op */ }
+        }
+
+        async function askHieuTruongCurrent(intoEl) {
+            await askAndRender('Hiệu trưởng nhà trường', intoEl);
+        }
+
+        async function askHieuTruongHistory(intoEl) {
+            await askAndRender('các thầy cô hiệu trưởng qua từng thời kỳ', intoEl);
         }
 
         // --- Lightbox logic ---
@@ -818,32 +850,54 @@
                     input.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
-                            sendQuestion();
+                            const q = input.value && input.value.trim();
+                            if (q) sendQuestion();
                         }
                     });
+                    // initial focus for accessibility
+                    input.setAttribute('aria-label', 'Câu hỏi');
+                    input.focus();
                 }
-            } catch (_) { /* noop */ }
-            try {
-                const overlay = document.getElementById('lightbox');
-                if (overlay) {
-                    const btn = overlay.querySelector('.lightbox-close');
-                    if (btn) btn.addEventListener('click', closeLightbox);
-                    overlay.addEventListener('click', (e) => {
-                        if (e.target === overlay) closeLightbox();
-                    });
-                    document.addEventListener('keydown', (e) => {
-                        if (e.key === 'Escape') closeLightbox();
-                    });
-                }
-            } catch (_) { /* noop */ }
 
-            // Wire contact modal close interactions
-            try {
-                const cm = document.getElementById('contact-modal');
-                if (cm) {
-                    cm.addEventListener('click', (e) => { if (e.target === cm) closeContactModal(); });
-                    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeContactModal(); });
+                // send button fallback (already has onclick, but ensure keyboard users are covered)
+                const sendBtn = document.getElementById('send-btn');
+                if (sendBtn) {
+                    sendBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        sendQuestion();
+                    });
                 }
+
+                // Lightbox close handlers
+                const lightbox = document.getElementById('lightbox');
+                if (lightbox) {
+                    const close = lightbox.querySelector('.lightbox-close');
+                    if (close) close.addEventListener('click', closeLightbox);
+                    // click on overlay (outside content) closes it
+                    lightbox.addEventListener('click', (ev) => {
+                        if (ev.target === lightbox) closeLightbox();
+                    });
+                }
+
+                // Contact modal overlay click to close and close buttons
+                const contactModal = document.getElementById('contact-modal');
+                if (contactModal) {
+                    contactModal.addEventListener('click', (ev) => {
+                        if (ev.target === contactModal) closeContactModal();
+                    });
+                    const closeBtns = contactModal.querySelectorAll('.close-btn');
+                    closeBtns.forEach(b => b.addEventListener('click', closeContactModal));
+                }
+
+                // Global escape key to close overlays
+                document.addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Escape') {
+                        closeLightbox();
+                        closeContactModal();
+                    }
+                });
+
+                updateEmptyStateVisibility();
             } catch (_) { /* noop */ }
         })();
     </script>
