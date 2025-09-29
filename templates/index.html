@@ -369,6 +369,18 @@
             chatContainer.appendChild(userMessage);
             updateEmptyStateVisibility();
 
+            // New: intercept exact keyword 'hoạt động' and render local choice buttons
+            try {
+                const normalized = question.toLowerCase().normalize('NFC');
+                if (normalized === 'hoạt động' || normalized === 'hoạt động?') {
+                    // render choices locally without calling backend
+                    renderHoatDongChoices();
+                    // clear input and stop further processing
+                    questionInput.value = '';
+                    return;
+                }
+            } catch (_) { /* noop */ }
+
             const typingEl = showTyping();
             try {
                 const response = await fetch('/ask', {
@@ -528,6 +540,46 @@
                 bar.appendChild(btnHistory);
                 intoEl.appendChild(bar);
             } catch (_) { /* no-op */ }
+        }
+
+        // New: render choices for "hoạt động" keyword
+        function renderHoatDongChoices() {
+            const chatContainer = document.getElementById('chat-container');
+            const bot = document.createElement('div');
+            bot.className = 'message bot';
+
+            const p = document.createElement('p');
+            p.textContent = 'Bạn muốn xem loại hoạt động nào?';
+            bot.appendChild(p);
+
+            const bar = document.createElement('div');
+            bar.className = 'choice-bar';
+
+            const opts = [
+                'hoạt động trải nghiệm',
+                'hoạt động đoàn',
+                'hoạt động thư viện',
+                'hoạt động ngoại khóa',
+                'hoạt động câu lạc bộ',
+                'hoạt động phong trào'
+            ];
+
+            opts.forEach((label) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = label;
+                btn.onclick = () => {
+                    disableChoices(bar);
+                    // send the chosen label as a new question to the backend
+                    askAndRender(label);
+                };
+                bar.appendChild(btn);
+            });
+
+            bot.appendChild(bar);
+            chatContainer.appendChild(bot);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            updateEmptyStateVisibility();
         }
 
         function renderEntries(data) {
