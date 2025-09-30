@@ -576,11 +576,9 @@
             // New: intercept exact keyword 'hoạt động' and render local choice buttons
             try {
                 const normalized = question.toLowerCase().normalize('NFC');
-                // also check a diacritics-stripped version to match inputs without accents
-                const normalizedNoDiacritics = normalized.normalize('NFD').replace(/[ -\uFFFF]/g, function(c) {
-                    // quick strip: remove combining diacritics range
-                    return c.normalize ? c.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : c;
-                }).replace(/[\u0300-\u036f]/g, '');
+                // helper: strip diacritics reliably (NFD + remove combining marks)
+                const stripDiacritics = (s) => { try { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (_) { return s; } };
+                const normalizedNoDiacritics = stripDiacritics(normalized);
 
                 // If user types 'cơ sở vật chất' (with or without diacritics), show facilities choices
                 try {
