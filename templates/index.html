@@ -206,6 +206,8 @@
                         <button class="prompt-chip" onclick="sendHieuTruong()">Hiệu trưởng nhà trường</button>
                         <!-- New: School song chip placed next to Hiệu trưởng -->
                         <button class="prompt-chip" onclick="sendQuick('bài hát')">Bài hát của trường</button>
+                        <!-- New: Facilities prompt chip -->
+                        <button class="prompt-chip" onclick="renderFacilitiesChoices()">Cơ sở vật chất</button>
                         <button class="prompt-chip" onclick="renderGiaoVienChoices()">Đội ngũ giáo viên</button>
                     </div>
                 </div>
@@ -574,6 +576,21 @@
             // New: intercept exact keyword 'hoạt động' and render local choice buttons
             try {
                 const normalized = question.toLowerCase().normalize('NFC');
+                // also check a diacritics-stripped version to match inputs without accents
+                const normalizedNoDiacritics = normalized.normalize('NFD').replace(/[ -\uFFFF]/g, function(c) {
+                    // quick strip: remove combining diacritics range
+                    return c.normalize ? c.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : c;
+                }).replace(/[\u0300-\u036f]/g, '');
+
+                // If user types 'cơ sở vật chất' (with or without diacritics), show facilities choices
+                try {
+                    if (normalized.includes('cơ sở vật chất') || normalizedNoDiacritics.includes('co so vat chat')) {
+                        renderFacilitiesChoices();
+                        questionInput.value = '';
+                        return;
+                    }
+                } catch(_) {}
+
                 if (normalized.includes('hoạt động')) {
                     // render choices locally without calling backend
                     renderHoatDongChoices();
@@ -688,6 +705,73 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
             updateEmptyStateVisibility();
         }
+
+        // New: render facilities choices for "Cơ sở vật chất"
+        function renderFacilitiesChoices() {
+            const chatContainer = document.getElementById('chat-container');
+            // Avoid creating duplicate facilities blocks: if one exists, scroll to it
+            try {
+                const existing = Array.from(chatContainer.querySelectorAll('.message.bot')).find(m => {
+                    const p = m.querySelector('p');
+                    return p && p.textContent && p.textContent.trim() === 'Bạn muốn xem phần nào của cơ sở vật chất?';
+                });
+                if (existing) {
+                    try { existing.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){ }
+                    return;
+                }
+            } catch(_){ }
+            const bot = document.createElement('div');
+            bot.className = 'message bot';
+
+            const p = document.createElement('p');
+            p.textContent = 'Bạn muốn xem phần nào của cơ sở vật chất?';
+            bot.appendChild(p);
+
+            const bar = document.createElement('div');
+            bar.className = 'choice-bar';
+
+            // Append the choice message and a dedicated placeholder for the response
+            chatContainer.appendChild(bot);
+            const responseHolder = document.createElement('div');
+            responseHolder.className = 'choice-response';
+            chatContainer.appendChild(responseHolder);
+
+            const opts = [
+                { label: 'Phòng học', q: 'Phòng học' },
+                { label: 'Phòng máy tính', q: 'Phòng máy tính' },
+                { label: 'Sân trường', q: 'Sân trường' }
+            ];
+
+            // Local fallback renderer: shows a short text + image from /images so the UI is usable without backend
+            function renderLocalFacility(name, intoEl) {
+                const map = {
+                    'Phòng học': { text: 'Các phòng học của trường được trang bị bàn ghế, bảng tương tác và ánh sáng hợp lý.', media_type: 'image', images: ['/images/PhongHoc.jpg'], captions: ['Phòng học'] },
+                    'Phòng máy tính': { text: 'Phòng máy tính hiện đại với nhiều dàn máy cấu hình tốt, phục vụ thực hành tin học và lập trình.', media_type: 'image', images: ['/images/PhongMayTinh1.jpg'], captions: ['Phòng máy tính'] },
+                    'Sân trường': { text: 'Sân trường rộng rãi, thoáng đãng, nơi tổ chức các hoạt động thể thao và sự kiện ngoài trời.', media_type: 'image', images: ['/images/SanTruong.jpg'], captions: ['Sân trường'] }
+                };
+                const data = map[name] ? [map[name]] : [{ text: 'Không có thông tin sẵn có về lựa chọn này.' }];
+                // renderEntries will replace the intoEl content
+                try { renderEntries(data, intoEl); } catch (_) { if (intoEl) intoEl.innerHTML = '<div class="message bot">Không có thông tin sẵn có.</div>'; }
+            }
+
+             opts.forEach((opt) => {
+                 const btn = document.createElement('button');
+                 btn.className = 'choice-btn';
+                 btn.textContent = opt.label;
+                 btn.dataset.choiceValue = opt.q;
+                 btn.onclick = () => {
+                    // Render a local immediate response for snappy UI
+                    renderLocalFacility(opt.q, responseHolder);
+                    // Then attempt to fetch authoritative content from the backend; if it fails, the local content remains
+                    try { askAndRender(opt.q, responseHolder, { scroll: false }).catch(() => {}); } catch (_) {}
+                 };
+                 bar.appendChild(btn);
+             });
+
+             bot.appendChild(bar);
+             try { bar.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){ }
+             updateEmptyStateVisibility();
+         }
 
         function renderHieuTruongChoices() {
             const chatContainer = document.getElementById('chat-container');
