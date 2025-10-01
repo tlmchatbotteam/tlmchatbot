@@ -1421,7 +1421,24 @@ def ask():
                                isinstance(img, str) and img.strip()]
             entry["captions"] = captions if captions else []
         result.append(entry)
-    return jsonify(result), 200
+    # Defensive: remove duplicate responses by text to avoid client showing repeated answers
+    try:
+        unique = []
+        seen = set()
+        for r in result:
+            t = (r.get('text') or '').strip()
+            if not t:
+                # include empty/unnamed entries once
+                key = '__empty__'
+            else:
+                key = t
+            if key in seen:
+                continue
+            seen.add(key)
+            unique.append(r)
+        return jsonify(unique), 200
+    except Exception:
+        return jsonify(result), 200
 
 
 @app.route('/images/<path:filename>')
