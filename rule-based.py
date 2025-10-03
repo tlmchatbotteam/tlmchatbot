@@ -567,6 +567,14 @@ def get_answer(question):
     core_question = re.sub(school_pattern, "", norm_question, flags=re.IGNORECASE).strip()
     if not core_question:  # If question was only the school name
         core_question = norm_question
+    # Normalize away common lead-in/trailing filler like 'cua truong', 've', etc.
+    # This helps queries such as "học phí của trường" -> expose core "học phí" to matcher.
+    try:
+        core_question = strip_leadin_phrases(core_question)
+        # strip_leadin_phrases returns a normalized (unaccented) string; keep as-is since
+        # downstream matchers re-normalize inputs internally.
+    except Exception:
+        pass
 
     # --- Step 2: High-Confidence Fast Path ---
     # This is the most important fix: check for a near-perfect match FIRST and return immediately.
