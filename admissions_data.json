@@ -1338,7 +1338,7 @@
       "images": "images/thoigianbieu.jpg"
     },
     {
-      "question": "Trường đại học liên kết",
+      "question": ["Trường đại học liên kết","Đại học liên kết","Đại học đối tác","Trường đại học đối tác","Đại học hợp tác","Trường đại học hợp tác","Đại học liên kết với trường","Trường đại học liên kết với trường","Đại học đối tác với trường","Trường đại học đối tác với trường","Đại học hợp tác với trường","Trường đại học hợp tác với trường"],
       "answer": "Đại học Hoa Sen, Đại học Văn Lang, Đại học Tôn Đức Thắng, Đại học Quốc Tế Hồng Bàng, …"
     },
     {
