@@ -5,7 +5,9 @@ import json
 import os
 import re
 import torch
-import unicodedata
+import unicodedata# --- GPT-4 Turbo Keyword Extractor ---
+from openai import OpenAI
+client = OpenAI()
 from difflib import SequenceMatcher
 from types import SimpleNamespace
 from flask import Flask, request, jsonify, send_from_directory, render_template
@@ -179,6 +181,46 @@ def normalize_text(text):
     text = text.lower().strip()
     text = re.sub(r'\s+', ' ', text)
     return text
+
+# Inserted: GPT-assisted keyword extractor (defensive about missing client)
+def extract_keyword_with_gpt_turbo(question, all_keywords):
+    """
+    Sử dụng GPT-4 Turbo để chọn keyword có trong danh sách all_keywords
+    phù hợp nhất với câu hỏi người dùng.
+    """
+    try:
+        # Defensive: require an API client named `client` to exist in globals()
+        client = globals().get('client')
+        if client is None:
+            print("[GPT] No 'client' available in globals() - skipping GPT extraction")
+            return None
+
+        prompt = f"""
+        Dưới đây là danh sách keyword có sẵn:
+        {', '.join(all_keywords[:500])}
+        Hãy chọn từ hoặc cụm từ trong danh sách trên phù hợp nhất với câu hỏi sau:
+        "{question}"
+        Chỉ trả về đúng keyword (phải có trong danh sách), không thêm ký tự khác.
+        """
+        resp = client.chat.completions.create(
+            model="gpt-4-turbo",
+            messages=[
+                {"role": "system", "content": "Bạn là hệ thống trích xuất keyword chính xác."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0,
+            max_tokens=32,
+        )
+        kw = resp.choices[0].message.content.strip().lower()
+        if kw in all_keywords:
+            print(f"[GPT] Keyword chọn: {kw}")
+            return kw
+        else:
+            print(f"[GPT] Keyword không trùng: {kw}")
+            return None
+    except Exception as e:
+        print(f"[GPT ERROR] {e}")
+        return None
 
 
 def add_li_ly_variants(keyword):
@@ -575,6 +617,16 @@ def get_answer(question):
         # downstream matchers re-normalize inputs internally.
     except Exception:
         pass
+
+    # --- GPT keyword extractor ---
+    try:
+        gpt_kw = extract_keyword_with_gpt_turbo(question, list(KEYWORD_TO_ITEM_MAP.keys()))
+        if gpt_kw and gpt_kw in KEYWORD_TO_ITEM_MAP:
+            item = KEYWORD_TO_ITEM_MAP[gpt_kw]
+            return [{"text": item.get("answer", ""), "media_type": "text", "media_content": None}]
+    except Exception as e:
+        # Fail silently and continue to fuzzy/semantic pipeline
+        print(f"[GPT] extract_keyword_with_gpt_turbo error: {e}")
 
     # --- Step 2: High-Confidence Fast Path ---
     # This is the most important fix: check for a near-perfect match FIRST and return immediately.

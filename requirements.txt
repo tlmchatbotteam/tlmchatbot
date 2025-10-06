@@ -1,11 +1,10 @@
-flask
-sentence-transformers
-scikit-learn
-numpy
-torch
-Pillow
-pyvi
-underthesea
-rapidfuzz
-faiss-cpu==1.8.0.post1
-openai
+flask==3.0.3
+openai==1.40.0
+faiss-cpu==1.7.4
+numpy==1.26.4
+scikit-learn==1.5.2
+transformers==4.44.0
+torch==2.3.1
+sentence-transformers==2.7.0
+rapidfuzz==3.6.1
+pyvi==0.1.1  # nếu bạn dùng tokenize tiếng Việt
