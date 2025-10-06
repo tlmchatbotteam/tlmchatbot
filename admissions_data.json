@@ -3,9 +3,9 @@
     {
       "question": [
         "Học phí của trường là bao nhiêu?",
-        "học phí",
-        "giá tiền",
-        "tiền học"
+        "Học phí",
+        "Học phí dao động","Học phí của trường","Học phí mỗi tháng","Học phí mỗi năm","Học phí năm học",
+        "Tiền học","Tiền học dao động","Tiền học mỗi tháng","Tiền học mỗi năm","Tiền học năm học","Tiền học phí","Tiền học phí dao động","Tiền học phí mỗi tháng","Tiền học phí mỗi năm","Tiền học phí năm học"
       ],
       "answer": "Đây là các khoản dự thu của 3 khối",
       "images": [
@@ -116,12 +116,13 @@
     },
     {
       "question": [
-        "sơ đồ trường ra sao",
+        "sơ đồ trường",
         "khu a ở đâu",
         "khu b ở đâu",
         "khu c ở đâu",
         "khu d ở đâu",
-        "cho tôi hình ảnh sơ đồ trường"
+       "sơ đồ trường học",
+        "bản đồ trường học"
       ],
       "answer": "đây là hình ảnh sơ đồ trường",
       "images": "images/sodo.jpg",
@@ -189,9 +190,13 @@
     },
     {
       "question": [
-        "phòng học",
+        "phòng học","Không gian lớp học","Ánh sáng phòng học",
+        "Ánh sáng lớp học",
         "lớp học",
-        "phòng học và lớp học như thế nào",
+        "phòng học và lớp học như thế nào","Quy mô phòng học",
+        "thông tin về phòng học",
+        "thông tin về lớp học",
+        "cho tôi thông tin về phòng học và lớp học","Quy mô lớp học",
         "phòng học và lớp học của trường"
       ],
       "answer": "100% phòng học, thư viện đều được trang bị 2 cái máy lạnh, 1 cái máy chiếu, micro. Phòng học đủ ánh sáng, không gian lớp học rộng rãi, đạt chuẩn.",
@@ -673,7 +678,7 @@
         "tổ GDKTPL",
         "giáo dục kinh tế pháp luật",
         "tổ GDKTPL như thế nào",
-        "GDKTPL"
+        "GDKTPL","Tổ giáo dục kinh tế và pháp luật"
       ],
       "answer": "TỔ GIÁO DỤC KINH TẾ VÀ PHÁP LUẬT\nTổ bộ môn Giáo dục Kinh tế và Pháp luật, trước đây là tổ Giáo dục công dân, có vai trò quan trọng trong việc định hướng giáo dục toàn diện, góp phần xây dựng thế hệ công dân có trách nhiệm và nhận thức sâu sắc về kinh tế và pháp luật trong xã hội hiện đại, góp phần phát triển ý thức công dân và trách nhiệm xã hội. Đồng thời giúp học sinh hiểu và tuân thủ các quy định của pháp luật, nâng cao ý thức về quyền lợi và nghĩa vụ trong các lĩnh vực như lao động, sở hữu trí tuệ, bảo vệ môi trường, ... Bên cạnh đó, các hoạt động giảng dạy của tổ còn giúp phát triển năng lực công dân toàn cầu, chuẩn bị cho học sinh khả năng thích nghi với nền kinh tế toàn cầu hóa và xã hội pháp quyền hiện đại, cung cấp thêm hiểu biết về thương mại quốc tế, pháp luật quốc tế và kinh tế thị trường. \n\tThành tích: \n- Nhiều năm liền đạt thành tích xuất sắc trong công tác ôn thi tốt nghiệp. \n- Giáo viên: 01 GV đạt giải “Người tuyên truyền pháp luật giỏi” cấp thành phố, 01 GV hướng dẫn 05 HS đạt giải khuyến khích cuộc thi “Học sinh, sinh viên với ý tưởng khởi nghiệp” cấp thành phố, 03 GV là Chiến sĩ thi đua cấp cơ sở, 01 GV là Nhà giáo trẻ tiêu biểu Quận 1. \n- Hoc sinh: 02 HS đạt giải 3 cuộc thi “An toàn giao thông vì nụ cười ngày mai” cấp thành phố, 05 HS đạt giải khuyến khích cuộc thi “Học sinh, sinh viên với ý tưởng khởi nghiệp” cấp thành phố. \n",
       "images": "images/thaycoktpl.jpg",
@@ -1346,7 +1351,7 @@
       "answer": "- Học sinh đi trễ cần phải xuống phòng giám thị xin giấy vào lớp.\n\n- Học sinh nghỉ học, PH có thể vào phòng giám thị để xin phép nghỉ học cho con. Trừ những trường hợp đặc biệt, PH có thể xin phép thông qua GVCN."
     },
     {
-      "question": "Danh mục vi phạm trừ điểm hạnh kiểm học sinh",
+      "question": ["Danh mục vi phạm trừ điểm hạnh kiểm học sinh","Danh mục vi phạm trừ điểm hạnh kiểm","Danh mục vi phạm trừ điểm hạnh kiểm của học sinh","Danh mục vi phạm trừ điểm hạnh kiểm học sinh của trường","Danh mục vi phạm trừ điểm hạnh kiểm của học sinh","Danh mục vi phạm trừ điểm","Danh mục vi phạm điểm trừ","Danh mục vi phạm trừ điểm hạnh kiểm học sinh của trường","Vi phạm trừ điểm hạnh kiểm học sinh","Vi phạm trừ điểm hạnh kiểm","Vi phạm trừ điểm hạnh kiểm của học sinh","Vi phạm trừ điểm hạnh kiểm học sinh của trường","Vi phạm trừ điểm hạnh kiểm của học sinh","Vi phạm trừ điểm","Vi phạm điểm trừ"],
       "answer": "Đây là danh mục vi phạm trừ điểm hạnh kiểm học sinh",
       "images": [
         "images/Vipham1.jpg",
