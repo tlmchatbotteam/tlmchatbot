@@ -71,25 +71,35 @@
         .message p { margin: 0 0 8px 0; line-height: 1.6; }
 
         /* Balanced layout for text + single image */
-        .answer { display: grid; grid-template-columns: 1.1fr 0.9fr; align-items: start; gap: 16px; }
-        .answer.has-image .text { align-self: start; }
+        /* When there is text + a single image we want the image to appear on the LEFT */
+        /* Make the left media column slightly wider so images appear larger */
+        .answer { display: grid; grid-template-columns: 420px 1fr; align-items: start; gap: 18px; }
+        /* Place media in the first grid column (left) and text in the second (right) */
+        .answer .media { grid-column: 1; }
+        .answer .text { grid-column: 2; align-self: start; }
         .answer .text p { max-width: none; /* override .bot p width cap */ margin: 0 0 8px; /* avoid auto-centering inside grid cell */ }
         .answer .media { }
-        .answer .media img { width: 100%; height: auto; max-height: 420px; object-fit: cover; border-radius: 10px; }
+        .answer .media img { width: 100%; height: auto; max-height: 520px; object-fit: cover; border-radius: 10px; }
 
-        /* Image gallery */
-        .image-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-        .image-container.single { grid-template-columns: 1fr; }
-        .image-container figure { margin: 0; background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-        .image-container img { width: 100%; height: auto; display: block; }
-        .image-container figcaption { padding: 6px 8px; font-size: 0.9rem; color: var(--muted); }
-        .bot .image-container, .bot .video { margin-left: auto; margin-right: auto; max-width: 1100px; }
+        /* Image gallery - stacked vertically
+           Changed from grid to a vertical flex column so images appear one below another.
+           This preserves image width:100% and responsive behavior while making the
+           gallery behave like a vertical list of image cards. */
+         .image-container { display: flex; flex-direction: column; gap: 12px; }
+         .image-container.single { flex-direction: column; }
+        /* Increase card width slightly so gallery images are larger on desktop */
+         .image-container figure { margin: 0; background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; width: min(420px, 100%); }
+         .image-container img { width: 100%; height: auto; display: block; }
+         .image-container figcaption { padding: 6px 8px; font-size: 0.9rem; color: var(--muted); }
+        /* Left-align the gallery inside bot messages (remove centering) */
+        .bot .image-container, .bot .video { margin-left: 0; margin-right: auto; max-width: 1100px; }
 
-        /* Stacked image cards like the reference UI */
+         /* Stacked image cards like the reference UI */
         .image-list { display: flex; flex-direction: column; gap: 12px; }
-        .image-list figure { width: min(720px, 100%); margin: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-        .image-list img { width: 100%; height: auto; display: block; }
-        .image-list figcaption { padding: 6px 8px; font-size: 0.9rem; color: var(--muted); }
+        /* Make stacked image-list slightly wider on desktop */
+        .image-list figure { width: min(760px, 100%); margin: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+         .image-list img { width: 100%; height: auto; display: block; }
+         .image-list figcaption { padding: 6px 8px; font-size: 0.9rem; color: var(--muted); }
 
         .video { position: relative; width: min(960px, 100%); aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; }
         .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
@@ -383,343 +393,12 @@
         }
 
         function sendQuick(q) {
-            const input = document.getElementById('question');
-            input.value = q;
-            sendQuestion();
-        }
-
-        function disableChoices(container) {
-            // Intentionally left as a no-op so buttons remain clickable per user's request.
-            // Previously this function disabled buttons to prevent multiple clicks;
-            // now we allow repeated clicks and instead replace the previous response.
-        }
-
-        function showTyping(targetContainer) {
-            const chatContainer = targetContainer || document.getElementById('chat-container');
-            const typing = document.createElement('div');
-            typing.className = 'message bot';
-            typing.dataset.typing = 'true';
-            const p = document.createElement('p');
-            const wrap = document.createElement('span');
-            wrap.className = 'typing-line';
-            const dots = document.createElement('span');
-            dots.className = 'dots';
-            for (let i = 0; i < 3; i++) {
-                const d = document.createElement('span');
-                d.className = 'dot';
-                dots.appendChild(d);
-            }
-            const text = document.createElement('span');
-            text.textContent = 'Đang suy nghĩ...';
-            wrap.appendChild(dots);
-            wrap.appendChild(text);
-            p.appendChild(wrap);
-            typing.appendChild(p);
-            // If target is a placeholder (not the main chat container) we clear it first
-            if (chatContainer !== document.getElementById('chat-container')) {
-                chatContainer.innerHTML = '';
-                chatContainer.appendChild(typing);
-            } else {
-                chatContainer.appendChild(typing);
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }
-            updateEmptyStateVisibility();
-            return typing;
-        }
-        function hideTyping(typingEl) {
-            try {
-                if (typingEl && typingEl.parentNode) typingEl.parentNode.removeChild(typingEl);
-                else {
-                    // Fallback: remove any leftover typing bubbles
-                    const chatContainer = document.getElementById('chat-container');
-                    const leftovers = chatContainer.querySelectorAll('[data-typing="true"]');
-                    leftovers.forEach(el => el.remove());
-                }
-            } catch (_) { /* noop */ }
-        }
-
-        // Render backend response entries into the chat or into a placeholder element.
-        function renderEntries(data, intoEl) {
-            const chatContainer = document.getElementById('chat-container');
-            const target = intoEl || chatContainer;
-
-            const entries = Array.isArray(data) ? data : (data ? [data] : []);
-            if (!entries.length) {
-                updateEmptyStateVisibility();
-                return;
-            }
-
-            // If rendering into a placeholder, clear it so we replace previous result
-            if (intoEl) target.innerHTML = '';
-
-            const createParagraphs = (text) => {
-                const frag = document.createDocumentFragment();
-                try {
-                    const parts = String(text || '').split(/\n\n+/);
-                    parts.forEach((t) => {
-                        const p = document.createElement('p');
-                        p.textContent = t.trim();
-                        frag.appendChild(p);
-                    });
-                } catch (_) {
-                    const p = document.createElement('p');
-                    p.textContent = text || '';
-                    frag.appendChild(p);
-                }
-                return frag;
-            };
-
-            const makeImageFigure = (src, caption) => {
-                const fig = document.createElement('figure');
-                const img = document.createElement('img');
-                img.src = src;
-                img.alt = caption || 'Hình ảnh';
-                img.loading = 'lazy';
-                img.decoding = 'async';
-                img.addEventListener('click', () => openLightbox(img.src, caption || ''));
-                fig.appendChild(img);
-                if (caption) {
-                    const cap = document.createElement('figcaption');
-                    cap.textContent = caption;
-                    fig.appendChild(cap);
-                }
-                return fig;
-            };
-
-            entries.forEach((entry) => {
-                const e = entry || {};
-                const wrap = document.createElement('div');
-                wrap.className = 'message bot';
-
-                const text = e.text || '';
-                const mediaType = e.media_type || 'text';
-                const images = Array.isArray(e.images) ? e.images : [];
-                const videoUrl = e.video_url || null;
-
-                if (mediaType === 'video' && videoUrl) {
-                    if (text) wrap.appendChild(createParagraphs(text));
-                    const v = document.createElement('div');
-                    v.className = 'video';
-                    const iframe = document.createElement('iframe');
-                    iframe.src = toEmbedUrl(videoUrl) || videoUrl;
-                    iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
-                    iframe.setAttribute('allowfullscreen', '');
-                    v.appendChild(iframe);
-                    wrap.appendChild(v);
-                } else if (mediaType === 'image' && images.length) {
-                    if (text) wrap.appendChild(createParagraphs(text));
-                    const list = document.createElement('div');
-                    list.className = 'image-list';
-                    images.forEach((src, i) => {
-                        const cap = Array.isArray(e.captions) ? e.captions[i] || '' : '';
-                        list.appendChild(makeImageFigure(src, cap));
-                    });
-                    wrap.appendChild(list);
-                } else {
-                    wrap.appendChild(createParagraphs(text));
-                }
-
-                // Special backend action hooks
-                try {
-                    if (e.action === 'hieutruong_choices') {
-                        if (target === chatContainer) {
-                            target.appendChild(wrap);
-                            const responseHolder = document.createElement('div');
-                            responseHolder.className = 'choice-response';
-                            target.appendChild(responseHolder);
-                            renderHieuTruongButtons(wrap, responseHolder);
-                            return; // handled
-                        } else {
-                            wrap.appendChild(document.createElement('div'));
-                            renderHieuTruongButtons(wrap, target);
-                        }
-                    }
-
-                    if (e.action && typeof e.action === 'object' && Array.isArray(e.action.clarify_choices)) {
-                        const bar = document.createElement('div');
-                        bar.className = 'choice-bar';
-                        e.action.clarify_choices.forEach((opt) => {
-                            const btn = document.createElement('button');
-                            btn.className = 'choice-btn';
-                            btn.textContent = opt;
-                            // store choice value on dataset so delegated handler can use it
-                            btn.dataset.choiceValue = opt;
-                            btn.onclick = () => askAndRender(opt, target === chatContainer ? null : target, { scroll: false });
-                            bar.appendChild(btn);
-                        });
-                        wrap.appendChild(bar);
-                    } else if (e.action === 'clarification' && Array.isArray(e.options)) {
-                        const bar = document.createElement('div');
-                        bar.className = 'choice-bar';
-                        e.options.forEach((opt) => {
-                            const btn = document.createElement('button');
-                            btn.className = 'choice-btn';
-                            btn.textContent = opt;
-                            btn.onclick = () => askAndRender(opt, target === chatContainer ? null : target, { scroll: false });
-                            bar.appendChild(btn);
-                        });
-                        wrap.appendChild(bar);
-                    } else if (Array.isArray(e.options) && e.options.length && typeof e.options[0] === 'object' && e.options[0].id) {
-                        const bar = document.createElement('div');
-                        bar.className = 'choice-bar';
-                        e.options.forEach((opt) => {
-                            const btn = document.createElement('button');
-                            btn.className = 'choice-btn';
-                            btn.textContent = opt.label || opt.name || opt;
-                            // store choice id for delegated handler
-                            btn.dataset.choiceId = opt.id;
-                            btn.dataset.choiceValue = btn.textContent;
-                            btn.onclick = () => sendChoice(opt.id, target === chatContainer ? null : target, { scroll: false });
-                            bar.appendChild(btn);
-                        });
-                        wrap.appendChild(bar);
-                    }
-                } catch (_) { /* noop */ }
-
-                target.appendChild(wrap);
-            });
-
-            if (!intoEl) chatContainer.scrollTop = chatContainer.scrollHeight;
-            updateEmptyStateVisibility();
-        }
-
-        async function sendQuestion() {
-            const questionInput = document.getElementById('question');
-            const question = questionInput.value.trim();
-            if (!question) return;
-
-            const chatContainer = document.getElementById('chat-container');
-            const userMessage = document.createElement('div');
-            userMessage.className = 'message user';
-            userMessage.textContent = question;
-            chatContainer.appendChild(userMessage);
-            updateEmptyStateVisibility();
-
-            // increment typed-question counter
-            USER_QUESTION_COUNT = (USER_QUESTION_COUNT || 0) + 1;
-
-            // If this is the second or later typed question, scroll to user's message so they see their question
-            if (USER_QUESTION_COUNT >= 2) {
-                try { userMessage.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
-            }
-
-            // New: intercept exact keyword 'hoạt động' and render local choice buttons
-            try {
-                const normalized = question.toLowerCase().normalize('NFC');
-                // helper: strip diacritics reliably (NFD + remove combining marks)
-                const stripDiacritics = (s) => { try { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (_) { return s; } };
-                const normalizedNoDiacritics = stripDiacritics(normalized);
-
-                // If user types 'cơ sở vật chất' (with or without diacritics), show facilities choices
-                try {
-                    if (normalized.includes('cơ sở vật chất') || normalizedNoDiacritics.includes('co so vat chat')) {
-                        renderFacilitiesChoices();
-                        questionInput.value = '';
-                        return;
-                    }
-                } catch(_) {}
-
-                if (normalized.includes('hoạt động')) {
-                    // render choices locally without calling backend
-                    renderHoatDongChoices();
-                    // clear input and stop further processing
-                    questionInput.value = '';
-                    return;
-                }
-
-                // New: intercept teacher-related keywords and render teacher team choices
-                const teacherKeywords = ['giáo viên', 'thầy cô giáo', 'thầy cô'];
-                if (teacherKeywords.some(k => normalized.includes(k))) {
-                    renderGiaoVienChoices();
-                    questionInput.value = '';
-                    return;
-                }
-            } catch (_) { /* noop */ }
-
-            const typingEl = showTyping();
-            try {
-                const response = await fetch('/ask', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question, session_id: SESSION_ID })
-                });
-
-                // Better error handling: if non-OK, read text and throw
-                if (!response.ok) {
-                    const txt = await response.text().catch(() => '');
-                    throw new Error(`HTTP ${response.status} ${response.statusText}: ${txt}`);
-                }
-
-                // Try to parse JSON safely. Use clone so we can read text on parse failure.
-                let data;
-                try {
-                    data = await response.json();
-                } catch (parseErr) {
-                    const raw = await response.clone().text().catch(() => '');
-                    throw new Error('Invalid JSON from server: ' + (raw ? raw.slice(0,1000) : '<no body>'));
-                }
-
-                hideTyping(typingEl);
-                renderEntries(data);
-                // If the backend response produced choice buttons, ensure the newest choice bar is visible
-                try {
-                    const bars = chatContainer.querySelectorAll('.choice-bar');
-                    if (bars && bars.length) {
-                        const lastBar = bars[bars.length - 1];
-                        try { lastBar.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){}
-                    }
-                } catch(_) {}
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-                questionInput.value = '';
-            } catch (error) {
-                console.error('Error in sendQuestion:', error);
-                hideTyping(typingEl);
-                const errorMessage = document.createElement('div');
-                errorMessage.className = 'message bot';
-                // Show a clearer message to user but include short reason
-                const reason = (error && error.message) ? error.message : 'Có lỗi xảy ra.';
-                errorMessage.textContent = 'Có lỗi xảy ra. Vui lòng thử lại! (' + reason.slice(0,200) + ')';
-                chatContainer.appendChild(errorMessage);
-
-                // New: show detailed error in debug panel
-                showDebugError(error);
-            } finally {
-                updateEmptyStateVisibility();
-            }
+            // Use askAndRender with via_button flag so prompt chips are treated as UI actions
+            try { askAndRender(q, null, { scroll: true }, { via_button: true }); } catch (e) { try { window.askAndRender && window.askAndRender(q, null, { scroll: true }, { via_button: true }); } catch(_) {} }
         }
 
         async function sendIntroVideo() {
-            const chatContainer = document.getElementById('chat-container');
-            const userMessage = document.createElement('div');
-            userMessage.className = 'message user';
-            userMessage.textContent = 'Giới thiệu về trường';
-            chatContainer.appendChild(userMessage);
-            updateEmptyStateVisibility();
-
-            const typingEl = showTyping();
-            try {
-                const response = await fetch('/ask', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: 'video', session_id: SESSION_ID })
-                });
-                const data = await response.json();
-                hideTyping(typingEl);
-                renderEntries(data);
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            } catch (error) {
-                console.error('Error:', error);
-                hideTyping(typingEl);
-                const errorMessage = document.createElement('div');
-                errorMessage.className = 'message bot';
-                errorMessage.textContent = 'Có lỗi xảy ra. Vui lòng thử lại!';
-                chatContainer.appendChild(errorMessage);
-
-                // New: show detailed error in debug panel
-                showDebugError(error);
-            } finally {
-                updateEmptyStateVisibility();
-            }
+            // This is a UI-driven quick action; use askAndRender so server knows to skip GPT
         }
 
         function sendHieuTruong() {
@@ -733,6 +412,39 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
             updateEmptyStateVisibility();
         }
+
+        // New: sendQuestion - when user presses Enter or clicks send
+        window.sendQuestion = function sendQuestion() {
+            try {
+                const input = document.getElementById('question');
+                if (!input) return;
+                const q = (input.value || '').trim();
+                if (!q) return;
+
+                // Increment user question counter
+                try { USER_QUESTION_COUNT = (typeof USER_QUESTION_COUNT === 'number') ? USER_QUESTION_COUNT + 1 : 1; } catch (_) { USER_QUESTION_COUNT = 1; }
+
+                const chatContainer = document.getElementById('chat-container');
+                // Render user's message into chat
+                try {
+                    const userMessage = document.createElement('div');
+                    userMessage.className = 'message user';
+                    userMessage.textContent = q;
+                    if (chatContainer) chatContainer.appendChild(userMessage);
+                } catch (_) { /* noop */ }
+
+                // Clear input and keep focus for accessibility
+                try { input.value = ''; input.focus(); } catch (_) {}
+
+                // Send to backend using existing helper (askAndRender preserves via_button semantics when needed)
+                try { askAndRender(q, null, { scroll: true }); } catch (e) { try { window.askAndRender && window.askAndRender(q, null, { scroll: true }); } catch(_) {} }
+
+                try { updateEmptyStateVisibility(); if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; } catch (_) {}
+            } catch (err) {
+                console.error('Error in sendQuestion:', err);
+            }
+        }
+        try { var sendQuestion = window.sendQuestion; } catch (_) { /* noop */ }
 
         // New: render facilities choices for "Cơ sở vật chất"
         function renderFacilitiesChoices() {
@@ -791,7 +503,7 @@
                     // Render a local immediate response for snappy UI
                     renderLocalFacility(opt.q, responseHolder);
                     // Then attempt to fetch authoritative content from the backend; if it fails, the local content remains
-                    try { askAndRender(opt.q, responseHolder, { scroll: false }).catch(() => {}); } catch (_) {}
+                    try { askAndRender(opt.q, responseHolder, { scroll: false }, { via_button: true }).catch(() => {}); } catch (_) {}
                  };
                  bar.appendChild(btn);
              });
@@ -820,13 +532,13 @@
             btnCurrent.className = 'choice-btn';
             btnCurrent.textContent = 'Hiệu trưởng hiện tại';
             btnCurrent.dataset.choiceValue = 'Hiệu trưởng nhà trường';
-            btnCurrent.onclick = () => { askHieuTruongCurrent(responseHolder, { scroll: false }); };
+            btnCurrent.onclick = () => { askHieuTruongCurrent(responseHolder, { scroll: false, via_button: true }); };
 
             const btnHistory = document.createElement('button');
             btnHistory.className = 'choice-btn';
             btnHistory.textContent = 'Hiệu trưởng qua từng thời kỳ';
             btnHistory.dataset.choiceValue = 'các thầy cô hiệu trưởng qua từng thời kỳ';
-            btnHistory.onclick = () => { askHieuTruongHistory(responseHolder, { scroll: false }); };
+            btnHistory.onclick = () => { askHieuTruongHistory(responseHolder, { scroll: false, via_button: true }); };
 
             bar.appendChild(btnCurrent);
             bar.appendChild(btnHistory);
@@ -869,7 +581,7 @@
                 // expose value for delegated handler and still keep inline for compatibility
                 btn.dataset.choiceValue = label;
                 btn.onclick = () => {
-                    askAndRender(label, responseHolder, { scroll: false });
+                    askAndRender(label, responseHolder, { scroll: false }, { via_button: true });
                 };
                 bar.appendChild(btn);
             });
@@ -911,7 +623,7 @@
                 btn.className = 'choice-btn';
                 btn.textContent = label;
                 btn.dataset.choiceValue = label;
-                btn.onclick = () => { askAndRender(label, responseHolder, { scroll: false }); };
+                btn.onclick = () => { askAndRender(label, responseHolder, { scroll: false }, { via_button: true }); };
                 bar.appendChild(btn);
             });
 
@@ -931,13 +643,13 @@
                 btnCurrent.className = 'choice-btn';
                 btnCurrent.textContent = 'Hiệu trưởng hiện tại';
                 btnCurrent.dataset.choiceValue = 'Hiệu trưởng nhà trường';
-                btnCurrent.onclick = () => { askHieuTruongCurrent(responseHolder, { scroll: false }); };
+                btnCurrent.onclick = () => { askHieuTruongCurrent(responseHolder, { scroll: false, via_button: true }); };
 
                 const btnHistory = document.createElement('button');
                 btnHistory.className = 'choice-btn';
                 btnHistory.textContent = 'Hiệu trưởng qua từng thời kỳ';
                 btnHistory.dataset.choiceValue = 'các thầy cô hiệu trưởng qua từng thời kỳ';
-                btnHistory.onclick = () => { askHieuTruongHistory(responseHolder, { scroll: false }); };
+                btnHistory.onclick = () => { askHieuTruongHistory(responseHolder, { scroll: false, via_button: true }); };
 
                 bar.appendChild(btnCurrent);
                 bar.appendChild(btnHistory);
@@ -945,8 +657,196 @@
             } catch (_) { /* no-op */ }
         }
 
+        // Small UI helpers: typing indicator and response renderer
+        function showTyping(intoEl) {
+            try {
+                const container = intoEl || document.getElementById('chat-container');
+                const wrap = document.createElement('div');
+                wrap.className = 'message bot typing-placeholder';
+                const line = document.createElement('div');
+                line.className = 'typing-line';
+                const dots = document.createElement('span');
+                dots.className = 'dots';
+                for (let i = 0; i < 3; i++) {
+                    const d = document.createElement('span');
+                    d.className = 'dot';
+                    dots.appendChild(d);
+                }
+                line.appendChild(dots);
+                wrap.appendChild(line);
+                if (container) container.appendChild(wrap);
+                try { if (!intoEl) container.scrollTop = container.scrollHeight; } catch(_){}
+                return wrap;
+            } catch (_) { return null; }
+        }
+
+        function hideTyping(el) {
+            try {
+                if (!el) return;
+                if (el.parentElement) el.parentElement.removeChild(el);
+            } catch (_) { /* noop */ }
+        }
+
+        function renderEntries(data, intoEl) {
+            try {
+                const chatContainer = document.getElementById('chat-container');
+                const entries = Array.isArray(data) ? data : [data];
+                const target = intoEl || chatContainer;
+                if (!target) return;
+                // If a placeholder (intoEl) was provided, replace its content instead of appending.
+                if (intoEl) {
+                    try { intoEl.innerHTML = ''; } catch (_) {}
+                }
+
+                entries.forEach((entry) => {
+                    try {
+                        // Some endpoints may return null/empty entries
+                        if (!entry) return;
+
+                        // Special action: produce choice UI from the server
+                        if (entry.action === 'hieutruong_choices') {
+                            // reuse the local renderer for this action
+                            try { renderHieuTruongChoices(); } catch (_) {}
+                            return;
+                        }
+
+                        const bot = document.createElement('div');
+                        bot.className = 'message bot';
+
+                        // Hold text separately so we can compose text + single-image layout
+                        const textContent = entry.text ? String(entry.text) : '';
+
+                        // Normalize images/captions extraction
+                        let images = [];
+                        let captions = [];
+                        try {
+                            // Render images if backend provided media_content OR images array (even if media_type isn't explicitly 'image')
+                            if ((entry.media_type === 'image' && (entry.media_content || entry.images)) || entry.images) {
+                                if (entry.media_content) {
+                                    if (Array.isArray(entry.media_content) && entry.media_content.length === 2 && Array.isArray(entry.media_content[0])) {
+                                        images = entry.media_content[0];
+                                        captions = entry.media_content[1] || [];
+                                    } else if (Array.isArray(entry.media_content)) {
+                                        images = entry.media_content;
+                                    } else {
+                                        images = [entry.media_content];
+                                    }
+                                } else if (entry.images) {
+                                    images = Array.isArray(entry.images) ? entry.images : [entry.images];
+                                    captions = Array.isArray(entry.captions) ? entry.captions : (entry.captions ? [entry.captions] : []);
+                                }
+                                if (!Array.isArray(images)) images = [images];
+                            }
+                        } catch (_) { images = []; captions = []; }
+
+                        // NEW: Video handling - render a responsive iframe for entries that include a video_url or media_type 'video'
+                        try {
+                            const videoUrl = entry.video_url || (entry.media_type === 'video' && entry.media_content) || null;
+                            if (videoUrl) {
+                                // If there's also exactly one image we prefer the explicit image flow; otherwise render video
+                                // Render text (if any) above the video
+                                if (textContent) {
+                                    const pVid = document.createElement('p');
+                                    pVid.textContent = textContent;
+                                    bot.appendChild(pVid);
+                                }
+                                const vidCont = document.createElement('div');
+                                vidCont.className = 'video';
+                                const iframe = document.createElement('iframe');
+                                // convert to embed URL where possible (YouTube short -> embed)
+                                iframe.src = toEmbedUrl(videoUrl) || videoUrl;
+                                iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+                                iframe.setAttribute('allowfullscreen', '');
+                                vidCont.appendChild(iframe);
+                                bot.appendChild(vidCont);
+                                target.appendChild(bot);
+                                return; // done with this entry
+                            }
+                        } catch (_) { /* noop */ }
+
+                        // If there is exactly one image and also text, render as a two-column answer (text left, image right)
+                        if (images && images.length === 1 && textContent) {
+                            const answerWrap = document.createElement('div');
+                            answerWrap.className = 'answer has-image';
+
+                            const left = document.createElement('div');
+                            left.className = 'text';
+                            const p = document.createElement('p');
+                            p.textContent = textContent;
+                            left.appendChild(p);
+
+                            const right = document.createElement('div');
+                            right.className = 'media';
+                            try {
+                                const fig = document.createElement('figure');
+                                const img = document.createElement('img');
+                                img.src = images[0];
+                                img.alt = (captions && captions[0]) ? captions[0] : '';
+                                img.loading = 'lazy';
+                                img.addEventListener('click', () => openLightbox(images[0], img.alt));
+                                fig.appendChild(img);
+                                if (captions && captions[0]) {
+                                    const cap = document.createElement('figcaption');
+                                    cap.textContent = captions[0];
+                                    fig.appendChild(cap);
+                                }
+                                right.appendChild(fig);
+                            } catch (_) {}
+
+                            answerWrap.appendChild(left);
+                            answerWrap.appendChild(right);
+                            bot.appendChild(answerWrap);
+                        } else if (images && images.length > 0) {
+                            // Multiple images (gallery) or single image without text: render as gallery
+                            const imgCont = document.createElement('div');
+                            imgCont.className = 'image-container';
+                            images.forEach((src, idx) => {
+                                try {
+                                    const fig = document.createElement('figure');
+                                    const img = document.createElement('img');
+                                    img.src = src;
+                                    img.alt = (captions && captions[idx]) ? captions[idx] : '';
+                                    img.loading = 'lazy';
+                                    img.addEventListener('click', () => openLightbox(src, img.alt));
+                                    fig.appendChild(img);
+                                    if (captions && captions[idx]) {
+                                        const cap = document.createElement('figcaption');
+                                        cap.textContent = captions[idx];
+                                        fig.appendChild(cap);
+                                    }
+                                    imgCont.appendChild(fig);
+                                } catch (_) {}
+                            });
+                            // If there is also text but multiple images, keep text above gallery
+                            if (textContent) {
+                                const p2 = document.createElement('p');
+                                p2.textContent = textContent;
+                                bot.appendChild(p2);
+                            }
+                            bot.appendChild(imgCont);
+                        } else {
+                            // No images: just render the text (if any)
+                            if (textContent) {
+                                const p = document.createElement('p');
+                                p.textContent = textContent;
+                                bot.appendChild(p);
+                            }
+                        }
+
+                        target.appendChild(bot);
+                    } catch (e) {
+                        console.error('Error rendering entry:', e);
+                    }
+                });
+
+                try { if (!intoEl && chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight; } catch(_){}
+            } catch (err) {
+                console.error('renderEntries error:', err);
+            }
+        }
+
         // Universal helper: send a question to the backend and render the response into an optional placeholder
-        window.askAndRender = async function askAndRender(question, intoEl, opts = { scroll: true }) {
+        window.askAndRender = async function askAndRender(question, intoEl, opts = { scroll: true }, meta = {}) {
              const chatContainer = document.getElementById('chat-container');
              const inflightKey = 'q:' + String(question || '');
              if (__IN_FLIGHT.has(inflightKey)) return; // avoid duplicate calls for same question
@@ -956,7 +856,8 @@
                  const response = await fetch('/ask', {
                      method: 'POST',
                      headers: { 'Content-Type': 'application/json' },
-                     body: JSON.stringify({ question, session_id: SESSION_ID })
+                     // include meta flags (e.g., { via_button: true }) so server can skip expensive GPT calls
+                     body: JSON.stringify(Object.assign({ question, session_id: SESSION_ID }, meta))
                  });
 
                  if (!response.ok) {
@@ -1051,11 +952,13 @@
         try { var sendChoice = window.sendChoice; } catch (_) { /* noop */ }
 
         async function askHieuTruongCurrent(intoEl, opts = { scroll: true }) {
-             await askAndRender('Hiệu trưởng nhà trường', intoEl, opts);
+             const meta = (opts && opts.via_button) ? { via_button: true } : {};
+             await askAndRender('Hiệu trưởng nhà trường', intoEl, opts, meta);
          }
 
         async function askHieuTruongHistory(intoEl, opts = { scroll: true }) {
-             await askAndRender('các thầy cô hiệu trưởng qua từng thời kỳ', intoEl, opts);
+             const meta = (opts && opts.via_button) ? { via_button: true } : {};
+             await askAndRender('các thầy cô hiệu trưởng qua từng thời kỳ', intoEl, opts, meta);
         }
 
         // --- Lightbox logic ---
@@ -1177,7 +1080,7 @@
                           const key = 'q:' + cval;
                           if (__IN_FLIGHT.has(key)) return;
                           __IN_FLIGHT.add(key);
-                          try { askAndRender(cval, intoEl, { scroll: false }).finally(() => __IN_FLIGHT.delete(key)); } catch(e){ __IN_FLIGHT.delete(key); }
+                          try { askAndRender(cval, intoEl, { scroll: false }, { via_button: true }).finally(() => __IN_FLIGHT.delete(key)); } catch(e){ __IN_FLIGHT.delete(key); }
                           return;
                         }
                     });

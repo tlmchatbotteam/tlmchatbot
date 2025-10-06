@@ -183,12 +183,17 @@ def normalize_text(text):
     return text
 
 # Inserted: GPT-assisted keyword extractor (defensive about missing client)
-def extract_keyword_with_gpt_turbo(question, all_keywords):
+def extract_keyword_with_gpt_turbo(question, all_keywords, skip_gpt: bool = False):
     """
     Sử dụng GPT-4 Turbo để chọn keyword có trong danh sách all_keywords
     phù hợp nhất với câu hỏi người dùng.
     """
     try:
+        # If caller requested to skip GPT (e.g., UI button action), avoid calling the API
+        if skip_gpt:
+            # Short-circuit: do not call the OpenAI API for UI/button-triggered requests
+            print("[GPT] Skipped by skip_gpt flag (UI/button request)")
+            return None
         # Defensive: require an API client named `client` to exist in globals()
         client = globals().get('client')
         if client is None:
@@ -556,7 +561,7 @@ def contains_dataset_keyword(text: str) -> bool:
 # =========================================================================
 # START: REFACTORED get_answer FUNCTION FOR RELIABILITY
 # =========================================================================
-def get_answer(question):
+def get_answer(question, skip_gpt: bool = False):
     """
     Handles user questions with a clear, structured logic flow.
     1. Prioritizes exact and near-perfect matches for immediate, accurate answers.
@@ -620,7 +625,8 @@ def get_answer(question):
 
     # --- GPT keyword extractor ---
     try:
-        gpt_kw = extract_keyword_with_gpt_turbo(question, list(KEYWORD_TO_ITEM_MAP.keys()))
+        # Only call GPT keyword extractor when not explicitly skipped (UI buttons)
+        gpt_kw = extract_keyword_with_gpt_turbo(question, list(KEYWORD_TO_ITEM_MAP.keys()), skip_gpt=skip_gpt)
         if gpt_kw and gpt_kw in KEYWORD_TO_ITEM_MAP:
             item = KEYWORD_TO_ITEM_MAP[gpt_kw]
             return [{"text": item.get("answer", ""), "media_type": "text", "media_content": None}]
@@ -1448,7 +1454,17 @@ def ask():
     else:
         question_for_answer = question
 
-    responses = get_answer(question_for_answer)
+    # Detect UI/button-originated requests and avoid calling GPT for them.
+    # Frontend can pass `via_button: true` or `trigger: 'button'` or `source: 'ui'` to indicate a UI button action.
+    is_ui_button = False
+    try:
+        if isinstance(data, dict):
+            if data.get('via_button') or data.get('trigger') in ('button', 'ui', 'click') or data.get('source') in ('ui', 'button'):
+                is_ui_button = True
+    except Exception:
+        is_ui_button = False
+
+    responses = get_answer(question_for_answer, skip_gpt=is_ui_button)
 
     # Store bot turn (text only, first response) for lightweight history
     try:

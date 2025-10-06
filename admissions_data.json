@@ -1252,10 +1252,10 @@
     },
     {
       "question": [
-        "bài hát",
-        "hành khúc",
-        "nhạc",
-        "bài nhạc"
+        "Bài hát",
+        "Hành khúc",
+        "Nhạc",
+        "Bài nhạc","Bài hát của trường"
       ],
       "answer": "Đây là bài hát của trường",
       "video_url": "https://www.youtube.com/watch?v=tgECMlXzSU4",
