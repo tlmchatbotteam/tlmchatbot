@@ -423,7 +423,7 @@
         "nhóm nhảy",
         "các clb của trường",
         "một số clb nổi bật của trường",
-        "Hoạt động câu lạc bộ"
+        "Hoạt động câu lạc bộ","Hoạt động câu lạc bộ và hoạt động ngoại khóa"
       ],
       "answer": "Đây là các câu lạc bộ của trường và hoạt động ngoại khoá của trường",
       "images": [
@@ -725,7 +725,7 @@
       "question": [
         "các hoạt động phong trào",
         "hoạt động phong trào",
-        "một số hoạt động phong trào"
+        "một số hoạt động phong trào","Hoạt động phong trào và hoạt động học tập"
       ],
       "answer": "Đây là tất cả các hoạt động học tập và hoạt động phong trào của trường",
       "images": [
@@ -1257,7 +1257,7 @@
         "nhạc",
         "bài nhạc"
       ],
-      "answer": "đây là bài hát của trường",
+      "answer": "Đây là bài hát của trường",
       "video_url": "https://www.youtube.com/watch?v=tgECMlXzSU4",
       "images": null,
       "captions": null
