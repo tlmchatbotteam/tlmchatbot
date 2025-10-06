@@ -120,32 +120,6 @@ def augment_with_context(session_id: str, q: str) -> str:
     except Exception:
         return q
 
-        # ===== END: FIX LOGIC LOOP =====
-
-        # Don't augment the canonical trigger so UI buttons can render
-        nq_self = normalize_and_unaccent(q)
-        if re.fullmatch(r"hieu\s*truong", nq_self):
-            return q
-        prev = last_user_turn(session_id)
-        if not prev:
-            return q
-        if looks_context_dependent(q):
-            # Combine as two sub-questions so existing splitter can help
-            return f"{prev} ; {q}"
-        # If no direct keywords detected, also try augmenting
-        nq = normalize_and_unaccent(q)
-        has_known = False
-        if len(nq) >= 3:
-            for key in KEYWORD_TO_ITEM_MAP.keys():
-                if len(key) >= 3 and (key in nq or nq in key):
-                    has_known = True
-                    break
-        if not has_known:
-            return f"{prev} ; {q}"
-        return q
-    except Exception:
-        return q
-
 
 # --- CẤU HÌNH VÀ TẢI DỮ LIỆU ---
 try:
@@ -629,7 +603,9 @@ def get_answer(question, skip_gpt: bool = False):
         gpt_kw = extract_keyword_with_gpt_turbo(question, list(KEYWORD_TO_ITEM_MAP.keys()), skip_gpt=skip_gpt)
         if gpt_kw and gpt_kw in KEYWORD_TO_ITEM_MAP:
             item = KEYWORD_TO_ITEM_MAP[gpt_kw]
-            return [{"text": item.get("answer", ""), "media_type": "text", "media_content": None}]
+            # Previously returned text-only here which caused images/media to be dropped
+            # when the GPT keyword extractor matched. Use the helper to preserve media.
+            return [_build_response_from_item(item)]
     except Exception as e:
         # Fail silently and continue to fuzzy/semantic pipeline
         print(f"[GPT] extract_keyword_with_gpt_turbo error: {e}")

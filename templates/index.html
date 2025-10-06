@@ -70,36 +70,38 @@
         .bot { margin-right: auto; background: var(--bot-msg); align-self: stretch; width: 100%; max-width: none; margin: 0; }
         .message p { margin: 0 0 8px 0; line-height: 1.6; }
 
-        /* Balanced layout for text + single image */
-        /* When there is text + a single image we want the image to appear on the LEFT */
-        /* Make the left media column slightly wider so images appear larger */
-        .answer { display: grid; grid-template-columns: 420px 1fr; align-items: start; gap: 18px; }
-        /* Place media in the first grid column (left) and text in the second (right) */
-        .answer .media { grid-column: 1; }
-        .answer .text { grid-column: 2; align-self: start; }
-        .answer .text p { max-width: none; /* override .bot p width cap */ margin: 0 0 8px; /* avoid auto-centering inside grid cell */ }
-        .answer .media { }
-        .answer .media img { width: 100%; height: auto; max-height: 520px; object-fit: cover; border-radius: 10px; }
+        /* New: render text first (full width) and place image below, left-aligned */
+        .answer { display: grid; grid-template-columns: 1fr; grid-auto-flow: row; gap: 18px; align-items: start; }
+        /* text occupies full width on top */
+        .answer .text { grid-column: 1; }
+        .answer .text p { max-width: 75ch; margin: 0 0 10px; }
+        /* media placed below text and left-aligned with a larger default width for emphasis */
+        /* increased to give images more visual weight on desktop */
+        .answer .media { grid-column: 1; justify-self: start; width: min(520px, 48%); }
+        .answer .media img { width: 100%; height: auto; max-height: 640px; object-fit: cover; border-radius: 12px; }
+        /* On medium/small screens the media should shrink to full width so layout stays usable */
+        @media (max-width: 1024px) {
+            .answer .media { width: min(420px, 60%); }
+        }
+        @media (max-width: 768px) {
+            .answer .media { width: 100%; }
+        }
 
-        /* Image gallery - stacked vertically
-           Changed from grid to a vertical flex column so images appear one below another.
-           This preserves image width:100% and responsive behavior while making the
-           gallery behave like a vertical list of image cards. */
-         .image-container { display: flex; flex-direction: column; gap: 12px; }
-         .image-container.single { flex-direction: column; }
-        /* Increase card width slightly so gallery images are larger on desktop */
-         .image-container figure { margin: 0; background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; width: min(420px, 100%); }
-         .image-container img { width: 100%; height: auto; display: block; }
-         .image-container figcaption { padding: 6px 8px; font-size: 0.9rem; color: var(--muted); }
-        /* Left-align the gallery inside bot messages (remove centering) */
-        .bot .image-container, .bot .video { margin-left: 0; margin-right: auto; max-width: 1100px; }
+        /* Image gallery */
+        /* make gallery cards larger on desktop but keep responsive */
+        .image-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+        .image-container.single { grid-template-columns: 1fr; }
+        .image-container figure { margin: 0; background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; width: 100%; }
+        .image-container img { width: 100%; height: auto; display: block; }
+        .image-container figcaption { padding: 6px 8px; font-size: 0.9rem; color: var(--muted); }
+        .bot .image-container, .bot .video { margin-left: auto; margin-right: auto; max-width: 1100px; }
 
-         /* Stacked image cards like the reference UI */
+        /* Stacked image cards like the reference UI */
         .image-list { display: flex; flex-direction: column; gap: 12px; }
-        /* Make stacked image-list slightly wider on desktop */
-        .image-list figure { width: min(760px, 100%); margin: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-         .image-list img { width: 100%; height: auto; display: block; }
-         .image-list figcaption { padding: 6px 8px; font-size: 0.9rem; color: var(--muted); }
+        /* make stacked cards wider on desktop for a more impactful visual */
+        .image-list figure { width: min(920px, 100%); margin: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .image-list img { width: 100%; height: auto; display: block; }
+        .image-list figcaption { padding: 6px 8px; font-size: 0.9rem; color: var(--muted); }
 
         .video { position: relative; width: min(960px, 100%); aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; }
         .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
