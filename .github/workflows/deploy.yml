@@ -9,61 +9,69 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    # Thiết lập các biến môi trường cho toàn bộ job để dễ quản lý
+    env:
+      VM_USER: ${{ secrets.VM_USER }}
+      VM_IP: ${{ secrets.VM_IP }}
+      PROJECT_DIR: /home/ubuntu/test2
+      REPO_URL: https://github.com/tlmchatbotteam/tlmchatbot.git
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up environment variables
-        run: |
-          echo "VM_USER=${{ secrets.VM_USER }}" >> $GITHUB_ENV
-          echo "VM_IP=${{ secrets.VM_IP }}" >> $GITHUB_ENV
-          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
-        shell: bash
-
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.VM_SSH_KEY_STR }}" > ~/.ssh/vm_ssh_key
+          echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/vm_ssh_key
           chmod 600 ~/.ssh/vm_ssh_key
-          ssh-keyscan -H "${{ secrets.VM_IP }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "$VM_IP" >> ~/.ssh/known_hosts
 
       - name: Deploy to VM
+        # Truyền secret OPENAI_API_KEY vào môi trường của riêng bước này
         env:
-          VM_USER: ${{ secrets.VM_USER }}
-          VM_IP: ${{ secrets.VM_IP }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          REPO_URL: https://github.com/tlmchatbotteam/tlmchatbot.git
-          PROJECT_DIR: /home/ubuntu/test2
         run: |
-          echo "Connecting to $VM_USER@$VM_IP ..."
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/vm_ssh_key $VM_USER@$VM_IP << 'EOT'
+          echo "Connecting to $VM_USER@$VM_IP..."
+          
+          # Sử dụng SSH với Here Document để thực thi một loạt lệnh trên VM
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/vm_ssh_key $VM_USER@$VM_IP << EOT
+            # Thiết lập shell để thoát ngay khi có lỗi
             set -eou pipefail
 
-            echo ">>> Checking repository..."
-            if [ ! -d "$PROJECT_DIR" ]; then
-              echo "Cloning repository..."
-              git clone "$REPO_URL" -b GCP "$PROJECT_DIR"
+            echo "Ensuring project directory exists at $PROJECT_DIR..."
+            mkdir -p "$PROJECT_DIR"
+            
+            # Di chuyển vào thư mục dự án
+            cd "$PROJECT_DIR"
+
+            # ✅ TẠO FILE .env: Ghi API key vào file .env trên VM
+            # Docker Compose sẽ tự động đọc file này
+            echo "Creating .env file..."
+            echo "OPENAI_API_KEY=$OPENAI_API_KEY" > .env
+
+            # Clone hoặc cập nhật mã nguồn
+            # Kiểm tra sự tồn tại của thư mục .git để quyết định clone hay pull
+            if [ ! -d ".git" ]; then
+              echo "Repository not found. Cloning..."
+              # Clone vào thư mục hiện tại (.)
+              git clone $REPO_URL -b GCP .
             else
-              echo "Updating repository..."
-              cd "$PROJECT_DIR"
+              echo "Repository exists. Updating..."
               git fetch origin
               git reset --hard origin/GCP
             fi
 
-            cd "$PROJECT_DIR" || { echo "Failed to cd to $PROJECT_DIR"; exit 1; }
-
-            echo ">>> Exporting environment variables..."
-            export OPENAI_API_KEY="${OPENAI_API_KEY}"
-
+            # Deploy ứng dụng bằng composeup.sh
+            echo "Running custom deployment script..."
             if [ -f "composeup.sh" ]; then
-              echo "Running custom deployment script..."
               bash composeup.sh
             else
-              echo "Running standard Docker Compose deployment..."
+              echo "composeup.sh not found! Running standard docker compose..."
               docker compose down || true
               docker compose up --build -d
             fi
 
-            echo ">>> Showing recent logs:"
-            docker compose logs --tail=10
+            echo "Deployment finished. Displaying recent logs:"
+            docker compose logs --tail=20
           EOT
