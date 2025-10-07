@@ -15,37 +15,34 @@ jobs:
 
       - name: Set up environment variables
         run: |
-          echo "VM_USER=$VM_USER" >> $GITHUB_ENV
-          echo "VM_IP=$VM_IP" >> $GITHUB_ENV
-          echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> $GITHUB_ENV
+          echo "VM_USER=${{ secrets.VM_USER }}" >> $GITHUB_ENV
+          echo "VM_IP=${{ secrets.VM_IP }}" >> $GITHUB_ENV
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
+        shell: bash
 
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/vm_ssh_key
+          echo "${{ secrets.VM_SSH_KEY_STR }}" > ~/.ssh/vm_ssh_key
           chmod 600 ~/.ssh/vm_ssh_key
-          ssh-keyscan -H "$VM_IP" >> ~/.ssh/known_hosts
-        env:
-          VM_IP: ${{ secrets.VM_IP }}
+          ssh-keyscan -H "${{ secrets.VM_IP }}" >> ~/.ssh/known_hosts
 
       - name: Deploy to VM
         env:
           VM_USER: ${{ secrets.VM_USER }}
           VM_IP: ${{ secrets.VM_IP }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          PROJECT_DIR: /home/ubuntu/test2
           REPO_URL: https://github.com/tlmchatbotteam/tlmchatbot.git
+          PROJECT_DIR: /home/ubuntu/test2
         run: |
-          echo "VM_USER=$VM_USER" 
-          echo "VM_IP=$VM_IP"
           echo "Connecting to $VM_USER@$VM_IP ..."
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/vm_ssh_key $VM_USER@$VM_IP << EOT
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/vm_ssh_key $VM_USER@$VM_IP << 'EOT'
             set -eou pipefail
 
-            # Clone or update repository
+            echo ">>> Checking repository..."
             if [ ! -d "$PROJECT_DIR" ]; then
               echo "Cloning repository..."
-              git clone $REPO_URL -b GCP "$PROJECT_DIR"
+              git clone "$REPO_URL" -b GCP "$PROJECT_DIR"
             else
               echo "Updating repository..."
               cd "$PROJECT_DIR"
@@ -55,10 +52,9 @@ jobs:
 
             cd "$PROJECT_DIR" || { echo "Failed to cd to $PROJECT_DIR"; exit 1; }
 
-            # ✅ Truyền biến môi trường vào VM để Docker Compose nhận được
-            export OPENAI_API_KEY="$OPENAI_API_KEY"
+            echo ">>> Exporting environment variables..."
+            export OPENAI_API_KEY="${OPENAI_API_KEY}"
 
-            # Deploy application
             if [ -f "composeup.sh" ]; then
               echo "Running custom deployment script..."
               bash composeup.sh
@@ -68,6 +64,6 @@ jobs:
               docker compose up --build -d
             fi
 
-            echo "Recent logs:"
+            echo ">>> Showing recent logs:"
             docker compose logs --tail=10
           EOT
