@@ -5,7 +5,9 @@ import json
 import os
 import re
 import torch
-import unicodedata
+import unicodedata# --- GPT-4 Turbo Keyword Extractor ---
+from openai import OpenAI
+client = OpenAI()
 from difflib import SequenceMatcher
 from types import SimpleNamespace
 from flask import Flask, request, jsonify, send_from_directory, render_template
@@ -118,32 +120,6 @@ def augment_with_context(session_id: str, q: str) -> str:
     except Exception:
         return q
 
-        # ===== END: FIX LOGIC LOOP =====
-
-        # Don't augment the canonical trigger so UI buttons can render
-        nq_self = normalize_and_unaccent(q)
-        if re.fullmatch(r"hieu\s*truong", nq_self):
-            return q
-        prev = last_user_turn(session_id)
-        if not prev:
-            return q
-        if looks_context_dependent(q):
-            # Combine as two sub-questions so existing splitter can help
-            return f"{prev} ; {q}"
-        # If no direct keywords detected, also try augmenting
-        nq = normalize_and_unaccent(q)
-        has_known = False
-        if len(nq) >= 3:
-            for key in KEYWORD_TO_ITEM_MAP.keys():
-                if len(key) >= 3 and (key in nq or nq in key):
-                    has_known = True
-                    break
-        if not has_known:
-            return f"{prev} ; {q}"
-        return q
-    except Exception:
-        return q
-
 
 # --- CẤU HÌNH VÀ TẢI DỮ LIỆU ---
 try:
@@ -179,6 +155,51 @@ def normalize_text(text):
     text = text.lower().strip()
     text = re.sub(r'\s+', ' ', text)
     return text
+
+# Inserted: GPT-assisted keyword extractor (defensive about missing client)
+def extract_keyword_with_gpt_turbo(question, all_keywords, skip_gpt: bool = False):
+    """
+    Sử dụng GPT-4 Turbo để chọn keyword có trong danh sách all_keywords
+    phù hợp nhất với câu hỏi người dùng.
+    """
+    try:
+        # If caller requested to skip GPT (e.g., UI button action), avoid calling the API
+        if skip_gpt:
+            # Short-circuit: do not call the OpenAI API for UI/button-triggered requests
+            print("[GPT] Skipped by skip_gpt flag (UI/button request)")
+            return None
+        # Defensive: require an API client named `client` to exist in globals()
+        client = globals().get('client')
+        if client is None:
+            print("[GPT] No 'client' available in globals() - skipping GPT extraction")
+            return None
+
+        prompt = f"""
+        Dưới đây là danh sách keyword có sẵn:
+        {', '.join(all_keywords[:500])}
+        Hãy chọn từ hoặc cụm từ trong danh sách trên phù hợp nhất với câu hỏi sau:
+        "{question}"
+        Chỉ trả về đúng keyword (phải có trong danh sách), không thêm ký tự khác.
+        """
+        resp = client.chat.completions.create(
+            model="gpt-4-turbo",
+            messages=[
+                {"role": "system", "content": "Bạn là hệ thống trích xuất keyword chính xác."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0,
+            max_tokens=32,
+        )
+        kw = resp.choices[0].message.content.strip().lower()
+        if kw in all_keywords:
+            print(f"[GPT] Keyword chọn: {kw}")
+            return kw
+        else:
+            print(f"[GPT] Keyword không trùng: {kw}")
+            return None
+    except Exception as e:
+        print(f"[GPT ERROR] {e}")
+        return None
 
 
 def add_li_ly_variants(keyword):
@@ -514,7 +535,7 @@ def contains_dataset_keyword(text: str) -> bool:
 # =========================================================================
 # START: REFACTORED get_answer FUNCTION FOR RELIABILITY
 # =========================================================================
-def get_answer(question):
+def get_answer(question, skip_gpt: bool = False):
     """
     Handles user questions with a clear, structured logic flow.
     1. Prioritizes exact and near-perfect matches for immediate, accurate answers.
@@ -575,6 +596,19 @@ def get_answer(question):
         # downstream matchers re-normalize inputs internally.
     except Exception:
         pass
+
+    # --- GPT keyword extractor ---
+    try:
+        # Only call GPT keyword extractor when not explicitly skipped (UI buttons)
+        gpt_kw = extract_keyword_with_gpt_turbo(question, list(KEYWORD_TO_ITEM_MAP.keys()), skip_gpt=skip_gpt)
+        if gpt_kw and gpt_kw in KEYWORD_TO_ITEM_MAP:
+            item = KEYWORD_TO_ITEM_MAP[gpt_kw]
+            # Previously returned text-only here which caused images/media to be dropped
+            # when the GPT keyword extractor matched. Use the helper to preserve media.
+            return [_build_response_from_item(item)]
+    except Exception as e:
+        # Fail silently and continue to fuzzy/semantic pipeline
+        print(f"[GPT] extract_keyword_with_gpt_turbo error: {e}")
 
     # --- Step 2: High-Confidence Fast Path ---
     # This is the most important fix: check for a near-perfect match FIRST and return immediately.
@@ -1396,7 +1430,17 @@ def ask():
     else:
         question_for_answer = question
 
-    responses = get_answer(question_for_answer)
+    # Detect UI/button-originated requests and avoid calling GPT for them.
+    # Frontend can pass `via_button: true` or `trigger: 'button'` or `source: 'ui'` to indicate a UI button action.
+    is_ui_button = False
+    try:
+        if isinstance(data, dict):
+            if data.get('via_button') or data.get('trigger') in ('button', 'ui', 'click') or data.get('source') in ('ui', 'button'):
+                is_ui_button = True
+    except Exception:
+        is_ui_button = False
+
+    responses = get_answer(question_for_answer, skip_gpt=is_ui_button)
 
     # Store bot turn (text only, first response) for lightweight history
     try:
