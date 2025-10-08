@@ -54,6 +54,8 @@ jobs:
             fi
             
             cd "$PROJECT_DIR" || { echo "Failed to change directory to $PROJECT_DIR"; exit 1; }
+
+            echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
             
             # Deploy application
             if [ -f "composeup.sh" ]; then
