@@ -1,4 +1,4 @@
-# filepath: rule-based-fixed.py
+# filepath: rule-based-improved.py
 # Copyright (c) [2025] [Nguyễn Minh Tấn Phúc]. Bảo lưu mọi quyền.
 # Nguồn: https://tlmchattest.streamlit.app/
 import json
@@ -512,15 +512,15 @@ def contains_dataset_keyword(text: str) -> bool:
 
 
 # =========================================================================
-# START: REFACTORED get_answer FUNCTION FOR RELIABILITY
+# START: REFACTORED get_answer FUNCTION FOR RELIABILITY (IMPROVED VERSION)
 # =========================================================================
 def get_answer(question):
     """
     Handles user questions with a clear, structured logic flow.
-    1. Prioritizes exact and near-perfect matches for immediate, accurate answers.
-    2. Gathers evidence from multiple sources (fuzzy, semantic) if the answer isn't obvious.
-    3. Asks for clarification only when there is genuine ambiguity between strong candidates.
-    4. Falls back to complex parsing for multi-intent questions as a last resort.
+    1. NEW: Prioritizes multi-intent detection to answer all parts of a complex query.
+    2. Falls back to exact and near-perfect matches for immediate, accurate answers on single topics.
+    3. Gathers evidence from multiple sources (fuzzy, semantic) if the answer isn't obvious.
+    4. Asks for clarification only when there is genuine ambiguity between strong candidates.
     """
 
     # Helper function to build a standard response object from a data item
@@ -559,81 +559,21 @@ def get_answer(question):
             {"text": hardcoded_response, "media_type": "text", "media_content": None, "action": "hieutruong_choices"}]
 
     # Clean the question for matching
-    SCHOOL_NAME_VARIANTS = [
-        "trường thpt", "thpt", "trường trung học phổ thông", "trung học phổ thông", "ten lơ men", "ten lơ man",
-        "ernst thälmann", "ernst thalmann", "trường cấp 3", "tlm", "trường ten lơ man"
-    ]
-    school_pattern = r"\b(" + r"|".join([re.escape(v) for v in SCHOOL_NAME_VARIANTS]) + r")\b"
-    core_question = re.sub(school_pattern, "", norm_question, flags=re.IGNORECASE).strip()
-    if not core_question:  # If question was only the school name
-        core_question = norm_question
-    # Normalize away common lead-in/trailing filler like 'cua truong', 've', etc.
-    # This helps queries such as "học phí của trường" -> expose core "học phí" to matcher.
-    try:
-        core_question = strip_leadin_phrases(core_question)
-        # strip_leadin_phrases returns a normalized (unaccented) string; keep as-is since
-        # downstream matchers re-normalize inputs internally.
-    except Exception:
-        pass
+    core_question = strip_leadin_phrases(norm_unaccent_question)
 
-    # --- Step 2: High-Confidence Fast Path ---
-    # This is the most important fix: check for a near-perfect match FIRST and return immediately.
-    try:
-        fuzzy_item, fuzzy_score = fuzzy_best_item(core_question)
-        if fuzzy_score > 0.95 and fuzzy_item:
-            return [_build_response_from_item(fuzzy_item)]
-    except Exception:
-        pass  # If this fails, we proceed to more complex logic
-
-    # --- Step 3: Gather Evidence for Ambiguous Cases ---
-    # Only run if the fast path didn't produce a clear winner.
-    near_candidates = []
-    try:
-        # Get fuzzy and semantic candidates
-        fuzzy_item, fuzzy_score = fuzzy_best_item(core_question)
-        embed_candidates = retrieve_topk_embeddings(core_question, top_k=3)
-
-        # Add fuzzy candidate if it's reasonably good
-        if fuzzy_item and fuzzy_score > 0.70:
-            near_candidates.append(fuzzy_item)
-
-        # Add semantic candidates if they are good and not already present
-        if embed_candidates:
-            for idx, sim in embed_candidates:
-                if sim > 0.68:  # Confidence threshold for semantic match
-                    q_text = app.session_state.question_texts[idx]
-                    cand_item = app.session_state.question_data_map.get(q_text)
-                    if cand_item and cand_item not in near_candidates:
-                        near_candidates.append(cand_item)
-    except Exception:
-        pass
-
-    # --- Step 4: Decision Logic ---
-    # If we have multiple strong, distinct candidates, ask for clarification.
-    if len(near_candidates) > 1:
-        return [make_clarifying_question(core_question, near_candidates)]
-
-    # If we have exactly one strong candidate, answer with it.
-    if len(near_candidates) == 1:
-        return [_build_response_from_item(near_candidates[0])]
-
-    # --- Step 5: Fallback to Multi-Intent Parsing ---
-    # This logic runs only if no single clear answer was found above.
-    sub_questions = find_multi_keyword_spans(normalize_and_unaccent(core_question))
-    if len(sub_questions) <= 1:
-        sub_questions = split_subquestions(core_question)
-
+    # --- Step 2: NEW - Multi-Intent First Path ---
+    # Ưu tiên kiểm tra xem câu hỏi có chứa nhiều từ khóa đã biết hay không.
+    # Ví dụ: "học phí và điểm chuẩn" sẽ tìm thấy cả "hoc phi" và "diem chuan".
+    sub_questions = find_multi_keyword_spans(core_question)
     if len(sub_questions) > 1:
         results = []
         for subq in sub_questions:
-            # For sub-questions, we want a direct answer, not more ambiguity checks.
-            # So we use a direct lookup.
-            item = KEYWORD_TO_ITEM_MAP.get(normalize_and_unaccent(subq))
+            item = KEYWORD_TO_ITEM_MAP.get(subq) # Tìm câu trả lời cho từng từ khóa
             if item:
                 results.append(_build_response_from_item(item))
 
         if results:
-            # Deduplicate identical results
+            # Deduplicate identical results to avoid sending the same answer twice
             unique_results = []
             seen_keys = set()
             for r in results:
@@ -641,11 +581,46 @@ def get_answer(question):
                 if key not in seen_keys:
                     unique_results.append(r)
                     seen_keys.add(key)
-            return unique_results
+            if unique_results:
+                return unique_results # Trả về tất cả các câu trả lời tìm được
+
+    # --- Step 3: High-Confidence Fast Path (for single-intent questions) ---
+    # Chỉ chạy nếu không phải là câu hỏi đa ý.
+    try:
+        fuzzy_item, fuzzy_score = fuzzy_best_item(core_question)
+        if fuzzy_score > 0.95 and fuzzy_item:
+            return [_build_response_from_item(fuzzy_item)]
+    except Exception:
+        pass
+
+    # --- Step 4: Gather Evidence for Ambiguous Cases ---
+    near_candidates = []
+    try:
+        fuzzy_item, fuzzy_score = fuzzy_best_item(core_question)
+        embed_candidates = retrieve_topk_embeddings(core_question, top_k=3)
+
+        if fuzzy_item and fuzzy_score > 0.70:
+            near_candidates.append(fuzzy_item)
+
+        if embed_candidates:
+            for idx, sim in embed_candidates:
+                if sim > 0.68:
+                    q_text = app.session_state.question_texts[idx]
+                    cand_item = app.session_state.question_data_map.get(q_text)
+                    if cand_item and cand_item not in near_candidates:
+                        near_candidates.append(cand_item)
+    except Exception:
+        pass
+
+    # --- Step 5: Decision Logic ---
+    if len(near_candidates) > 1:
+        return [make_clarifying_question(core_question, near_candidates)]
+
+    if len(near_candidates) == 1:
+        return [_build_response_from_item(near_candidates[0])]
 
     # --- Step 6: Final Fallback ---
-    # If all else fails, use the generic find_answer_and_media on the original question.
-    # This acts as a catch-all for complex phrasing the above logic might miss.
+    # Catch-all for complex phrasing.
     final_ans, media_type, media_content = find_answer_and_media(question)
     final_response = {
         "text": final_ans,
@@ -653,12 +628,10 @@ def get_answer(question):
         "media_content": media_content
     }
 
-    # Gate the final fallback if no keyword is present at all
     if not contains_dataset_keyword(core_question):
         final_response["text"] = "Xin lỗi, tôi không có thông tin về nội dung này."
 
     return [final_response]
-
 
 # =========================================================================
 # END: REFACTORED get_answer FUNCTION
