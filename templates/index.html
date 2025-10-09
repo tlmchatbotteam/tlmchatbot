@@ -210,7 +210,6 @@
             <div class="logo"><img src="/images/lg.jpg" alt="Logo"></div>
             <div class="nav">
                 <button class="primary" onclick="startNewChat()">Cuộc trò chuyện mới</button>
-                <!-- New: contact info button -->
                 <button onclick="openContactModal()">Thông tin liên hệ</button>
             </div>
         </aside>
@@ -218,8 +217,7 @@
         <section class="main">
             <header class="topbar">
                 <div class="brand">Chatbot Tuyển Sinh</div>
-                <!-- Removed top-right action buttons -->
-            </header>
+                </header>
 
             <div class="content">
                 <div id="empty-state">
@@ -229,9 +227,7 @@
                     <div class="prompts">
                         <button class="prompt-chip" onclick="renderHoatDongChoices()">Các hoạt động của trường</button>
                         <button class="prompt-chip" onclick="sendHieuTruong()">Hiệu trưởng nhà trường</button>
-                        <!-- New: School song chip placed next to Hiệu trưởng -->
                         <button class="prompt-chip" onclick="sendQuick('bài hát')">Bài hát của trường</button>
-                        <!-- New: Facilities prompt chip -->
                         <button class="prompt-chip" onclick="renderFacilitiesChoices()">Cơ sở vật chất</button>
                         <button class="prompt-chip" onclick="renderGiaoVienChoices()">Đội ngũ giáo viên</button>
                     </div>
@@ -247,10 +243,8 @@
         </section>
     </div>
 
-    <!-- New: Scroll-to-top button -->
     <button id="scroll-top-btn" aria-label="Lên đầu trang" title="Lên đầu trang">↑</button>
 
-    <!-- Lightbox root -->
     <div id="lightbox" class="lightbox-overlay" aria-hidden="true" tabindex="-1">
         <div class="lightbox-content" role="dialog" aria-modal="true">
             <button class="lightbox-close" aria-label="Đóng">×</button>
@@ -259,7 +253,6 @@
         </div>
     </div>
 
-    <!-- New: Contact modal -->
     <div id="contact-modal" class="modal-overlay" aria-hidden="true" tabindex="-1">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
             <div class="modal-header">
@@ -583,6 +576,35 @@
             updateEmptyStateVisibility();
         }
 
+        // =================================================================
+        // ======================== HÀM ĐÃ SỬA ĐỔI ========================
+        // =================================================================
+        /**
+         * Thêm một nút "Quay lại" vào container chứa kết quả.
+         * Nút này sẽ reset cuộc trò chuyện về trạng thái ban đầu.
+         * @param {HTMLElement} targetContainer - Element chứa nội dung chi tiết (ví dụ: responseHolder).
+         */
+        function addBackButton(targetContainer) {
+            // Chỉ thêm nút nếu container có nội dung
+            if (!targetContainer || !targetContainer.hasChildNodes()) return;
+
+            // Kiểm tra xem nút quay lại đã tồn tại chưa để tránh thêm nhiều lần
+            if (targetContainer.querySelector('.back-button')) return;
+
+            const backButton = document.createElement('button');
+            backButton.textContent = '↩️ Trở về menu chính';
+            backButton.className = 'choice-btn back-button'; // Thêm class 'back-button' để nhận diện
+            backButton.style.marginTop = '12px'; // Thêm một chút khoảng cách
+
+            // SỬA ĐỔI: Gọi hàm startNewChat() để quay về menu chính
+            backButton.onclick = () => {
+                startNewChat();
+            };
+            targetContainer.appendChild(backButton);
+        }
+        // =================================================================
+        // =================================================================
+
         async function sendQuestion() {
             const questionInput = document.getElementById('question');
             const question = questionInput.value.trim();
@@ -782,19 +804,25 @@
                 try { renderEntries(data, intoEl); } catch (_) { if (intoEl) intoEl.innerHTML = '<div class="message bot">Không có thông tin sẵn có.</div>'; }
             }
 
-             opts.forEach((opt) => {
-                 const btn = document.createElement('button');
-                 btn.className = 'choice-btn';
-                 btn.textContent = opt.label;
-                 btn.dataset.choiceValue = opt.q;
-                 btn.onclick = () => {
-                    // Render a local immediate response for snappy UI
-                    renderLocalFacility(opt.q, responseHolder);
-                    // Then attempt to fetch authoritative content from the backend; if it fails, the local content remains
-                    try { askAndRender(opt.q, responseHolder, { scroll: false }).catch(() => {}); } catch (_) {}
-                 };
-                 bar.appendChild(btn);
-             });
+            opts.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = opt.label;
+                btn.dataset.choiceValue = opt.q;
+                // ================== SỬA ĐỔI ==================
+                btn.onclick = async () => {
+                   // Render a local immediate response for snappy UI
+                   renderLocalFacility(opt.q, responseHolder);
+                   addBackButton(responseHolder); // Sử dụng văn bản mặc định
+                   // Then attempt to fetch authoritative content from the backend; if it fails, the local content remains
+                   try {
+                       await askAndRender(opt.q, responseHolder, { scroll: false });
+                       addBackButton(responseHolder); // Thêm lại nút sau khi tải xong
+                   } catch (_) {}
+                };
+                // =============================================
+                bar.appendChild(btn);
+            });
 
              bot.appendChild(bar);
              try { bar.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){ }
@@ -820,13 +848,23 @@
             btnCurrent.className = 'choice-btn';
             btnCurrent.textContent = 'Hiệu trưởng hiện tại';
             btnCurrent.dataset.choiceValue = 'Hiệu trưởng nhà trường';
-            btnCurrent.onclick = () => { askHieuTruongCurrent(responseHolder, { scroll: false }); };
+            // ================== SỬA ĐỔI ==================
+            btnCurrent.onclick = async () => {
+                await askHieuTruongCurrent(responseHolder, { scroll: false });
+                addBackButton(responseHolder);
+            };
+            // =============================================
 
             const btnHistory = document.createElement('button');
             btnHistory.className = 'choice-btn';
             btnHistory.textContent = 'Hiệu trưởng qua từng thời kỳ';
             btnHistory.dataset.choiceValue = 'các thầy cô hiệu trưởng qua từng thời kỳ';
-            btnHistory.onclick = () => { askHieuTruongHistory(responseHolder, { scroll: false }); };
+            // ================== SỬA ĐỔI ==================
+            btnHistory.onclick = async () => {
+                await askHieuTruongHistory(responseHolder, { scroll: false });
+                addBackButton(responseHolder);
+            };
+            // =============================================
 
             bar.appendChild(btnCurrent);
             bar.appendChild(btnHistory);
@@ -868,9 +906,14 @@
                 btn.textContent = label;
                 // expose value for delegated handler and still keep inline for compatibility
                 btn.dataset.choiceValue = label;
-                btn.onclick = () => {
-                    askAndRender(label, responseHolder, { scroll: false });
+                // ================== SỬA ĐỔI ==================
+                btn.onclick = async () => {
+                    // Chờ cho nội dung được render xong
+                    await askAndRender(label, responseHolder, { scroll: false });
+                    // Thêm nút quay lại
+                    addBackButton(responseHolder);
                 };
+                // =============================================
                 bar.appendChild(btn);
             });
 
@@ -911,7 +954,12 @@
                 btn.className = 'choice-btn';
                 btn.textContent = label;
                 btn.dataset.choiceValue = label;
-                btn.onclick = () => { askAndRender(label, responseHolder, { scroll: false }); };
+                // ================== SỬA ĐỔI ==================
+                btn.onclick = async () => {
+                    await askAndRender(label, responseHolder, { scroll: false });
+                    addBackButton(responseHolder);
+                };
+                // =============================================
                 bar.appendChild(btn);
             });
 
