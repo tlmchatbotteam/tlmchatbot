@@ -30,7 +30,7 @@
       "captions": null
     },
     {
-      "question": "Làm thế nào để đăng ký xét tuyển?",
+      "question": ["Làm thế nào để đăng ký xét tuyển?","Hình thức xét tuyển","Cách đăng ký xét tuyển","Cách thức đăng ký xét tuyển","Làm sao để đăng ký xét tuyển","Đăng ký xét tuyển như thế nào","Đăng ký xét tuyển ra sao","Đăng ký xét tuyển ở đâu","Đăng ký xét tuyển bằng cách nào","Đăng ký xét tuyển qua đâu","Đăng ký xét tuyển qua cách nào","Đăng ký xét tuyển qua hình thức nào"],
       "answer": "Bạn có thể đăng ký trực tuyến qua website trường hoặc nộp hồ sơ trực tiếp tại văn phòng tuyển sinh(thông tin thử nghiệm)",
       "images": null,
       "captions": null
@@ -124,7 +124,7 @@
        "sơ đồ trường học",
         "bản đồ trường học"
       ],
-      "answer": "đây là hình ảnh sơ đồ trường",
+      "answer": "Đây là hình ảnh sơ đồ trường",
       "images": "images/sodo.jpg",
       "captions": null
     },
@@ -558,7 +558,7 @@
       "question": [
         "môi truờng học tập",
         "môi trường học",
-        "môi trường học tập như thế nào"
+        "môi trường học tập như thế nào","môi trường học ở trường","môi trường học tập ở trường","môi trường"
       ],
       "answer": "Thầy cô giảng bài dễ hiểu, hướng dẫn nhiệt tình theo phương pháp dạy học sáng tạo, bạn bè thân thiện, hòa đồng.",
       "images": null,
@@ -1290,7 +1290,7 @@
     },
     {
       "question": [
-        "Ngoai ngữ 2",
+        "Ngoại ngữ 2",
         "Ngoại ngữ thứ hai",
         "Ngôn ngữ 2",
         "Ngôn ngữ thứ hai",
