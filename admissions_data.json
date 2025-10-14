@@ -135,7 +135,7 @@
         "thông tin liên hệ",
         "email",
         "cho tôi thông tin liên hệ",
-        "thông tin liên hệ của nhà trường"
+        "thông tin liên hệ của nhà trường","Các kênh thông tin chính thức","liên hệ nhà trường","thông tin về nhà trường","thông tin về trường","thông tin liên lạc","liên lạc với trường như thế nào","liên lạc với trường ra sao","liên lạc với trường qua đâu","liên lạc với trường qua cách nào","liên lạc với trường qua hình thức nào","làm sao để liên lạc với trường","làm thế nào để liên lạc với trường","làm sao để liên hệ với trường","làm thế nào để liên hệ với trường"
       ],
       "answer": "Trường Trung học phổ thông Tên Lơ Man nằm tại số 8 Trần Hưng Đạo, phường Bến Thành, TP. Hồ Chí Minh. Điện thoại liên hệ: (028)38299702, (028)38218020. Email: c3tenloman.tphochiminh@moet.edu.vn. Ban giám hiệu nhà trường gồm: - Thầy Nguyễn Hùng Khương, chức vụ: Hiệu trưởng, số điện thoại: 0913103045. - Cô Phan Thị Phương Trang, chức vụ: Phó hiệu trưởng, số điện thoại: 0919655589. - Thầy Trần Hải Bình, chức vụ: Phó hiệu trưởng, số điện thoại: 0929289858",
       "images": null,
@@ -491,17 +491,6 @@
     },
     {
       "question": [
-        "ưu điểm",
-        "hạn chế",
-        "ưu điểm và hạn chế",
-        "một số ưu điểm và hạn chế của trường"
-      ],
-      "answer": "Ưu điểm:\n\n- 100 % phòng học đều có máy lạnh, máy chiếu, micro.\n\n- Vị trí địa lý dễ tìm, giao thông đến trường thuận tiện (xe bus, tàu điện ngầm, …) \n\n - Tiện ích xung quanh trường (công viên có nhiều cây xanh, ăn uống, vui chơi …)\n\nHạn chế:\n\n- Phòng học không cố định.\n\n- Khuôn viên trường hơi nhỏ.",
-      "images": null,
-      "captions": null
-    },
-    {
-      "question": [
         "học bổng",
         "học bổng dành cho học sinh",
         "thông tin về học bổng"
@@ -510,23 +499,12 @@
       "images": null,
       "captions": null
     },
-    {
-      "question": [
-        "nhà vệ sinh",
-        "toilet",
-        "nhà vệ sinh trường như thế nào",
-        "nhà vệ sịnh có sạch không",
-        "nhà vệ sinh trường"
-      ],
-      "answer": "Nhà vệ sinh sạch sẽ, thoáng mát",
-      "images": null,
-      "captions": null
-    },
+
     {
       "question": [
         "loại hình trường",
-        "trường gì",
-        "trường ten lơ man thuộc loại hình trường gì"
+        "trường gì"
+        ,"trường ten lơ man thuộc loại hình trường gì"
       ],
       "answer": "Trường THPT Ten Lơ Man là cơ sở giáo dục phổ thông của hệ thống giáo dục quốc dân, là đơn vị sự nghiệp công lập trực thuộc Sở Giáo dục và Đào tạo Thành phố Hồ Chí Minh. \nTrường thực hiện chức năng, nhiệm vụ, quyền hạn theo Điều lệ Trường trung học cơ sở, trung học phổ thông và trường phổ thông có nhiều cấp học của Bộ Giáo dục và Đào tạo và các quy định Pháp luật có liên quan. Trường có tư cách pháp nhân, có tài khoản và con dấu riêng hoạt động theo quy định của Pháp luật.\nTrường THPT Ten Lơ Man thực hiện nhiệm vụ và quyền hạn sau đây: \n- Xây dựng kế hoạch chiến lược phát triển nhà trường, gắn với điều kiện kinh tế - xã hội của địa phương; xác định tầm nhìn, sứ mệnh, các giá trị cốt lõi về giáo dục, văn hóa, lịch sử và truyền thống của nhà trường; \n- Xây dựng và tổ chức thực hiện kế hoạch giáo dục của nhà trường, theo chương trình giáo dục phổ thông do Bộ trưởng Bộ Giáo dục và Đào tạo ban hành, cùng Sở Giáo dục và Đào tạo và nhà trường xây dựng. Phối hợp với gia đình học sinh, tổ chức và cá nhân trong việc tổ chức các hoạt động giáo dục\n",
       "images": null,
@@ -578,7 +556,8 @@
     {
       "question": [
         "quỹ khuyến học",
-        "khuyến khích học sinh",
+        "khuyến khích học sinh","quỹ khuyến học của trường",
+        "quỹ khuyến học của trường như thế nào",
         "trường khuyến khích học sinh như thế nào"
       ],
       "answer": "Quỹ khuyến học “Trái tim yêu thương” trường THPT Ten Lơ Man đã được thành lập và duy trì từ nhiều năm nay nhằm tiếp nối truyền thống cao đẹp của dân tộc: khuyến học – khuyến tài; tương thân, tương ái. Với mục tiêu thực hiện nhiệm vụ giáo dục truyền thống hiếu học, giáo dục tinh thần biết yêu thương, chia sẻ cho học sinh; thể hiện sự quan tâm, hỗ trợ những học sinh nghèo vượt khó để không một ai bị bỏ lại phía sau, quỹ đã nhận được sự ủng hộ và đồng hành rất lớn cả về vật chất và tinh thần của nhiều bậc cha mẹ học sinh, các mạnh thường quân, cựu học sinh, cựu giáo viên nhiều thế hệ của nhà trường\n\tHàng năm, bằng nguồn quỹ khuyến học, nhà trường đã thực hiện nhiều hoạt động ý nghĩa như: trao học bổng, trao quà Tết cho học sinh giỏi, học sinh có hoàn cảnh khó khăn; hỗ trợ học phí cho những học sinh nghèo; hỗ trợ công tác bồi dưỡng học sinh giỏi, khen thưởng học sinh giỏi trong năm học, học sinh đỗ thủ khoa, á khoa trong các kỳ thi tuyển sinh 10, tốt nghiệp THPT và tuyển sinh vào các trường đại học... Đặc biệt, với mục tiêu tạo môi trường giáo dục nhân ái, ấm áp nghĩa tình, quỹ “Trái tim yêu thương” đã luôn kịp thời đồng hành, hỗ trợ những học sinh bị bệnh hiểm nghèo, gặp biến cố trong cuộc sống. Trong đại dịch Covid 19, nhà trường đã cùng với các em học sinh vượt qua khó khăn bằng việc “trao tay”các thiết bị điện tử phục vụ học tập trực tuyến; gửi các phần quà hỗ trợ đến những em học sinh khó khăn, mồ côi cha, mẹ vì đại dịch.\n\tQũy khuyến học “Trái tim yêu thương” là biểu hiện của truyền thống giáo dục cao đẹp của nhà trường; là nơi lấp lánh những thương yêu; nơi gửi trao những  điều tử tế để các em học sinh, đặc biệt những học sinh nghèo vượt khó có thêm nhiều động lực, niềm tin vào cuộc sống. Từ đó góp phần nuôi dưỡng và dệt nên những ước mơ.\n",
