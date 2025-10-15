@@ -230,7 +230,8 @@
                         <button class="prompt-chip" onclick="sendQuick('bài hát')">Bài hát của trường</button>
                         <button class="prompt-chip" onclick="renderFacilitiesChoices()">Cơ sở vật chất</button>
                         <button class="prompt-chip" onclick="renderGiaoVienChoices()">Đội ngũ giáo viên</button>
-                    </div>
+                        <button class="prompt-chip" onclick="sendSuKien()">10 sự kiện nổi bật của trường năm 2024</button>
+                        </div>
                 </div>
 
                 <main id="chat-container"></main>
@@ -374,6 +375,13 @@
                 updateEmptyStateVisibility();
             } catch (_) { /* noop */ }
         }
+
+        // ===== HÀM MỚI ĐÃ ĐƯỢC THÊM VÀO ĐÂY =====
+        function sendSuKien() {
+            // Sử dụng hàm sendQuick đã có sẵn để gửi câu hỏi
+            sendQuick('10 sự kiện nổi bật của trường năm 2024');
+        }
+        // =======================================
 
         function sendQuick(q) {
             const input = document.getElementById('question');
