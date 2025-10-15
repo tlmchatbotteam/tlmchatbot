@@ -822,18 +822,6 @@
     },
     {
       "question": [
-        "video",
-        "clip",
-        "vid",
-        "phim"
-      ],
-      "answer": "Đây là video giới thiệu về trường của chúng tôi:",
-      "video_url": "https://www.youtube.com/watch?v=HzvZVAvBkto",
-      "images": null,
-      "captions": null
-    },
-    {
-      "question": [
         "vắng có phép buổi 1",
         "vắng có phép buổi 2",
         "vắng có phép sáng",
