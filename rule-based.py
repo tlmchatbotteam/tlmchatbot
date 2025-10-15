@@ -1,4 +1,4 @@
-# filepath: rule-based-improved.py
+# filepath: rule-based-modified.py
 # Copyright (c) [2025] [Nguyễn Minh Tấn Phúc]. Bảo lưu mọi quyền.
 # Nguồn: https://tlmchattest.streamlit.app/
 import json
@@ -512,15 +512,15 @@ def contains_dataset_keyword(text: str) -> bool:
 
 
 # =========================================================================
-# START: REFACTORED get_answer FUNCTION FOR RELIABILITY (IMPROVED VERSION)
+# START: REFACTORED get_answer FUNCTION FOR RELIABILITY (MODIFIED VERSION)
 # =========================================================================
 def get_answer(question):
     """
     Handles user questions with a clear, structured logic flow.
-    1. NEW: Prioritizes multi-intent detection to answer all parts of a complex query.
-    2. Falls back to exact and near-perfect matches for immediate, accurate answers on single topics.
-    3. Gathers evidence from multiple sources (fuzzy, semantic) if the answer isn't obvious.
-    4. Asks for clarification only when there is genuine ambiguity between strong candidates.
+    MODIFIED: Returns all matching information for a given keyword.
+    1. Prioritizes exact keyword matches to return all associated answers.
+    2. NEW: If an exact match exists in KEYWORD_TO_ITEMS_MAP, it returns all corresponding items.
+    3. Falls back to multi-intent detection, fuzzy matching, and semantic search if no exact multi-match is found.
     """
 
     # Helper function to build a standard response object from a data item
@@ -561,18 +561,12 @@ def get_answer(question):
     # Clean the question for matching
     core_question = strip_leadin_phrases(norm_unaccent_question)
 
-    # --- Step 2: NEW - Multi-Intent First Path ---
-    # Ưu tiên kiểm tra xem câu hỏi có chứa nhiều từ khóa đã biết hay không.
-    # Ví dụ: "học phí và điểm chuẩn" sẽ tìm thấy cả "hoc phi" và "diem chuan".
-    sub_questions = find_multi_keyword_spans(core_question)
-    if len(sub_questions) > 1:
-        results = []
-        for subq in sub_questions:
-            item = KEYWORD_TO_ITEM_MAP.get(subq) # Tìm câu trả lời cho từng từ khóa
-            if item:
-                results.append(_build_response_from_item(item))
-
-        if results:
+    # --- Step 2: NEW - Exact Multi-Answer Path ---
+    # Ưu tiên kiểm tra xem câu hỏi có khớp chính xác với một từ khóa có nhiều câu trả lời không.
+    if core_question in KEYWORD_TO_ITEMS_MAP:
+        items = KEYWORD_TO_ITEMS_MAP[core_question]
+        if len(items) > 0:
+            results = [_build_response_from_item(item) for item in items]
             # Deduplicate identical results to avoid sending the same answer twice
             unique_results = []
             seen_keys = set()
@@ -582,10 +576,32 @@ def get_answer(question):
                     unique_results.append(r)
                     seen_keys.add(key)
             if unique_results:
-                return unique_results # Trả về tất cả các câu trả lời tìm được
+                return unique_results  # Trả về tất cả các câu trả lời tìm được
 
-    # --- Step 3: High-Confidence Fast Path (for single-intent questions) ---
-    # Chỉ chạy nếu không phải là câu hỏi đa ý.
+    # --- Step 3: Multi-Intent Span-Based Path ---
+    # Nếu không có khớp chính xác, thử tách câu hỏi thành nhiều ý.
+    sub_questions = find_multi_keyword_spans(core_question)
+    if len(sub_questions) > 1:
+        results = []
+        for subq in sub_questions:
+            # Sử dụng map nhiều giá trị ở đây để lấy hết thông tin
+            items = KEYWORD_TO_ITEMS_MAP.get(subq, [])
+            for item in items:
+                if item:
+                    results.append(_build_response_from_item(item))
+
+        if results:
+            unique_results = []
+            seen_keys = set()
+            for r in results:
+                key = r.get("text", "")
+                if key not in seen_keys:
+                    unique_results.append(r)
+                    seen_keys.add(key)
+            if unique_results:
+                return unique_results
+
+    # --- Step 4: High-Confidence Fast Path (for single-intent questions) ---
     try:
         fuzzy_item, fuzzy_score = fuzzy_best_item(core_question)
         if fuzzy_score > 0.95 and fuzzy_item:
@@ -593,7 +609,7 @@ def get_answer(question):
     except Exception:
         pass
 
-    # --- Step 4: Gather Evidence for Ambiguous Cases ---
+    # --- Step 5: Gather Evidence for Ambiguous Cases ---
     near_candidates = []
     try:
         fuzzy_item, fuzzy_score = fuzzy_best_item(core_question)
@@ -612,15 +628,14 @@ def get_answer(question):
     except Exception:
         pass
 
-    # --- Step 5: Decision Logic ---
+    # --- Step 6: Decision Logic ---
     if len(near_candidates) > 1:
         return [make_clarifying_question(core_question, near_candidates)]
 
     if len(near_candidates) == 1:
         return [_build_response_from_item(near_candidates[0])]
 
-    # --- Step 6: Final Fallback ---
-    # Catch-all for complex phrasing.
+    # --- Step 7: Final Fallback ---
     final_ans, media_type, media_content = find_answer_and_media(question)
     final_response = {
         "text": final_ans,
@@ -632,6 +647,7 @@ def get_answer(question):
         final_response["text"] = "Xin lỗi, tôi không có thông tin về nội dung này."
 
     return [final_response]
+
 
 # =========================================================================
 # END: REFACTORED get_answer FUNCTION
