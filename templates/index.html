@@ -797,7 +797,9 @@
             const opts = [
                 { label: 'Phòng học', q: 'Phòng học' },
                 { label: 'Phòng máy tính', q: 'Phòng máy tính' },
-                { label: 'Sân trường', q: 'Sân trường' }
+                { label: 'Sân trường', q: 'Sân trường' },
+                { label: 'Căn tin', q: 'Căn tin' },
+                { label: 'Thư viện', q: 'Thư viện' }
             ];
 
             // Local fallback renderer: shows a short text + image from /images so the UI is usable without backend
@@ -805,7 +807,9 @@
                 const map = {
                     'Phòng học': { text: 'Các phòng học của trường được trang bị bàn ghế, bảng tương tác và ánh sáng hợp lý.', media_type: 'image', images: ['/images/PhongHoc.jpg'], captions: ['Phòng học'] },
                     'Phòng máy tính': { text: 'Phòng máy tính hiện đại với nhiều dàn máy cấu hình tốt, phục vụ thực hành tin học và lập trình.', media_type: 'image', images: ['/images/PhongMayTinh1.jpg'], captions: ['Phòng máy tính'] },
-                    'Sân trường': { text: 'Sân trường rộng rãi, thoáng đãng, nơi tổ chức các hoạt động thể thao và sự kiện ngoài trời.', media_type: 'image', images: ['/images/SanTruong.jpg'], captions: ['Sân trường'] }
+                    'Sân trường': { text: 'Sân trường rộng rãi, thoáng đãng, nơi tổ chức các hoạt động thể thao và sự kiện ngoài trời.', media_type: 'image', images: ['/images/SanTruong.jpg'], captions: ['Sân trường'] },
+                    'Căn tin': { text: 'Căn tin của trường sạch sẽ, cung cấp các bữa ăn hợp vệ sinh và đa dạng.', media_type: 'image', images: ['/images/CanTin.jpg'], captions: ['Căn tin'] },
+                    'Thư viện': { text: 'Thư viện có không gian yên tĩnh và nguồn tài liệu phong phú, phục vụ nhu cầu học tập và nghiên cứu của học sinh.', media_type: 'image', images: ['/images/ThuVien.jpg'], captions: ['Thư viện'] }
                 };
                 const data = map[name] ? [map[name]] : [{ text: 'Không có thông tin sẵn có về lựa chọn này.' }];
                 // renderEntries will replace the intoEl content
@@ -899,8 +903,19 @@
             bar.className = 'choice-bar';
 
             const teams = [
-                'Tổ ngoại ngữ','Tổ địa lý','Tổ giáo dục kinh tế và pháp luật','Tổ giáo dục quốc phòng và an ninh',
-                'Tổ giáo dục thể chất','Tổ hóa học','Tổ vật lí','Tổ sinh học','Tổ lịch sử','Tổ văn phòng','Tổ ngữ văn','Đội ngũ giáo viên'
+                'Tổ địa lý',
+                'Tổ giáo dục kinh tế và pháp luật',
+                'Tổ giáo dục quốc phòng và an ninh',
+                'Tổ giáo dục thể chất',
+                'Tổ hóa học',
+                'Tổ lịch sử',
+                'Tổ ngoại ngữ',
+                'Tổ ngữ văn',
+                'Tổ sinh học',
+                'Tổ toán',
+                'Tổ vật lí',
+                'Tổ văn phòng',
+                'Đội ngũ giáo viên'
             ];
 
             chatContainer.appendChild(bot);
