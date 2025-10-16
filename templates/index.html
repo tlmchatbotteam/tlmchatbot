@@ -958,13 +958,16 @@
             const bar = document.createElement('div');
             bar.className = 'choice-bar';
 
+            // ================== SỬA ĐỔI ==================
+            // Đã thay đổi thứ tự của các mục trong mảng opts
             const opts = [
+                'Hoạt động câu lạc bộ và hoạt động ngoại khóa',
+                'Hoạt động phong trào và hoạt động học tập',
                 'Hoạt động trải nghiệm hướng nghiệp',
                 'Hoạt động đoàn',
-                'Hoạt động thư viện',
-                'Hoạt động câu lạc bộ và hoạt động ngoại khóa',
-                'Hoạt động phong trào và hoạt động học tập'
+                'Hoạt động thư viện'
             ];
+            // =============================================
 
             // Append the choice message and a dedicated placeholder for the response
             chatContainer.appendChild(bot);
