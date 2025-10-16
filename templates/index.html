@@ -134,14 +134,75 @@
             40% { transform: scale(1); opacity: 1; }
         }
 
-        /* Lightbox */
-        .lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 24px; }
-        .lightbox-overlay.show { display: flex; }
-        .lightbox-content { position: relative; max-width: 92vw; max-height: 88vh; display: flex; flex-direction: column; align-items: center; }
-        .lightbox-image { max-width: 100%; max-height: 80vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); background: #111; }
-        .lightbox-caption { color: #e5e7eb; margin-top: 10px; text-align: center; font-size: 0.95rem; max-width: 90vw; }
-        .lightbox-close { position: absolute; top: -12px; right: -12px; width: 36px; height: 36px; border: none; border-radius: 999px; background: #fff; color: #111; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.25); font-size: 20px; line-height: 36px; padding: 0; }
-        .lightbox-close:hover { background: #f3f4f6; }
+        /* ======================================= */
+        /* SỬA ĐỔI CSS CHO LIGHTBOX TOÀN MÀN HÌNH */
+        /* ======================================= */
+        .lightbox-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9); /* Làm nền tối hơn */
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 0; /* Bỏ padding để ảnh chiếm toàn bộ không gian */
+        }
+        .lightbox-overlay.show {
+            display: flex;
+        }
+        .lightbox-content {
+            position: relative;
+            width: 100%; /* Chiếm toàn bộ chiều rộng */
+            height: 100%; /* Chiếm toàn bộ chiều cao */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .lightbox-image {
+            width: 100%; /* Chiếm toàn bộ chiều rộng của container */
+            height: 100%; /* Chiếm toàn bộ chiều cao của container */
+            object-fit: contain; /* Đảm bảo toàn bộ ảnh được hiển thị, không bị cắt xén hoặc biến dạng */
+            border-radius: 0; /* Bỏ bo góc */
+            box-shadow: none; /* Bỏ đổ bóng */
+        }
+        .lightbox-caption {
+            position: absolute; /* Định vị tuyệt đối so với .lightbox-content */
+            bottom: 20px; /* Cách đáy 20px */
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            background: rgba(0, 0, 0, 0.7); /* Nền mờ để dễ đọc chữ */
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 1rem;
+            max-width: 90vw;
+            pointer-events: none; /* Cho phép click xuyên qua caption */
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px; /* Căn lề trên và phải */
+            right: 20px;
+            width: 40px; /* Tăng kích thước để dễ bấm hơn */
+            height: 40px;
+            border: none;
+            border-radius: 50%; /* Nút tròn */
+            background: rgba(255, 255, 255, 0.9); /* Nền trắng mờ */
+            color: #111;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+            font-size: 24px; /* Tăng kích thước icon */
+            line-height: 40px;
+            padding: 0;
+            z-index: 1001; /* Đảm bảo nút đóng luôn ở trên cùng */
+        }
+        .lightbox-close:hover {
+            background: #fff;
+        }
+        /* ======================================= */
+        /* KẾT THÚC SỬA ĐỔI             */
+        /* ======================================= */
 
         /* Choice buttons */
         .choice-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }

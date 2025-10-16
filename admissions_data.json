@@ -1358,7 +1358,11 @@
         "hoạt động hướng nghiệp",
         "hoạt động trải nghiệm hướng nghiệp"
       ],
-      "answer": "Hoạt động trải nghiệm hướng nghiệp định kỳ hàng năm:\n\n+ Tour Đà Lạt: Sau khi thi HK1\n\n+ Tour Phan Thiết : Sau khi thi giữa HK2"
+      "answer": "Hoạt động trải nghiệm hướng nghiệp định kỳ hàng năm:\n\n+ Tour Đà Lạt: Sau khi thi HK1\n\n+ Tour Phan Thiết : Sau khi thi giữa HK2",
+        "images": [
+            "images/PhanThiet1.jpg",
+            "images/PhanThiet2.jpg","images/PhanThiet3.jpg"
+        ]
     },
     {
       "question": [
