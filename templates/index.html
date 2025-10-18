@@ -67,7 +67,18 @@
 
         .message { max-width: min(1000px, 96%); padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); font-size: 1.05rem; }
         .user { margin-left: auto; background: var(--user-msg); }
-        .bot { margin-right: auto; background: var(--bot-msg); align-self: stretch; width: 100%; max-width: none; margin: 0; }
+        .bot {
+            margin-right: auto;
+            background: var(--bot-msg);
+            align-self: stretch;
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            /* ======================================= */
+            /* === SỬA ĐỔI: THÊM DÒNG NÀY ĐỂ SỬA LỖI CUỘN === */
+            /* ======================================= */
+            scroll-margin-top: var(--topbar-h);
+        }
         .message p { margin: 0 0 8px 0; line-height: 1.6; }
 
         /* Balanced layout for text + single image */
@@ -288,7 +299,7 @@
                     <div class="prompts">
                         <button class="prompt-chip" onclick="renderHoatDongChoices()">Các hoạt động của trường</button>
                         <button class="prompt-chip" onclick="sendHieuTruong()">Hiệu trưởng nhà trường</button>
-                        <button class="prompt-chip" onclick="sendQuick('bài hát')">Bài hát của trường</button>
+                        <button class="prompt-chip" onclick="sendBaiHat()">Bài hát của trường</button>
                         <button class="prompt-chip" onclick="renderFacilitiesChoices()">Cơ sở vật chất</button>
                         <button class="prompt-chip" onclick="renderGiaoVienChoices()">Đội ngũ giáo viên</button>
                         <button class="prompt-chip" onclick="sendSuKien()">10 sự kiện nổi bật của trường năm 2024</button>
@@ -437,12 +448,48 @@
             } catch (_) { /* noop */ }
         }
 
-        // ===== HÀM MỚI ĐÃ ĐƯỢC THÊM VÀO ĐÂY =====
-        function sendSuKien() {
-            // Sử dụng hàm sendQuick đã có sẵn để gửi câu hỏi
-            sendQuick('10 sự kiện nổi bật của trường năm 2024');
+        async function sendSuKien() {
+            const question = '10 sự kiện nổi bật của trường năm 2024';
+            const chatContainer = document.getElementById('chat-container');
+
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = question;
+            chatContainer.appendChild(userMessage);
+            updateEmptyStateVisibility();
+
+            const responseHolder = document.createElement('div');
+            responseHolder.className = 'choice-response';
+            chatContainer.appendChild(responseHolder);
+
+            await window.askAndRender(question, responseHolder, { scroll: false });
+
+            addBackButton(responseHolder);
+
+            try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
         }
-        // =======================================
+
+        async function sendBaiHat() {
+            const question = 'bài hát';
+            const userDisplayQuestion = 'Bài hát của trường';
+            const chatContainer = document.getElementById('chat-container');
+
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = userDisplayQuestion;
+            chatContainer.appendChild(userMessage);
+            updateEmptyStateVisibility();
+
+            const responseHolder = document.createElement('div');
+            responseHolder.className = 'choice-response';
+            chatContainer.appendChild(responseHolder);
+
+            await window.askAndRender(question, responseHolder, { scroll: false });
+
+            addBackButton(responseHolder);
+
+            try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
+        }
 
         function sendQuick(q) {
             const input = document.getElementById('question');
@@ -451,9 +498,6 @@
         }
 
         function disableChoices(container) {
-            // Intentionally left as a no-op so buttons remain clickable per user's request.
-            // Previously this function disabled buttons to prevent multiple clicks;
-            // now we allow repeated clicks and instead replace the previous response.
         }
 
         function showTyping(targetContainer) {
@@ -477,7 +521,6 @@
             wrap.appendChild(text);
             p.appendChild(wrap);
             typing.appendChild(p);
-            // If target is a placeholder (not the main chat container) we clear it first
             if (chatContainer !== document.getElementById('chat-container')) {
                 chatContainer.innerHTML = '';
                 chatContainer.appendChild(typing);
@@ -488,11 +531,11 @@
             updateEmptyStateVisibility();
             return typing;
         }
+
         function hideTyping(typingEl) {
             try {
                 if (typingEl && typingEl.parentNode) typingEl.parentNode.removeChild(typingEl);
                 else {
-                    // Fallback: remove any leftover typing bubbles
                     const chatContainer = document.getElementById('chat-container');
                     const leftovers = chatContainer.querySelectorAll('[data-typing="true"]');
                     leftovers.forEach(el => el.remove());
@@ -500,18 +543,41 @@
             } catch (_) { /* noop */ }
         }
 
-        // Render backend response entries into the chat or into a placeholder element.
+        // =======================================
+        // ===== HÀM MỚI ĐƯỢC THÊM VÀO =====
+        // =======================================
+        function waitForImages(elements) {
+            const promises = [];
+            elements.forEach(container => {
+                const images = container.querySelectorAll('img');
+                images.forEach(img => {
+                    // Chỉ chờ những ảnh chưa được tải xong
+                    if (!img.complete) {
+                        promises.push(new Promise((resolve) => {
+                            // Cả khi tải thành công hoặc lỗi đều phải kết thúc việc chờ đợi
+                            img.onload = resolve;
+                            img.onerror = resolve;
+                        }));
+                    }
+                });
+            });
+            return Promise.all(promises);
+        }
+
+        // =======================================
+        // ===== HÀM RENDERENTRIES ĐÃ SỬA ĐỔI =====
+        // =======================================
         function renderEntries(data, intoEl) {
             const chatContainer = document.getElementById('chat-container');
             const target = intoEl || chatContainer;
+            const newElements = []; // <-- Dòng mới: Chuẩn bị một danh sách
 
             const entries = Array.isArray(data) ? data : (data ? [data] : []);
             if (!entries.length) {
                 updateEmptyStateVisibility();
-                return;
+                return newElements; // <-- Dòng đã sửa: Trả về danh sách rỗng
             }
 
-            // If rendering into a placeholder, clear it so we replace previous result
             if (intoEl) target.innerHTML = '';
 
             const createParagraphs = (text) => {
@@ -581,7 +647,6 @@
                     wrap.appendChild(createParagraphs(text));
                 }
 
-                // Special backend action hooks
                 try {
                     if (e.action === 'hieutruong_choices') {
                         if (target === chatContainer) {
@@ -590,13 +655,13 @@
                             responseHolder.className = 'choice-response';
                             target.appendChild(responseHolder);
                             renderHieuTruongButtons(wrap, responseHolder);
-                            return; // handled
+                            newElements.push(wrap, responseHolder);
+                            return;
                         } else {
                             wrap.appendChild(document.createElement('div'));
                             renderHieuTruongButtons(wrap, target);
                         }
                     }
-
                     if (e.action && typeof e.action === 'object' && Array.isArray(e.action.clarify_choices)) {
                         const bar = document.createElement('div');
                         bar.className = 'choice-bar';
@@ -604,7 +669,6 @@
                             const btn = document.createElement('button');
                             btn.className = 'choice-btn';
                             btn.textContent = opt;
-                            // store choice value on dataset so delegated handler can use it
                             btn.dataset.choiceValue = opt;
                             btn.onclick = () => askAndRender(opt, target === chatContainer ? null : target, { scroll: false });
                             bar.appendChild(btn);
@@ -628,7 +692,6 @@
                             const btn = document.createElement('button');
                             btn.className = 'choice-btn';
                             btn.textContent = opt.label || opt.name || opt;
-                            // store choice id for delegated handler
                             btn.dataset.choiceId = opt.id;
                             btn.dataset.choiceValue = btn.textContent;
                             btn.onclick = () => sendChoice(opt.id, target === chatContainer ? null : target, { scroll: false });
@@ -639,41 +702,32 @@
                 } catch (_) { /* noop */ }
 
                 target.appendChild(wrap);
+                newElements.push(wrap); // <-- Dòng mới: Thêm phần tử vào danh sách
             });
 
             if (!intoEl) chatContainer.scrollTop = chatContainer.scrollHeight;
             updateEmptyStateVisibility();
+            return newElements; // <-- Dòng đã sửa: Trả về danh sách các phần tử mới
         }
 
-        // =================================================================
-        // ======================== HÀM ĐÃ SỬA ĐỔI ========================
-        // =================================================================
-        /**
-         * Thêm một nút "Quay lại" vào container chứa kết quả.
-         * Nút này sẽ reset cuộc trò chuyện về trạng thái ban đầu.
-         * @param {HTMLElement} targetContainer - Element chứa nội dung chi tiết (ví dụ: responseHolder).
-         */
         function addBackButton(targetContainer) {
-            // Chỉ thêm nút nếu container có nội dung
             if (!targetContainer || !targetContainer.hasChildNodes()) return;
-
-            // Kiểm tra xem nút quay lại đã tồn tại chưa để tránh thêm nhiều lần
             if (targetContainer.querySelector('.back-button')) return;
 
             const backButton = document.createElement('button');
             backButton.textContent = '↩️ Trở về menu chính';
-            backButton.className = 'choice-btn back-button'; // Thêm class 'back-button' để nhận diện
-            backButton.style.marginTop = '12px'; // Thêm một chút khoảng cách
+            backButton.className = 'choice-btn back-button';
+            backButton.style.marginTop = '12px';
 
-            // SỬA ĐỔI: Gọi hàm startNewChat() để quay về menu chính
             backButton.onclick = () => {
                 startNewChat();
             };
             targetContainer.appendChild(backButton);
         }
-        // =================================================================
-        // =================================================================
 
+        // =======================================
+        // ===== HÀM SENDQUESTION ĐÃ SỬA ĐỔI HOÀN TOÀN =====
+        // =======================================
         async function sendQuestion() {
             const questionInput = document.getElementById('question');
             const question = questionInput.value.trim();
@@ -686,44 +740,22 @@
             chatContainer.appendChild(userMessage);
             updateEmptyStateVisibility();
 
-            // increment typed-question counter
             USER_QUESTION_COUNT = (USER_QUESTION_COUNT || 0) + 1;
 
-            // If this is the second or later typed question, scroll to user's message so they see their question
-            if (USER_QUESTION_COUNT >= 2) {
-                try { userMessage.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
-            }
-
-            // New: intercept exact keyword 'hoạt động' and render local choice buttons
             try {
                 const normalized = question.toLowerCase().normalize('NFC');
-                // helper: strip diacritics reliably (NFD + remove combining marks)
                 const stripDiacritics = (s) => { try { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (_) { return s; } };
                 const normalizedNoDiacritics = stripDiacritics(normalized);
 
-                // If user types 'cơ sở vật chất' (with or without diacritics), show facilities choices
-                try {
-                    if (normalized.includes('cơ sở vật chất') || normalizedNoDiacritics.includes('co so vat chat')) {
-                        renderFacilitiesChoices();
-                        questionInput.value = '';
-                        return;
-                    }
-                } catch(_) {}
-
-                if (normalized.includes('hoạt động')) {
-                    // render choices locally without calling backend
-                    renderHoatDongChoices();
-                    // clear input and stop further processing
-                    questionInput.value = '';
-                    return;
+                if (normalized.includes('cơ sở vật chất') || normalizedNoDiacritics.includes('co so vat chat')) {
+                    renderFacilitiesChoices(); questionInput.value = ''; return;
                 }
-
-                // New: intercept teacher-related keywords and render teacher team choices
+                if (normalized.includes('hoạt động')) {
+                    renderHoatDongChoices(); questionInput.value = ''; return;
+                }
                 const teacherKeywords = ['giáo viên', 'thầy cô giáo', 'thầy cô'];
                 if (teacherKeywords.some(k => normalized.includes(k))) {
-                    renderGiaoVienChoices();
-                    questionInput.value = '';
-                    return;
+                    renderGiaoVienChoices(); questionInput.value = ''; return;
                 }
             } catch (_) { /* noop */ }
 
@@ -735,13 +767,11 @@
                     body: JSON.stringify({ question, session_id: SESSION_ID })
                 });
 
-                // Better error handling: if non-OK, read text and throw
                 if (!response.ok) {
                     const txt = await response.text().catch(() => '');
                     throw new Error(`HTTP ${response.status} ${response.statusText}: ${txt}`);
                 }
 
-                // Try to parse JSON safely. Use clone so we can read text on parse failure.
                 let data;
                 try {
                     data = await response.json();
@@ -751,28 +781,32 @@
                 }
 
                 hideTyping(typingEl);
-                renderEntries(data);
-                // If the backend response produced choice buttons, ensure the newest choice bar is visible
-                try {
-                    const bars = chatContainer.querySelectorAll('.choice-bar');
-                    if (bars && bars.length) {
-                        const lastBar = bars[bars.length - 1];
-                        try { lastBar.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){}
+                // Lấy về các phần tử mới được render
+                const newElements = renderEntries(data);
+
+                // Nếu có phần tử mới được thêm vào
+                if (newElements && newElements.length > 0) {
+                    // Chờ tất cả hình ảnh trong các phần tử này tải xong
+                    await waitForImages(newElements);
+
+                    // Sau khi ảnh đã tải xong, BÂY GIỜ mới cuộn
+                    try {
+                        // Logic cuộn này sẽ sử dụng `scroll-margin-top` đã thêm vào CSS
+                        newElements[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } catch (_) {
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
                     }
-                } catch(_) {}
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+
                 questionInput.value = '';
             } catch (error) {
                 console.error('Error in sendQuestion:', error);
                 hideTyping(typingEl);
                 const errorMessage = document.createElement('div');
                 errorMessage.className = 'message bot';
-                // Show a clearer message to user but include short reason
                 const reason = (error && error.message) ? error.message : 'Có lỗi xảy ra.';
                 errorMessage.textContent = 'Có lỗi xảy ra. Vui lòng thử lại! (' + reason.slice(0,200) + ')';
                 chatContainer.appendChild(errorMessage);
-
-                // New: show detailed error in debug panel
                 showDebugError(error);
             } finally {
                 updateEmptyStateVisibility();
@@ -805,8 +839,6 @@
                 errorMessage.className = 'message bot';
                 errorMessage.textContent = 'Có lỗi xảy ra. Vui lòng thử lại!';
                 chatContainer.appendChild(errorMessage);
-
-                // New: show detailed error in debug panel
                 showDebugError(error);
             } finally {
                 updateEmptyStateVisibility();
@@ -825,10 +857,8 @@
             updateEmptyStateVisibility();
         }
 
-        // New: render facilities choices for "Cơ sở vật chất"
         function renderFacilitiesChoices() {
             const chatContainer = document.getElementById('chat-container');
-            // Avoid creating duplicate facilities blocks: if one exists, scroll to it
             try {
                 const existing = Array.from(chatContainer.querySelectorAll('.message.bot')).find(m => {
                     const p = m.querySelector('p');
@@ -849,7 +879,6 @@
             const bar = document.createElement('div');
             bar.className = 'choice-bar';
 
-            // Append the choice message and a dedicated placeholder for the response
             chatContainer.appendChild(bot);
             const responseHolder = document.createElement('div');
             responseHolder.className = 'choice-response';
@@ -863,7 +892,6 @@
                 { label: 'Thư viện', q: 'Thư viện' }
             ];
 
-            // Local fallback renderer: shows a short text + image from /images so the UI is usable without backend
             function renderLocalFacility(name, intoEl) {
                 const map = {
                     'Phòng học': { text: 'Các phòng học của trường được trang bị bàn ghế, bảng tương tác và ánh sáng hợp lý.', media_type: 'image', images: ['/images/PhongHoc.jpg'], captions: ['Phòng học'] },
@@ -873,7 +901,6 @@
                     'Thư viện': { text: 'Thư viện có không gian yên tĩnh và nguồn tài liệu phong phú, phục vụ nhu cầu học tập và nghiên cứu của học sinh.', media_type: 'image', images: ['/images/ThuVien.jpg'], captions: ['Thư viện'] }
                 };
                 const data = map[name] ? [map[name]] : [{ text: 'Không có thông tin sẵn có về lựa chọn này.' }];
-                // renderEntries will replace the intoEl content
                 try { renderEntries(data, intoEl); } catch (_) { if (intoEl) intoEl.innerHTML = '<div class="message bot">Không có thông tin sẵn có.</div>'; }
             }
 
@@ -882,18 +909,16 @@
                 btn.className = 'choice-btn';
                 btn.textContent = opt.label;
                 btn.dataset.choiceValue = opt.q;
-                // ================== SỬA ĐỔI ==================
                 btn.onclick = async () => {
-                   // Render a local immediate response for snappy UI
                    renderLocalFacility(opt.q, responseHolder);
-                   addBackButton(responseHolder); // Sử dụng văn bản mặc định
-                   // Then attempt to fetch authoritative content from the backend; if it fails, the local content remains
+                   addBackButton(responseHolder);
                    try {
                        await askAndRender(opt.q, responseHolder, { scroll: false });
-                       addBackButton(responseHolder); // Thêm lại nút sau khi tải xong
+                       addBackButton(responseHolder);
                    } catch (_) {}
+
+                   try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
                 };
-                // =============================================
                 bar.appendChild(btn);
             });
 
@@ -921,23 +946,21 @@
             btnCurrent.className = 'choice-btn';
             btnCurrent.textContent = 'Hiệu trưởng hiện tại';
             btnCurrent.dataset.choiceValue = 'Hiệu trưởng nhà trường';
-            // ================== SỬA ĐỔI ==================
             btnCurrent.onclick = async () => {
                 await askHieuTruongCurrent(responseHolder, { scroll: false });
                 addBackButton(responseHolder);
+                try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
             };
-            // =============================================
 
             const btnHistory = document.createElement('button');
             btnHistory.className = 'choice-btn';
             btnHistory.textContent = 'Hiệu trưởng qua từng thời kỳ';
             btnHistory.dataset.choiceValue = 'các thầy cô hiệu trưởng qua từng thời kỳ';
-            // ================== SỬA ĐỔI ==================
             btnHistory.onclick = async () => {
                 await askHieuTruongHistory(responseHolder, { scroll: false });
                 addBackButton(responseHolder);
+                try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
             };
-            // =============================================
 
             bar.appendChild(btnCurrent);
             bar.appendChild(btnHistory);
@@ -945,12 +968,10 @@
             bot.appendChild(bar);
             chatContainer.appendChild(bot);
             chatContainer.appendChild(responseHolder);
-            // ensure view moves down to show the BUTTONS (bar) when choices are created from a typed question
             try { bar.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){}
             updateEmptyStateVisibility();
         }
 
-        // New: render teacher-team choices for queries like "giáo viên" or "thầy cô"
         function renderGiaoVienChoices() {
             const chatContainer = document.getElementById('chat-container');
             const bot = document.createElement('div');
@@ -964,19 +985,7 @@
             bar.className = 'choice-bar';
 
             const teams = [
-                'Tổ địa lý',
-                'Tổ giáo dục kinh tế và pháp luật',
-                'Tổ giáo dục quốc phòng và an ninh',
-                'Tổ giáo dục thể chất',
-                'Tổ hóa học',
-                'Tổ lịch sử',
-                'Tổ ngoại ngữ',
-                'Tổ ngữ văn',
-                'Tổ sinh học',
-                'Tổ toán',
-                'Tổ vật lí',
-                'Tổ văn phòng',
-                'Đội ngũ giáo viên'
+                'Tổ địa lý', 'Tổ giáo dục kinh tế và pháp luật', 'Tổ giáo dục quốc phòng và an ninh', 'Tổ giáo dục thể chất', 'Tổ hóa học', 'Tổ lịch sử', 'Tổ ngoại ngữ', 'Tổ ngữ văn', 'Tổ sinh học', 'Tổ toán', 'Tổ vật lí', 'Tổ văn phòng', 'Đội ngũ giáo viên'
             ];
 
             chatContainer.appendChild(bot);
@@ -988,21 +997,16 @@
                 const btn = document.createElement('button');
                 btn.className = 'choice-btn';
                 btn.textContent = label;
-                // expose value for delegated handler and still keep inline for compatibility
                 btn.dataset.choiceValue = label;
-                // ================== SỬA ĐỔI ==================
                 btn.onclick = async () => {
-                    // Chờ cho nội dung được render xong
                     await askAndRender(label, responseHolder, { scroll: false });
-                    // Thêm nút quay lại
                     addBackButton(responseHolder);
+                    try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
                 };
-                // =============================================
                 bar.appendChild(btn);
             });
 
             bot.appendChild(bar);
-            // scroll to the BUTTONS (bar) so the user sees them when they were produced by a typed question
             try { bar.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){}
             updateEmptyStateVisibility();
         }
@@ -1019,18 +1023,10 @@
             const bar = document.createElement('div');
             bar.className = 'choice-bar';
 
-            // ================== SỬA ĐỔI ==================
-            // Đã thay đổi thứ tự của các mục trong mảng opts
             const opts = [
-                'Hoạt động câu lạc bộ và hoạt động ngoại khóa',
-                'Hoạt động phong trào và hoạt động học tập',
-                'Hoạt động trải nghiệm hướng nghiệp',
-                'Hoạt động đoàn',
-                'Hoạt động thư viện'
+                'Hoạt động câu lạc bộ và hoạt động ngoại khóa', 'Hoạt động phong trào và hoạt động học tập', 'Hoạt động trải nghiệm hướng nghiệp', 'Hoạt động đoàn', 'Hoạt động thư viện'
             ];
-            // =============================================
 
-            // Append the choice message and a dedicated placeholder for the response
             chatContainer.appendChild(bot);
             const responseHolder = document.createElement('div');
             responseHolder.className = 'choice-response';
@@ -1041,24 +1037,21 @@
                 btn.className = 'choice-btn';
                 btn.textContent = label;
                 btn.dataset.choiceValue = label;
-                // ================== SỬA ĐỔI ==================
                 btn.onclick = async () => {
                     await askAndRender(label, responseHolder, { scroll: false });
                     addBackButton(responseHolder);
+                    try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
                 };
-                // =============================================
                 bar.appendChild(btn);
             });
 
             bot.appendChild(bar);
-            // scroll to the BUTTONS (bar) so the user sees them when they were produced by a typed question
             try { bar.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){}
             updateEmptyStateVisibility();
         }
 
         function renderHieuTruongButtons(intoEl, responseHolder) {
             try {
-                // intoEl is the wrap (message bot) element that sits in the chat
                 const bar = document.createElement('div');
                 bar.className = 'choice-bar';
 
@@ -1066,13 +1059,19 @@
                 btnCurrent.className = 'choice-btn';
                 btnCurrent.textContent = 'Hiệu trưởng hiện tại';
                 btnCurrent.dataset.choiceValue = 'Hiệu trưởng nhà trường';
-                btnCurrent.onclick = () => { askHieuTruongCurrent(responseHolder, { scroll: false }); };
+                btnCurrent.onclick = async () => {
+                    await askHieuTruongCurrent(responseHolder, { scroll: false });
+                    try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
+                };
 
                 const btnHistory = document.createElement('button');
                 btnHistory.className = 'choice-btn';
                 btnHistory.textContent = 'Hiệu trưởng qua từng thời kỳ';
                 btnHistory.dataset.choiceValue = 'các thầy cô hiệu trưởng qua từng thời kỳ';
-                btnHistory.onclick = () => { askHieuTruongHistory(responseHolder, { scroll: false }); };
+                btnHistory.onclick = async () => {
+                    await askHieuTruongHistory(responseHolder, { scroll: false });
+                    try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
+                };
 
                 bar.appendChild(btnCurrent);
                 bar.appendChild(btnHistory);
@@ -1080,11 +1079,10 @@
             } catch (_) { /* no-op */ }
         }
 
-        // Universal helper: send a question to the backend and render the response into an optional placeholder
         window.askAndRender = async function askAndRender(question, intoEl, opts = { scroll: true }) {
              const chatContainer = document.getElementById('chat-container');
              const inflightKey = 'q:' + String(question || '');
-             if (__IN_FLIGHT.has(inflightKey)) return; // avoid duplicate calls for same question
+             if (__IN_FLIGHT.has(inflightKey)) return;
              __IN_FLIGHT.add(inflightKey);
              const typingEl = showTyping(intoEl);
              try {
@@ -1107,11 +1105,18 @@
                  }
 
                  hideTyping(typingEl);
-                 renderEntries(data, intoEl);
+                 const newElements = renderEntries(data, intoEl);
+
+                 if (intoEl && newElements.length > 0) {
+                     await waitForImages(newElements);
+                 }
 
                  if (intoEl) {
-                     try { if (opts && opts.scroll) intoEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){ }
-                     if (opts && opts.scroll) { const inp = document.getElementById('question'); if (inp) inp.focus(); }
+                     if (opts && opts.scroll) {
+                         try { intoEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_){ }
+                         const inp = document.getElementById('question');
+                         if (inp) inp.focus();
+                     }
                  } else {
                      try { chatContainer.scrollTop = chatContainer.scrollHeight; } catch(_){ }
                  }
@@ -1119,7 +1124,7 @@
                  console.error('Error in askAndRender:', error);
                  hideTyping(typingEl);
                  const errorMessage = document.createElement('div');
-                 errorMessage.className = 'message bot';
+errorMessage.className = 'message bot';
                  const reason = (error && error.message) ? error.message : 'Có lỗi xảy ra.';
                  if (intoEl) { intoEl.innerHTML = ''; intoEl.appendChild(errorMessage); }
                  else chatContainer.appendChild(errorMessage);
@@ -1130,14 +1135,12 @@
                  updateEmptyStateVisibility();
              }
          }
-        // Also expose a plain global identifier so direct calls to askAndRender(...) work
         try { var askAndRender = window.askAndRender; } catch (_) { /* noop */ }
 
-        // Global handler for choice button selections (sends choice_id to backend)
         window.sendChoice = async function sendChoice(choiceId, intoEl, opts = { scroll: true }) {
             const chatContainer = document.getElementById('chat-container');
             const inflightKey = 'choice:' + String(choiceId);
-            if (__IN_FLIGHT.has(inflightKey)) return; // prevent duplicate choice sends
+            if (__IN_FLIGHT.has(inflightKey)) return;
             __IN_FLIGHT.add(inflightKey);
             const typingEl = showTyping(intoEl);
             try {
@@ -1163,8 +1166,11 @@
                 renderEntries(data, intoEl);
 
                 if (intoEl) {
-                    try { if (opts && opts.scroll) intoEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_){ }
-                    if (opts && opts.scroll) { const inp = document.getElementById('question'); if (inp) inp.focus(); }
+                    if (opts && opts.scroll) {
+                         try { intoEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_){ }
+                        const inp = document.getElementById('question');
+                        if (inp) inp.focus();
+                    }
                 } else {
                     try { chatContainer.scrollTop = chatContainer.scrollHeight; } catch(_){ }
                 }
@@ -1193,7 +1199,6 @@
              await askAndRender('các thầy cô hiệu trưởng qua từng thời kỳ', intoEl, opts);
         }
 
-        // --- Lightbox logic ---
         function openLightbox(src, caption) {
             try {
                 const overlay = document.getElementById('lightbox');
@@ -1218,13 +1223,11 @@
             } catch (_) { /* noop */ }
         }
 
-        // --- Contact modal logic ---
         function openContactModal() {
             const overlay = document.getElementById('contact-modal');
             if (!overlay) return;
             overlay.classList.add('show');
             overlay.setAttribute('aria-hidden', 'false');
-            // prevent background scroll
             document.body.style.overflow = 'hidden';
         }
         function closeContactModal() {
@@ -1235,7 +1238,6 @@
             document.body.style.overflow = '';
         }
 
-        // Init basic events
         (function initUI() {
             try {
                 const input = document.getElementById('question');
@@ -1247,12 +1249,10 @@
                           if (q) sendQuestion();
                         }
                     });
-                    // initial focus for accessibility
                     input.setAttribute('aria-label', 'Câu hỏi');
                     input.focus();
                 }
 
-                // send button fallback (already has onclick, but ensure keyboard users are covered)
                 const sendBtn = document.getElementById('send-btn');
                 if (sendBtn) {
                     sendBtn.addEventListener('click', (e) => {
@@ -1261,24 +1261,18 @@
                     });
                 }
 
-                // Delegated click handler for choice-buttons (works for dynamic buttons)
                 const chatContainer = document.getElementById('chat-container');
                 if (chatContainer) {
                     chatContainer.addEventListener('click', (ev) => {
-                        // robustly find the nearest .choice-btn ancestor (handles text-node clicks)
                         let el = ev.target;
                         while (el && el !== chatContainer && !(el.classList && el.classList.contains('choice-btn'))) {
-                            el = el.nodeType === 3 ? el.parentElement : el.parentElement; // move up from text nodes too
+                            el = el.nodeType === 3 ? el.parentElement : el.parentElement;
                         }
                         const btn = (el && el !== chatContainer) ? el : null;
                         if (!btn) return;
 
-                        // If the button already has an explicit onclick handler, don't duplicate handling here.
-                        // Many buttons are created with inline onclick (btn.onclick = ...). In that case the inline
-                        // handler will run; the delegated handler should not run a second time.
                         if (typeof btn.onclick === 'function') return;
 
-                        // find placeholder (choice-response) next to the bot message
                         let intoEl = null;
                         try {
                             const wrap = btn.closest && btn.closest('.message.bot');
@@ -1292,44 +1286,49 @@
                             }
                         } catch (_) { /* noop */ }
 
-                        // dispatch based on data attributes (prefer dataset over inline handlers)
                         const cid = btn.dataset && btn.dataset.choiceId;
                         const cval = (btn.dataset && btn.dataset.choiceValue) || btn.textContent && btn.textContent.trim();
                         try {
-                            // prevent default bubbling/behavior for delegated handling
                             ev.preventDefault();
                             ev.stopPropagation();
                         } catch (_) {}
 
                         if (cid) {
                             const key = 'choice:' + cid;
-                            if (__IN_FLIGHT.has(key)) return; // already in flight
+                            if (__IN_FLIGHT.has(key)) return;
                             __IN_FLIGHT.add(key);
-                            try { sendChoice(cid, intoEl, { scroll: false }).finally(() => __IN_FLIGHT.delete(key)); } catch(e){ __IN_FLIGHT.delete(key); }
+                            try {
+                                sendChoice(cid, intoEl, { scroll: false }).finally(() => {
+                                    __IN_FLIGHT.delete(key);
+                                    if (intoEl) try { intoEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
+                                });
+                            } catch(e){ __IN_FLIGHT.delete(key); }
                             return;
                         }
                         if (cval) {
                           const key = 'q:' + cval;
                           if (__IN_FLIGHT.has(key)) return;
                           __IN_FLIGHT.add(key);
-                          try { askAndRender(cval, intoEl, { scroll: false }).finally(() => __IN_FLIGHT.delete(key)); } catch(e){ __IN_FLIGHT.delete(key); }
+                          try {
+                              askAndRender(cval, intoEl, { scroll: false }).finally(() => {
+                                  __IN_FLIGHT.delete(key);
+                                  if (intoEl) try { intoEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
+                              });
+                          } catch(e){ __IN_FLIGHT.delete(key); }
                           return;
                         }
                     });
                 }
 
-                // Lightbox close handlers
                 const lightbox = document.getElementById('lightbox');
                 if (lightbox) {
                     const close = lightbox.querySelector('.lightbox-close');
                     if (close) close.addEventListener('click', closeLightbox);
-                    // click on overlay (outside content) closes it
                     lightbox.addEventListener('click', (ev) => {
                         if (ev.target === lightbox) closeLightbox();
                     });
                 }
 
-                // Contact modal overlay click to close and close buttons
                 const contactModal = document.getElementById('contact-modal');
                 if (contactModal) {
                     contactModal.addEventListener('click', (ev) => {
@@ -1339,7 +1338,6 @@
                     closeBtns.forEach(b => b.addEventListener('click', closeContactModal));
                 }
 
-                // Global escape key to close overlays
                 document.addEventListener('keydown', (ev) => {
                     if (ev.key === 'Escape') {
                         closeLightbox();
@@ -1349,7 +1347,6 @@
 
                 updateEmptyStateVisibility();
 
-                // Scroll-to-top button behavior
                 try {
                     const scrollBtn = document.getElementById('scroll-top-btn');
                     const chatContainer = document.getElementById('chat-container');
@@ -1371,7 +1368,6 @@
                             } catch (_) {}
                         });
                     }
-                    // initial state
                     setTimeout(toggle, 300);
                 } catch (_) { /* noop */ }
 
