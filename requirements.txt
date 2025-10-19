@@ -1,10 +1,58 @@
+# ============================================
+# CORE DEPENDENCIES
+# ============================================
 flask==3.0.3
-openai==1.40.0
-faiss-cpu==1.7.4
-numpy==1.26.4
-scikit-learn==1.5.2
-transformers==4.44.0
-torch==2.3.1
-sentence-transformers==2.7.0
-rapidfuzz==3.6.1
-pyvi==0.1.1  # nếu bạn dùng tokenize tiếng Việt
+werkzeug==3.0.3  # Flask dependency
+
+# ============================================
+# AI/ML MODELS
+# ============================================
+torch==2.4.1  # Updated: newer stable version
+sentence-transformers==3.0.1  # Updated: latest with better multilingual support
+transformers==4.44.2  # Updated: minor security patches
+
+# ============================================
+# VECTOR SEARCH & INDEXING
+# ============================================
+faiss-cpu==1.8.0  # Updated: better performance
+# faiss-gpu==1.8.0  # Uncomment if you have CUDA GPU
+scikit-learn==1.5.2  # Keep: used for KNN fallback
+
+# ============================================
+# TEXT PROCESSING
+# ============================================
+numpy==1.26.4  # Keep: stable version
+rapidfuzz==3.9.7  # Updated: faster fuzzy matching
+
+# ============================================
+# OPTIONAL BUT RECOMMENDED
+# ============================================
+# Vietnamese text processing (currently not used in optimized version)
+# pyvi==0.1.1  # Uncomment if you implement Vietnamese word segmentation
+
+# Redis for persistent cache (recommended for production)
+# redis==5.0.8  # Uncomment if you use Redis cache
+# hiredis==2.3.2  # Optional: faster Redis parser
+
+# Rate limiting (recommended for production)
+# flask-limiter==3.8.0  # Uncomment if you add rate limiting
+
+# Monitoring & Logging
+# python-json-logger==2.0.7  # Structured logging
+
+# ============================================
+# DEVELOPMENT ONLY (don't install in production)
+# ============================================
+# pytest==8.3.2  # Testing
+# black==24.8.0  # Code formatting
+# flake8==7.1.1  # Linting
+
+# ============================================
+# NOTES
+# ============================================
+# 1. Install: pip install -r requirements.txt
+# 2. For GPU support: Replace faiss-cpu with faiss-gpu
+# 3. Minimum Python version: 3.8+
+# 4. Recommended Python version: 3.11+
+# 5. Total download size: ~2.5 GB (first time)
+# 6. Disk space needed: ~5 GB (with models cached)
