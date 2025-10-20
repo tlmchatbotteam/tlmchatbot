@@ -12,35 +12,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set envvar
-
-        env:
-          VM_USER: ubuntu
-          VM_IP:   35.240.138.116
+      - name: Set environment variables
         run: |
-          echo "VM_USER=$VM_USER" >> $GITHUB_ENV
-          echo "VM_IP=$VM_IP"     >> $GITHUB_ENV
-
-      - name: Set OpenAI API Key
-        run: echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
+          echo "VM_USER=ubuntu" >> $GITHUB_ENV
+          echo "VM_IP=35.240.138.116" >> $GITHUB_ENV
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
 
       - name: Set up SSH
         run: |
-          mkdir -p                               ~/.ssh
+          mkdir -p ~/.ssh
           echo "${{ secrets.VM_SSH_KEY_STR }}" > ~/.ssh/vm_ssh_key
-          chmod 600                              ~/.ssh/vm_ssh_key
-          ssh-keyscan -H "$VM_IP"             >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/vm_ssh_key
+          echo "SSH key first line:"
+          head -n 1 ~/.ssh/vm_ssh_key
+          echo "SSH key last line:"
+          tail -n 1 ~/.ssh/vm_ssh_key
+          ssh-keyscan -H $VM_IP >> ~/.ssh/known_hosts
 
       - name: Deploy to VM
         env:
           PROJECT_DIR: /home/ubuntu/test2
-          REPO_URL:    https://github.com/${{ github.repository }}.git
+          REPO_URL: https://github.com/${{ github.repository }}.git
         run: |
-          echo "VM_USER=$VM_USER" 
-          echo "VM_IP=$VM_IP"
-          echo "ssh -o StrictHostKeyChecking=no -i ~/.ssh/vm_ssh_key $VM_USER@$VM_IP  "
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/vm_ssh_key $VM_USER@$VM_IP << EOT
-            set -eou pipefail
+          echo "Deploying to $VM_USER@$VM_IP"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/vm_ssh_key $VM_USER@$VM_IP << 'EOT'
+            set -e
+            
+            PROJECT_DIR="${PROJECT_DIR}"
+            REPO_URL="${REPO_URL}"
+            OPENAI_API_KEY="${OPENAI_API_KEY}"
             
             # Clone or update repository
             if [ ! -d "$PROJECT_DIR" ]; then
@@ -55,7 +55,7 @@ jobs:
             
             cd "$PROJECT_DIR" || { echo "Failed to change directory to $PROJECT_DIR"; exit 1; }
 
-            echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
+            echo "OPENAI_API_KEY=$OPENAI_API_KEY" > .env
             
             # Deploy application
             if [ -f "composeup.sh" ]; then

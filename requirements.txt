@@ -55,4 +55,5 @@ rapidfuzz==3.9.7  # Updated: faster fuzzy matching
 # 3. Minimum Python version: 3.8+
 # 4. Recommended Python version: 3.11+
 # 5. Total download size: ~2.5 GB (first time)
-# 6. Disk space needed: ~5 GB (with models cached)
+openai>=1.12.0
+python-dotenv>=1.0.0
