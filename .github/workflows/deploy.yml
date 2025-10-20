@@ -35,7 +35,7 @@ jobs:
           REPO_URL: https://github.com/${{ github.repository }}.git
         run: |
           echo "Deploying to $VM_USER@$VM_IP"
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/vm_ssh_key $VM_USER@$VM_IP << 'EOT'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/vm_ssh_key $VM_USER@$VM_IP << EOT
             set -e
             
             PROJECT_DIR="${PROJECT_DIR}"
