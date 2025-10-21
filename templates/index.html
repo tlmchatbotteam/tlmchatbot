@@ -524,9 +524,22 @@
             if (chatContainer !== document.getElementById('chat-container')) {
                 chatContainer.innerHTML = '';
                 chatContainer.appendChild(typing);
+                // Cuộn xuống tin nhắn typing trong targetContainer
+                try {
+                    setTimeout(() => {
+                        typing.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                } catch(_) {}
             } else {
                 chatContainer.appendChild(typing);
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                // Cuộn xuống tin nhắn typing trong chat chính
+                try {
+                    setTimeout(() => {
+                        typing.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                } catch(_) {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
             }
             updateEmptyStateVisibility();
             return typing;
@@ -733,6 +746,9 @@
             const question = questionInput.value.trim();
             if (!question) return;
 
+            // Xóa nội dung trên thanh câu hỏi ngay sau khi nhấn gửi
+            questionInput.value = '';
+
             const chatContainer = document.getElementById('chat-container');
             const userMessage = document.createElement('div');
             userMessage.className = 'message user';
@@ -748,14 +764,17 @@
                 const normalizedNoDiacritics = stripDiacritics(normalized);
 
                 if (normalized.includes('cơ sở vật chất') || normalizedNoDiacritics.includes('co so vat chat')) {
-                    renderFacilitiesChoices(); questionInput.value = ''; return;
+                    renderFacilitiesChoices();
+                    return;
                 }
                 if (normalized.includes('hoạt động')) {
-                    renderHoatDongChoices(); questionInput.value = ''; return;
+                    renderHoatDongChoices();
+                    return;
                 }
                 const teacherKeywords = ['giáo viên', 'thầy cô giáo', 'thầy cô'];
                 if (teacherKeywords.some(k => normalized.includes(k))) {
-                    renderGiaoVienChoices(); questionInput.value = ''; return;
+                    renderGiaoVienChoices();
+                    return;
                 }
             } catch (_) { /* noop */ }
 
@@ -798,7 +817,6 @@
                     }
                 }
 
-                questionInput.value = '';
             } catch (error) {
                 console.error('Error in sendQuestion:', error);
                 hideTyping(typingEl);
