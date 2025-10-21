@@ -1632,10 +1632,39 @@ def ask():
 @app.route('/images/<path:filename>')
 def serve_image(filename):
     try:
+        # Debug: Log request details
+        logger.info(f"[IMAGE REQUEST] Requested: {filename}")
+        logger.info(f"[IMAGE REQUEST] Images dir: {config.IMAGES_DIR}")
+        logger.info(f"[IMAGE REQUEST] Absolute path: {os.path.abspath(config.IMAGES_DIR)}")
+
+        # Check if images directory exists
+        if not os.path.exists(config.IMAGES_DIR):
+            logger.error(f"[IMAGE ERROR] Images directory does not exist: {config.IMAGES_DIR}")
+            return jsonify({"error": "Images directory not found"}), 404
+
+        # Check if file exists
+        file_path = os.path.join(config.IMAGES_DIR, filename)
+        if not os.path.exists(file_path):
+            logger.error(f"[IMAGE ERROR] File not found: {file_path}")
+            # List available files for debugging
+            try:
+                available_files = os.listdir(config.IMAGES_DIR)
+                logger.error(f"[IMAGE ERROR] Available files: {available_files[:10]}")  # First 10 files
+            except Exception as list_err:
+                logger.error(f"[IMAGE ERROR] Cannot list directory: {list_err}")
+            return jsonify({"error": f"Image not found: {filename}"}), 404
+
+        # Check file permissions
+        if not os.access(file_path, os.R_OK):
+            logger.error(f"[IMAGE ERROR] No read permission for: {file_path}")
+            return jsonify({"error": "Permission denied"}), 403
+
+        logger.info(f"[IMAGE SUCCESS] Serving: {file_path}")
         return send_from_directory(config.IMAGES_DIR, filename)
+
     except Exception as e:
-        logger.error(f"Error serving image {filename}: {e}")
-        return "Image not found", 404
+        logger.error(f"[IMAGE ERROR] Unexpected error serving {filename}: {e}", exc_info=True)
+        return jsonify({"error": f"Error: {str(e)}"}), 500
 
 
 @app.route('/')
