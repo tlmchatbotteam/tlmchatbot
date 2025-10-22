@@ -557,24 +557,24 @@
         }
 
         // =======================================
-        // ===== HÀM MỚI ĐƯỢC THÊM VÀO =====
+        // ===== HÀM MỚI ĐƯỢC THÊM VÀO / SỬA ĐỔI =====
         // =======================================
         function waitForImages(elements) {
-            const promises = [];
-            elements.forEach(container => {
-                const images = container.querySelectorAll('img');
-                images.forEach(img => {
-                    // Chỉ chờ những ảnh chưa được tải xong
-                    if (!img.complete) {
-                        promises.push(new Promise((resolve) => {
-                            // Cả khi tải thành công hoặc lỗi đều phải kết thúc việc chờ đợi
-                            img.onload = resolve;
-                            img.onerror = resolve;
-                        }));
-                    }
-                });
-            });
-            return Promise.all(promises);
+            const promises = [];
+            elements.forEach(container => {
+                const images = container.querySelectorAll('img');
+                images.forEach(img => {
+                    if (!img.complete) {
+                        promises.push(new Promise((resolve) => {
+                            img.onload = resolve;
+                            img.onerror = resolve;
+                            // ✅ THÊM: Timeout 5s để tránh treo vĩnh viễn
+                            setTimeout(resolve, 5000);
+                        }));
+                    }
+                });
+            });
+            return Promise.all(promises); // ← Luôn trả về Promise
         }
 
         // =======================================
@@ -931,16 +931,19 @@
                 // ============ SỬA LỖI Ở ĐÂY ============
                 // =======================================
                 btn.onclick = async () => {
-                   // 1. Chỉ render nội dung cục bộ đã định nghĩa trong 'map'
-                   renderLocalFacility(opt.q, responseHolder);
-                   // 2. Thêm nút quay lại
-                   addBackButton(responseHolder);
-
-                   // 3. Khối lệnh 'try...catch' gọi 'askAndRender' đã bị XÓA BỎ
-                   //    vì nó thừa thãi, gây ra việc tải lại nội dung.
-
-                   // 4. Cuộn xuống để xem kết quả
-                   try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
+                   // 1. Render nội dung
+                   renderLocalFacility(opt.q, responseHolder);
+                   
+                   // 2. CHỜ ẢNH LOAD XONG
+                   await waitForImages([responseHolder]);
+                   
+                   // 3. Thêm nút quay lại
+                   addBackButton(responseHolder);
+                   
+                   // 4. BÂY GIỜ mới scroll
+                   try { 
+                       responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+                   } catch(_) {}
                 };
                 // =======================================
                 // ============ KẾT THÚC SỬA LỖI ============
