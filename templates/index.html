@@ -927,16 +927,24 @@
                 btn.className = 'choice-btn';
                 btn.textContent = opt.label;
                 btn.dataset.choiceValue = opt.q;
+                // =======================================
+                // ============ SỬA LỖI Ở ĐÂY ============
+                // =======================================
                 btn.onclick = async () => {
+                   // 1. Chỉ render nội dung cục bộ đã định nghĩa trong 'map'
                    renderLocalFacility(opt.q, responseHolder);
+                   // 2. Thêm nút quay lại
                    addBackButton(responseHolder);
-                   try {
-                       await askAndRender(opt.q, responseHolder, { scroll: false });
-                       addBackButton(responseHolder);
-                   } catch (_) {}
 
+                   // 3. Khối lệnh 'try...catch' gọi 'askAndRender' đã bị XÓA BỎ
+                   //    vì nó thừa thãi, gây ra việc tải lại nội dung.
+
+                   // 4. Cuộn xuống để xem kết quả
                    try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
                 };
+                // =======================================
+                // ============ KẾT THÚC SỬA LỖI ============
+                // =======================================
                 bar.appendChild(btn);
             });
 
