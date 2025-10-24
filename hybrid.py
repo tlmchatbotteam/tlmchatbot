@@ -76,7 +76,7 @@ class ChatbotConfig:
     IMAGES_DIR: str = os.getenv('IMAGES_DIR', 'images')
 
     # GPT API settings
-    USE_GPT: bool = os.getenv('USE_GPT', 'false').lower() == 'true'
+    USE_GPT: bool = os.getenv('USE_GPT', 'false').lower() == 'false'
     GPT_MODEL: str = os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
 
     # NEW: Separate settings for keyword extraction
@@ -84,7 +84,7 @@ class ChatbotConfig:
     GPT_KEYWORD_TEMPERATURE: float = float(os.getenv('GPT_KEYWORD_TEMPERATURE', '0'))
 
     # GPT Normalization settings (now returns keyword only)
-    USE_GPT_NORMALIZATION: bool = os.getenv('USE_GPT_NORMALIZATION', 'true').lower() == 'true'
+    USE_GPT_NORMALIZATION: bool = os.getenv('USE_GPT_NORMALIZATION', 'true').lower() == 'false'
     NORMALIZATION_TEMPERATURE: float = 0  # Deterministic for keyword selection
     NORMALIZATION_MAX_TOKENS: int = 50  # Shorter - just need 1 keyword
 
