@@ -1,7 +1,6 @@
-# Optimized Rule-Based Chatbot with GPT Keyword-Only Integration
-# MAJOR UPDATE: GPT returns ONLY keywords from dataset (no free-form rewriting)
-# This ensures 100% accuracy - GPT can only return existing keywords
-
+# Optimized Rule-Based Chatbot - FIXED VERSION
+# Improvements: Logging, Caching, Session Management, Trie Algorithm, Config Management
+# Fixes: UTF-8 encoding for Windows, Cross-encoder model
 import json
 import os
 import re
@@ -17,11 +16,6 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass
 from typing import Optional, List, Tuple, Dict
 from functools import lru_cache
-from dotenv import load_dotenv
-from openai import OpenAI
-
-# Load environment variables
-load_dotenv()
 
 # FIX: Force UTF-8 encoding on Windows console
 if sys.platform == 'win32':
@@ -29,6 +23,7 @@ if sys.platform == 'win32':
         sys.stdout.reconfigure(encoding='utf-8')
         sys.stderr.reconfigure(encoding='utf-8')
     except AttributeError:
+        # Python < 3.7
         import io
 
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
@@ -44,18 +39,6 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
-
-# Initialize OpenAI client with error handling
-try:
-    client = OpenAI(
-        api_key=os.getenv('OPENAI_API_KEY'),
-        timeout=int(os.getenv('OPENAI_TIMEOUT', '10')),
-        max_retries=int(os.getenv('OPENAI_MAX_RETRIES', '3'))
-    )
-    logger.info("OpenAI client initialized successfully")
-except Exception as e:
-    logger.error(f"Failed to initialize OpenAI client: {e}")
-    client = None
 
 # NEW: fast fuzzy matching with graceful fallback
 try:
@@ -75,20 +58,7 @@ class ChatbotConfig:
     DATA_PATH: str = os.getenv('DATA_PATH', 'admissions_data.json')
     IMAGES_DIR: str = os.getenv('IMAGES_DIR', 'images')
 
-    # GPT API settings
-    USE_GPT: bool = os.getenv('USE_GPT', 'false').lower() == 'false'
-    GPT_MODEL: str = os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
-
-    # NEW: Separate settings for keyword extraction
-    GPT_KEYWORD_MAX_TOKENS: int = int(os.getenv('GPT_KEYWORD_MAX_TOKENS', '50'))
-    GPT_KEYWORD_TEMPERATURE: float = float(os.getenv('GPT_KEYWORD_TEMPERATURE', '0'))
-
-    # GPT Normalization settings (now returns keyword only)
-    USE_GPT_NORMALIZATION: bool = os.getenv('USE_GPT_NORMALIZATION', 'true').lower() == 'false'
-    NORMALIZATION_TEMPERATURE: float = 0  # Deterministic for keyword selection
-    NORMALIZATION_MAX_TOKENS: int = 50  # Shorter - just need 1 keyword
-
-    # Thresholds
+    # Thresholds - GIỮ NGUYÊN GIÁ TRỊ CŨ
     FUZZY_STRONG: float = 0.88
     FUZZY_MIN: float = 0.60
     EMBED_STRONG: float = 0.72
@@ -101,12 +71,9 @@ class ChatbotConfig:
     CACHE_SIZE: int = 1000
     SESSION_EXPIRATION_HOURS: int = 24
 
-    # NEW: Pre-filtering for GPT
-    GPT_PREFILTER_CANDIDATES: int = 30  # Send only top 30 candidates to GPT
-
-    # Model names
+    # Model names - FIXED
     SBERT_MODEL: str = "paraphrase-multilingual-mpnet-base-v2"
-    CROSS_ENCODER_MODEL: str = "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
+    CROSS_ENCODER_MODEL: str = "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"  # Fixed: model exists
 
 
 config = ChatbotConfig()
@@ -123,7 +90,10 @@ class TrieNode:
 
 
 class KeywordTrie:
-    """Cây Trie để tìm kiếm nhanh keywords"""
+    """
+    Cây Trie để tìm kiếm nhanh keywords
+    Độ phức tạp: O(n×m) thay vì O(n²)
+    """
 
     def __init__(self):
         self.root = TrieNode()
@@ -134,11 +104,13 @@ class KeywordTrie:
         try:
             tokens = phrase.split()
             self.max_phrase_length = max(self.max_phrase_length, len(tokens))
+
             node = self.root
             for token in tokens:
                 if token not in node.children:
                     node.children[token] = TrieNode()
                 node = node.children[token]
+
             node.is_end = True
             node.data = data
         except Exception as e:
@@ -149,17 +121,23 @@ class KeywordTrie:
         try:
             tokens = question.split()
             matches = []
+
             for start_idx in range(len(tokens)):
                 node = self.root
+
                 for end_idx in range(start_idx, min(start_idx + self.max_phrase_length, len(tokens))):
                     token = tokens[end_idx]
+
                     if token not in node.children:
                         break
+
                     node = node.children[token]
+
                     if node.is_end:
                         phrase = ' '.join(tokens[start_idx:end_idx + 1])
                         phrase_length = end_idx - start_idx + 1
                         matches.append((phrase, node.data, phrase_length))
+
             return matches
         except Exception as e:
             logger.error(f"Error searching matches for '{question}': {e}")
@@ -196,14 +174,20 @@ class HybridMatcher:
     def find_match(self, question: str) -> Optional[dict]:
         """Tìm match theo thứ tự: exact -> trie -> token check"""
         try:
+            # Level 1: Exact match
             if question in self.exact_map:
                 return self.exact_map[question]
+
+            # Level 2: Trie matching
             trie_result = self.trie.find_best_match(question)
             if trie_result:
                 return trie_result
+
+            # Level 3: Token existence check
             tokens = set(question.split())
             if not tokens.intersection(self.all_tokens):
                 return None
+
             return None
         except Exception as e:
             logger.error(f"Error in hybrid matching: {e}")
@@ -241,9 +225,11 @@ class ResponseCache:
     def set(self, text: str, response: dict):
         try:
             key = self._make_key(text)
+
             if len(self.cache) >= self.max_size:
                 oldest = self.access_order.pop(0)
                 del self.cache[oldest]
+
             self.cache[key] = response
             self.access_order.append(key)
         except Exception as e:
@@ -282,12 +268,14 @@ class SessionStore:
     def append_message(self, session_id: str, role: str, text: str):
         try:
             self._cleanup_expired()
+
             if session_id not in self.sessions:
                 self.sessions[session_id] = {
                     'history': [],
                     'created': datetime.now(),
                     'last_access': datetime.now()
                 }
+
             session = self.sessions[session_id]
             session['history'].append({
                 'role': role,
@@ -295,6 +283,7 @@ class SessionStore:
                 'timestamp': datetime.now().isoformat()
             })
             session['last_access'] = datetime.now()
+
             if len(session['history']) > config.HISTORY_LIMIT:
                 session['history'] = session['history'][-config.HISTORY_LIMIT:]
         except Exception as e:
@@ -336,11 +325,14 @@ def load_admissions_data(file_path: str) -> dict:
         if not os.path.exists(file_path):
             logger.error(f"Data file not found: {file_path}")
             return {"questions": []}
+
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
+
         if 'questions' not in data:
             logger.error("Invalid data format: 'questions' key missing")
             return {"questions": []}
+
         logger.info(f"Loaded {len(data['questions'])} questions from {file_path}")
         return data
     except json.JSONDecodeError as e:
@@ -390,223 +382,6 @@ def normalize_and_unaccent(text: str) -> str:
     except Exception as e:
         logger.error(f"Error in normalize_and_unaccent: {e}")
         return text
-
-
-# --- NEW: IMPROVED GPT KEYWORD-ONLY NORMALIZER ---
-@lru_cache(maxsize=1000)
-def detect_needs_normalization(text: str) -> bool:
-    """
-    Phát hiện câu hỏi cần chuẩn hóa bởi GPT
-
-    Returns:
-        True nếu cần GPT xử lý (không dấu, viết tắt, typo)
-    """
-    try:
-        norm = normalize_text(text)
-
-        # 1. Check không dấu
-        has_vietnamese_chars = bool(
-            re.search(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', norm))
-        if not has_vietnamese_chars and len(norm) > 5:
-            logger.info(f"[Detector] No Vietnamese accents detected: {text[:50]}")
-            return True
-
-        # 2. Check viết tắt (nhiều từ ngắn liên tiếp)
-        tokens = norm.split()
-        short_tokens = [t for t in tokens if len(t) <= 3 and t.isalpha()]
-        if len(short_tokens) >= 2:
-            logger.info(f"[Detector] Abbreviations detected: {text[:50]}")
-            return True
-
-        # 3. Check typo patterns
-        invalid_patterns = [
-            r'[bcdfghjklmnpqrstvwxyz]{4,}',  # 4+ phụ âm liên tiếp
-            r'\b[a-z]{1,2}\b.*\b[a-z]{1,2}\b',  # nhiều từ 1-2 ký tự
-        ]
-        for pattern in invalid_patterns:
-            if re.search(pattern, norm):
-                logger.info(f"[Detector] Invalid pattern detected: {text[:50]}")
-                return True
-
-        # 4. Check từ không tồn tại trong keywords (will be initialized later)
-        if 'ALL_KEYWORDS_SET' in globals():
-            unaccented = normalize_and_unaccent(text)
-            found_tokens = set(unaccented.split()) & ALL_KEYWORDS_SET
-            if len(tokens) >= 3 and len(found_tokens) == 0:
-                logger.info(f"[Detector] No keyword match: {text[:50]}")
-                return True
-
-        return False
-
-    except Exception as e:
-        logger.error(f"[Detector] Error: {e}")
-        return False
-
-
-def pre_filter_keywords(question: str, all_keywords: list, top_k: int = 50) -> list:
-    """
-    Lọc trước keywords bằng fuzzy matching để giảm số lượng gửi GPT
-
-    Args:
-        question: Câu hỏi người dùng
-        all_keywords: Tất cả keywords từ dataset
-        top_k: Số lượng candidates tối đa
-
-    Returns:
-        List keywords phù hợp nhất
-    """
-    try:
-        norm_q = normalize_and_unaccent(question)
-
-        if fuzz and process:
-            # Use RapidFuzz for fast matching
-            matches = process.extract(
-                norm_q,
-                all_keywords,
-                scorer=fuzz.token_set_ratio,
-                limit=top_k
-            )
-            candidates = [m[0] for m in matches if m[1] > 30]
-            logger.info(f"[Pre-filter] Found {len(candidates)} candidates using RapidFuzz")
-            return candidates
-        else:
-            # Fallback: token overlap
-            q_tokens = set(norm_q.split())
-            candidates = []
-            for kw in all_keywords:
-                kw_tokens = set(kw.split())
-                if q_tokens & kw_tokens:
-                    candidates.append(kw)
-            result = candidates[:top_k]
-            logger.info(f"[Pre-filter] Found {len(result)} candidates using token overlap")
-            return result
-
-    except Exception as e:
-        logger.error(f"Error pre-filtering keywords: {e}")
-        return all_keywords[:top_k]
-
-
-@lru_cache(maxsize=500)
-def normalize_query_with_gpt_keyword_only(query: str, keywords_hash: str) -> Optional[str]:
-    """
-    🆕 GPT CHỈ TRẢ VỀ KEYWORD TỪ DATASET - KHÔNG TỰ DO VIẾT LẠI CÂU
-
-    Đảm bảo 100% keyword thuộc dataset, tránh GPT sáng tạo từ không có sẵn.
-
-    Args:
-        query: Câu hỏi người dùng (có thể không dấu/viết tắt/lỗi)
-        keywords_hash: Hash của danh sách keywords (để cache)
-
-    Returns:
-        Keyword từ dataset hoặc None
-
-    Examples:
-        >>> normalize_query_with_gpt_keyword_only("hoc phi truong", "...")
-        "học phí"
-
-        >>> normalize_query_with_gpt_keyword_only("ts lop 10", "...")
-        "tuyển sinh lớp 10"
-    """
-    try:
-        if not config.USE_GPT_NORMALIZATION or client is None:
-            logger.debug("[GPT Keyword] Disabled or client not available")
-            return None
-
-        # Lấy tất cả keywords từ dataset
-        all_keywords = list(KEYWORD_TO_ITEM_MAP.keys())
-
-        # Pre-filter để giảm tokens (quan trọng để tiết kiệm cost!)
-        candidates = pre_filter_keywords(
-            query,
-            all_keywords,
-            top_k=config.GPT_PREFILTER_CANDIDATES
-        )
-
-        if not candidates:
-            logger.warning(f"[GPT Keyword] No candidates found for: {query}")
-            return None
-
-        # 🆕 PROMPT MỚI: BUỘC GPT CHỌN TỪ DANH SÁCH
-        prompt = f"""Bạn là hệ thống matching câu hỏi với dataset keywords.
-
-DANH SÁCH KEYWORDS CÓ SẴN (chọn ĐÚNG 1 phù hợp nhất):
-{chr(10).join([f"- {kw}" for kw in candidates])}
-
-CÂU HỎI NGƯỜI DÙNG (có thể không dấu/viết tắt/lỗi chính tả):
-"{query}"
-
-YÊU CẦU:
-1. Phân tích ý định của câu hỏi
-2. Chọn ĐÚNG 1 keyword phù hợp nhất từ danh sách trên
-3. CHỈ trả về keyword đó, KHÔNG giải thích, KHÔNG thêm bớt gì
-
-VÍ DỤ CHUẨN:
-- Input: "hoc phi truong" → Output: học phí
-- Input: "ts lop 10" → Output: tuyển sinh lớp 10  
-- Input: "diem chuan ntn" → Output: điểm chuẩn
-- Input: "hp vb2" → Output: học phí văn bằng 2
-
-Keyword phù hợp:"""
-
-        response = client.chat.completions.create(
-            model=config.GPT_MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Bạn là chuyên gia matching keyword. LUÔN LUÔN chỉ trả về ĐÚNG 1 keyword có trong danh sách đã cho, không thêm bớt gì."
-                },
-                {"role": "user", "content": prompt}
-            ],
-            temperature=config.NORMALIZATION_TEMPERATURE,  # 0 = deterministic
-            max_tokens=config.NORMALIZATION_MAX_TOKENS  # 50 = đủ cho 1 keyword
-        )
-
-        keyword = response.choices[0].message.content.strip().lower()
-
-        # Làm sạch output (GPT đôi khi thêm quotes/prefix)
-        keyword = re.sub(r'^["\'\-→•]|["\']$', '', keyword)
-        keyword = keyword.replace('output:', '').replace('→', '').strip()
-
-        # 🔒 VALIDATE: Keyword PHẢI có trong dataset
-        if keyword in all_keywords:
-            logger.info(f"[GPT Keyword] ✓ '{query}' → '{keyword}'")
-            return keyword
-
-        # Thử normalize và check lại
-        keyword_normalized = normalize_and_unaccent(keyword)
-        if keyword_normalized in all_keywords:
-            logger.info(f"[GPT Keyword] ✓ '{query}' → '{keyword_normalized}' (normalized)")
-            return keyword_normalized
-
-        # Thử fuzzy match với candidates (GPT có thể sai chính tả nhẹ)
-        if fuzz and process:
-            match = process.extractOne(
-                keyword,
-                all_keywords,
-                scorer=fuzz.ratio,
-                score_cutoff=85
-            )
-            if match:
-                matched_keyword = match[0]
-                logger.warning(f"[GPT Keyword] ⚠ '{keyword}' fuzzy matched to '{matched_keyword}'")
-                return matched_keyword
-
-        # ❌ REJECT: Keyword không hợp lệ
-        logger.warning(f"[GPT Keyword] ✗ Invalid: '{keyword}' not in dataset (query: '{query}')")
-        return None
-
-    except Exception as e:
-        logger.error(f"[GPT Keyword] Error: {e}")
-        return None
-
-
-def normalize_query_with_gpt_keyword_wrapper(query: str) -> Optional[str]:
-    """
-    Wrapper để làm keywords_hash có thể cache được
-    """
-    all_keywords = list(KEYWORD_TO_ITEM_MAP.keys())
-    keywords_hash = hashlib.md5(','.join(sorted(all_keywords)).encode()).hexdigest()
-    return normalize_query_with_gpt_keyword_only(query, keywords_hash)
 
 
 def strip_leadin_phrases(text: str) -> str:
@@ -682,13 +457,17 @@ def augment_with_context(session_id: str, q: str) -> str:
     """Ghép với ngữ cảnh nếu cần"""
     try:
         norm_q_unaccented = normalize_and_unaccent(q)
-        if 'KEYWORD_TO_ITEM_MAP' in globals() and norm_q_unaccented in KEYWORD_TO_ITEM_MAP:
+
+        if norm_q_unaccented in KEYWORD_TO_ITEM_MAP:
             return q
+
         if re.fullmatch(r"hieu\s*truong", norm_q_unaccented):
             return q
+
         prev = last_user_turn(session_id)
         if not prev:
             return q
+
         interrogatives = [
             r"\bai\b", r"\bgi\b", r"\bgi\s*\?", r"o\s*dau", r"khi\s*nao",
             r"bao\s*gio", r"bao\s*nhieu", r"the\s*nao", r"nao", r"khong", r"sao"
@@ -696,6 +475,7 @@ def augment_with_context(session_id: str, q: str) -> str:
         for pat in interrogatives:
             if re.search(pat, norm_q_unaccented):
                 return f"{prev} ; {q}"
+
         return q
     except Exception as e:
         logger.error(f"Error augmenting context: {e}")
@@ -1155,75 +935,9 @@ def make_clarifying_question(user_query: str, candidates: list) -> dict:
         return {"text": "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "media_type": "text", "media_content": None}
 
 
-# --- 🆕 NEW: GPT KEYWORD-ONLY PIPELINE ---
-def get_answer_with_gpt_normalization(question: str, session_id: Optional[str] = None):
-    """
-    🆕 Pipeline mới: GPT chỉ trả về keyword từ dataset
-
-    Flow:
-    1. Detect nếu câu hỏi cần normalize (không dấu/viết tắt/typo)
-    2. GPT chọn keyword từ dataset → 100% đảm bảo có trong data
-    3. Lấy đáp án trực tiếp từ keyword
-    4. Fallback về pipeline cũ nếu GPT fail
-
-    Args:
-        question: Câu hỏi gốc
-        session_id: Session ID (optional)
-
-    Returns:
-        List of response dictionaries
-    """
-    try:
-        # Bước 1: Detect cần normalize?
-        needs_norm = detect_needs_normalization(question)
-
-        if needs_norm and config.USE_GPT_NORMALIZATION:
-            logger.info(f"[Pipeline] Query needs normalization: {question[:50]}")
-
-            # Bước 2: GPT chọn keyword từ dataset
-            matched_keyword = normalize_query_with_gpt_keyword_wrapper(question)
-
-            if matched_keyword:
-                logger.info(f"[Pipeline] ✓ GPT matched keyword: '{matched_keyword}'")
-
-                # Bước 3: Lấy đáp án trực tiếp từ keyword
-                if matched_keyword in KEYWORD_TO_ITEM_MAP:
-                    item = KEYWORD_TO_ITEM_MAP[matched_keyword]
-
-                    ans = item.get('answer', "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.")
-                    media_type = "text"
-                    media_content = None
-                    images = item.get('images')
-                    captions = item.get('captions')
-                    video_url = item.get('video_url')
-
-                    if images and isinstance(images, str):
-                        images = [images]
-                    if video_url:
-                        media_type = "video"
-                        media_content = video_url
-                    elif images:
-                        media_type = "image"
-                        media_content = (images, captions)
-
-                    logger.info(f"[Pipeline] ✓ Returning answer from GPT-matched keyword")
-                    return [{"text": ans, "media_type": media_type, "media_content": media_content}]
-                else:
-                    logger.warning(f"[Pipeline] Keyword '{matched_keyword}' not found in map")
-            else:
-                logger.info(f"[Pipeline] GPT didn't return valid keyword, fallback to regular pipeline")
-
-        # Bước 4: Fallback về pipeline cũ
-        return get_answer(question, skip_gpt=False)
-
-    except Exception as e:
-        logger.error(f"[Pipeline] Error: {e}")
-        return get_answer(question, skip_gpt=False)
-
-
 # --- MAIN ANSWER FUNCTIONS ---
-def get_answer(question, skip_gpt: bool = False):
-    """Xử lý câu hỏi với pipeline hybrid"""
+def get_answer(question):
+    """Xử lý câu hỏi và trả về câu trả lời"""
     try:
         def _build_response_from_item(item):
             if not item:
@@ -1372,7 +1086,7 @@ def find_answer_and_media(question):
                         return answer, "image", (images, captions)
                     return answer, "text", None
 
-        # 1) HYBRID MATCHER
+        # 1) HYBRID MATCHER - thay thế N-gram loop cũ
         if HYBRID_MATCHER:
             matched_item = HYBRID_MATCHER.find_match(norm_question)
             if matched_item:
@@ -1388,14 +1102,14 @@ def find_answer_and_media(question):
                     return answer, "image", (images, captions)
                 return answer, "text", None
 
-        # 2) Adaptive routing
+        # 2) Adaptive routing - GIỮ NGUYÊN THRESHOLDS
         if not contains_dataset_keyword(question):
             return "Xin lỗi, tôi không có thông tin về nội dung này.", "text", None
 
-        FUZZY_STRONG = config.FUZZY_STRONG
-        EMBED_STRONG = config.EMBED_STRONG
-        FUZZY_MIN = config.FUZZY_MIN
-        EMBED_MIN = config.EMBED_MIN
+        FUZZY_STRONG = config.FUZZY_STRONG  # 0.88
+        EMBED_STRONG = config.EMBED_STRONG  # 0.72
+        FUZZY_MIN = config.FUZZY_MIN  # 0.60
+        EMBED_MIN = config.EMBED_MIN  # 0.60
 
         best_fuzzy_item, best_fuzzy_ratio = fuzzy_best_item(question)
 
@@ -1568,8 +1282,7 @@ def ask():
         else:
             question_for_answer = question
 
-        # Call the GPT normalization pipeline
-        responses = get_answer_with_gpt_normalization(question_for_answer, session_id)
+        responses = get_answer(question_for_answer)
 
         # Cache response
         response_cache.set(question, responses)
@@ -1632,39 +1345,10 @@ def ask():
 @app.route('/images/<path:filename>')
 def serve_image(filename):
     try:
-        # Debug: Log request details
-        logger.info(f"[IMAGE REQUEST] Requested: {filename}")
-        logger.info(f"[IMAGE REQUEST] Images dir: {config.IMAGES_DIR}")
-        logger.info(f"[IMAGE REQUEST] Absolute path: {os.path.abspath(config.IMAGES_DIR)}")
-
-        # Check if images directory exists
-        if not os.path.exists(config.IMAGES_DIR):
-            logger.error(f"[IMAGE ERROR] Images directory does not exist: {config.IMAGES_DIR}")
-            return jsonify({"error": "Images directory not found"}), 404
-
-        # Check if file exists
-        file_path = os.path.join(config.IMAGES_DIR, filename)
-        if not os.path.exists(file_path):
-            logger.error(f"[IMAGE ERROR] File not found: {file_path}")
-            # List available files for debugging
-            try:
-                available_files = os.listdir(config.IMAGES_DIR)
-                logger.error(f"[IMAGE ERROR] Available files: {available_files[:10]}")  # First 10 files
-            except Exception as list_err:
-                logger.error(f"[IMAGE ERROR] Cannot list directory: {list_err}")
-            return jsonify({"error": f"Image not found: {filename}"}), 404
-
-        # Check file permissions
-        if not os.access(file_path, os.R_OK):
-            logger.error(f"[IMAGE ERROR] No read permission for: {file_path}")
-            return jsonify({"error": "Permission denied"}), 403
-
-        logger.info(f"[IMAGE SUCCESS] Serving: {file_path}")
         return send_from_directory(config.IMAGES_DIR, filename)
-
     except Exception as e:
-        logger.error(f"[IMAGE ERROR] Unexpected error serving {filename}: {e}", exc_info=True)
-        return jsonify({"error": f"Error: {str(e)}"}), 500
+        logger.error(f"Error serving image {filename}: {e}")
+        return "Image not found", 404
 
 
 @app.route('/')
@@ -1687,7 +1371,6 @@ def status():
         has_ce = model_manager.cross_encoder_model is not None
         has_sbert = model_manager.sbert_model is not None
         has_hybrid = HYBRID_MATCHER is not None
-        has_gpt = client is not None and config.USE_GPT
 
         return jsonify({
             "status": "healthy",
@@ -1699,8 +1382,6 @@ def status():
             "cross_encoder": bool(has_ce),
             "sbert": bool(has_sbert),
             "hybrid_matcher": bool(has_hybrid),
-            "gpt_enabled": bool(has_gpt),
-            "gpt_normalization": config.USE_GPT_NORMALIZATION,
             "cache": {
                 "size": len(response_cache.cache),
                 "hits": response_cache.hits,
@@ -1772,8 +1453,6 @@ if __name__ == "__main__":
         logger.info(f"  Data path: {config.DATA_PATH}")
         logger.info(f"  Images dir: {config.IMAGES_DIR}")
         logger.info(f"  Cache size: {config.CACHE_SIZE}")
-        logger.info(f"  GPT enabled: {config.USE_GPT}")
-        logger.info(f"  GPT normalization: {config.USE_GPT_NORMALIZATION}")
         logger.info(f"  Thresholds: FUZZY_STRONG={config.FUZZY_STRONG}, FUZZY_MIN={config.FUZZY_MIN}")
         logger.info(f"              EMBED_STRONG={config.EMBED_STRONG}, EMBED_MIN={config.EMBED_MIN}")
 
@@ -1788,7 +1467,6 @@ if __name__ == "__main__":
         logger.info(f"  Hybrid matcher: {'Ready' if HYBRID_MATCHER else 'Not available'}")
         logger.info(f"  SBERT model: {'Loaded' if model_manager.sbert_model else 'Not loaded'}")
         logger.info(f"  Cross-encoder: {'Loaded' if model_manager.cross_encoder_model else 'Not loaded'}")
-        logger.info(f"  OpenAI client: {'Ready' if client else 'Not available'}")
 
         logger.info("=" * 60)
         logger.info("Server ready! Starting Flask...")
