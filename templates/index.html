@@ -875,6 +875,9 @@
             updateEmptyStateVisibility();
         }
 
+        // =======================================
+        // = HÀM NÀY ĐÃ ĐƯỢC SỬA ĐỔI THEO YÊU CẦU =
+        // =======================================
         function renderFacilitiesChoices() {
             const chatContainer = document.getElementById('chat-container');
             try {
@@ -910,17 +913,7 @@
                 { label: 'Thư viện', q: 'Thư viện' }
             ];
 
-            function renderLocalFacility(name, intoEl) {
-                const map = {
-                    'Phòng học': { text: 'Các phòng học của trường được trang bị bàn ghế, bảng tương tác và ánh sáng hợp lý.', media_type: 'image', images: ['/images/PhongHoc.jpg'], captions: ['Phòng học'] },
-                    'Phòng máy tính': { text: 'Phòng máy tính hiện đại với nhiều dàn máy cấu hình tốt, phục vụ thực hành tin học và lập trình.', media_type: 'image', images: ['/images/PhongMayTinh1.jpg'], captions: ['Phòng máy tính'] },
-                    'Sân trường': { text: 'Sân trường rộng rãi, thoáng đãng, nơi tổ chức các hoạt động thể thao và sự kiện ngoài trời.', media_type: 'image', images: ['/images/SanTruong.jpg'], captions: ['Sân trường'] },
-                    'Căn tin': { text: 'Căn tin của trường sạch sẽ, cung cấp các bữa ăn hợp vệ sinh và đa dạng.', media_type: 'image', images: ['/images/CanTin.jpg'], captions: ['Căn tin'] },
-                    'Thư viện': { text: 'Thư viện có không gian yên tĩnh và nguồn tài liệu phong phú, phục vụ nhu cầu học tập và nghiên cứu của học sinh.', media_type: 'image', images: ['/images/ThuVien.jpg'], captions: ['Thư viện'] }
-                };
-                const data = map[name] ? [map[name]] : [{ text: 'Không có thông tin sẵn có về lựa chọn này.' }];
-                try { renderEntries(data, intoEl); } catch (_) { if (intoEl) intoEl.innerHTML = '<div class="message bot">Không có thông tin sẵn có.</div>'; }
-            }
+            // --- Đã xóa hàm renderLocalFacility(name, intoEl) ---
 
             opts.forEach((opt) => {
                 const btn = document.createElement('button');
@@ -931,8 +924,8 @@
                 // ============ SỬA LỖI Ở ĐÂY ============
                 // =======================================
                 btn.onclick = async () => {
-                    // 1. Render nội dung
-                    renderLocalFacility(opt.q, responseHolder);
+                    // 1. Render nội dung bằng cách gọi server
+                    await askAndRender(opt.q, responseHolder, { scroll: false });
 
                     // 2. CHỜ ẢNH LOAD XONG
                     await waitForImages([responseHolder]);
@@ -1338,6 +1331,9 @@ errorMessage.className = 'message bot';
                           const key = 'q:' + cval;
                           if (__IN_FLIGHT.has(key)) return;
                           __IN_FLIGHT.add(key);
+                          /* ======================================= */
+                          /* === LỖI ĐÃ ĐƯỢC SỬA (XÓA CHỮ 'D') === */
+                          /* ======================================= */
                           try {
                               askAndRender(cval, intoEl, { scroll: false }).finally(() => {
                                   __IN_FLIGHT.delete(key);
