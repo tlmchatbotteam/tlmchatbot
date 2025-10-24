@@ -560,21 +560,21 @@
         // ===== HÀM MỚI ĐƯỢC THÊM VÀO / SỬA ĐỔI =====
         // =======================================
         function waitForImages(elements) {
-            const promises = [];
-            elements.forEach(container => {
-                const images = container.querySelectorAll('img');
-                images.forEach(img => {
-                    if (!img.complete) {
-                        promises.push(new Promise((resolve) => {
-                            img.onload = resolve;
-                            img.onerror = resolve;
-                            // ✅ THÊM: Timeout 5s để tránh treo vĩnh viễn
-                            setTimeout(resolve, 5000);
-                        }));
-                    }
-                });
-            });
-            return Promise.all(promises); // ← Luôn trả về Promise
+            const promises = [];
+            elements.forEach(container => {
+                const images = container.querySelectorAll('img');
+                images.forEach(img => {
+                    if (!img.complete) {
+                        promises.push(new Promise((resolve) => {
+                            img.onload = resolve;
+                            img.onerror = resolve;
+                            // ✅ THÊM: Timeout 5s để tránh treo vĩnh viễn
+                            setTimeout(resolve, 5000);
+                        }));
+                    }
+                });
+            });
+            return Promise.all(promises); // ← Luôn trả về Promise
         }
 
         // =======================================
@@ -931,19 +931,19 @@
                 // ============ SỬA LỖI Ở ĐÂY ============
                 // =======================================
                 btn.onclick = async () => {
-                   // 1. Render nội dung
-                   renderLocalFacility(opt.q, responseHolder);
-                   
-                   // 2. CHỜ ẢNH LOAD XONG
-                   await waitForImages([responseHolder]);
-                   
-                   // 3. Thêm nút quay lại
-                   addBackButton(responseHolder);
-                   
-                   // 4. BÂY GIỜ mới scroll
-                   try { 
-                       responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
-                   } catch(_) {}
+                    // 1. Render nội dung
+                    renderLocalFacility(opt.q, responseHolder);
+
+                    // 2. CHỜ ẢNH LOAD XONG
+                    await waitForImages([responseHolder]);
+
+                    // 3. Thêm nút quay lại
+                    addBackButton(responseHolder);
+
+                    // 4. BÂY GIỜ mới scroll
+                    try {
+                        responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } catch(_) {}
                 };
                 // =======================================
                 // ============ KẾT THÚC SỬA LỖI ============
@@ -1164,7 +1164,7 @@ errorMessage.className = 'message bot';
                  updateEmptyStateVisibility();
              }
          }
-        try { var askAndRender = window.askAndRender; } catch (_) { /* noop */ }
+
 
         window.sendChoice = async function sendChoice(choiceId, intoEl, opts = { scroll: true }) {
             const chatContainer = document.getElementById('chat-container');
