@@ -63,11 +63,11 @@ jobs:
               bash composeup.sh
             else
               echo "Running standard Docker Compose deployment..."
-              docker-compose down || true
-              docker-compose up --build -d
+              docker compose down || true
+              docker compose up --build -d
             fi
             
             # Show recent logs
             echo "Recent application logs:"
-            docker-compose logs --tail=10
+            docker compose logs --tail=10
           EOT
