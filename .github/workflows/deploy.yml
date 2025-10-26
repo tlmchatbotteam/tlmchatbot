@@ -14,8 +14,8 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "VM_USER=ubuntu" >> $GITHUB_ENV
-          echo "VM_IP=35.240.138.116" >> $GITHUB_ENV
+          echo "VM_USER=Lalo" >> $GITHUB_ENV
+          echo "VM_IP=34.124.143.147" >> $GITHUB_ENV
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
 
       - name: Set up SSH
