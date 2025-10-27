@@ -524,9 +524,22 @@
             if (chatContainer !== document.getElementById('chat-container')) {
                 chatContainer.innerHTML = '';
                 chatContainer.appendChild(typing);
+                // Cuộn xuống tin nhắn typing trong targetContainer
+                try {
+                    setTimeout(() => {
+                        typing.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                } catch(_) {}
             } else {
                 chatContainer.appendChild(typing);
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                // Cuộn xuống tin nhắn typing trong chat chính
+                try {
+                    setTimeout(() => {
+                        typing.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                } catch(_) {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
             }
             updateEmptyStateVisibility();
             return typing;
@@ -544,24 +557,24 @@
         }
 
         // =======================================
-        // ===== HÀM MỚI ĐƯỢC THÊM VÀO =====
+        // ===== HÀM MỚI ĐƯỢC THÊM VÀO / SỬA ĐỔI =====
         // =======================================
         function waitForImages(elements) {
             const promises = [];
             elements.forEach(container => {
                 const images = container.querySelectorAll('img');
                 images.forEach(img => {
-                    // Chỉ chờ những ảnh chưa được tải xong
                     if (!img.complete) {
                         promises.push(new Promise((resolve) => {
-                            // Cả khi tải thành công hoặc lỗi đều phải kết thúc việc chờ đợi
                             img.onload = resolve;
                             img.onerror = resolve;
+                            // ✅ THÊM: Timeout 5s để tránh treo vĩnh viễn
+                            setTimeout(resolve, 5000);
                         }));
                     }
                 });
             });
-            return Promise.all(promises);
+            return Promise.all(promises); // ← Luôn trả về Promise
         }
 
         // =======================================
@@ -733,6 +746,9 @@
             const question = questionInput.value.trim();
             if (!question) return;
 
+            // Xóa nội dung trên thanh câu hỏi ngay sau khi nhấn gửi
+            questionInput.value = '';
+
             const chatContainer = document.getElementById('chat-container');
             const userMessage = document.createElement('div');
             userMessage.className = 'message user';
@@ -748,14 +764,17 @@
                 const normalizedNoDiacritics = stripDiacritics(normalized);
 
                 if (normalized.includes('cơ sở vật chất') || normalizedNoDiacritics.includes('co so vat chat')) {
-                    renderFacilitiesChoices(); questionInput.value = ''; return;
+                    renderFacilitiesChoices();
+                    return;
                 }
                 if (normalized.includes('hoạt động')) {
-                    renderHoatDongChoices(); questionInput.value = ''; return;
+                    renderHoatDongChoices();
+                    return;
                 }
                 const teacherKeywords = ['giáo viên', 'thầy cô giáo', 'thầy cô'];
                 if (teacherKeywords.some(k => normalized.includes(k))) {
-                    renderGiaoVienChoices(); questionInput.value = ''; return;
+                    renderGiaoVienChoices();
+                    return;
                 }
             } catch (_) { /* noop */ }
 
@@ -798,7 +817,6 @@
                     }
                 }
 
-                questionInput.value = '';
             } catch (error) {
                 console.error('Error in sendQuestion:', error);
                 hideTyping(typingEl);
@@ -857,6 +875,9 @@
             updateEmptyStateVisibility();
         }
 
+        // =======================================
+        // = HÀM NÀY ĐÃ ĐƯỢC SỬA ĐỔI THEO YÊU CẦU =
+        // =======================================
         function renderFacilitiesChoices() {
             const chatContainer = document.getElementById('chat-container');
             try {
@@ -892,33 +913,34 @@
                 { label: 'Thư viện', q: 'Thư viện' }
             ];
 
-            function renderLocalFacility(name, intoEl) {
-                const map = {
-                    'Phòng học': { text: 'Các phòng học của trường được trang bị bàn ghế, bảng tương tác và ánh sáng hợp lý.', media_type: 'image', images: ['/images/PhongHoc.jpg'], captions: ['Phòng học'] },
-                    'Phòng máy tính': { text: 'Phòng máy tính hiện đại với nhiều dàn máy cấu hình tốt, phục vụ thực hành tin học và lập trình.', media_type: 'image', images: ['/images/PhongMayTinh1.jpg'], captions: ['Phòng máy tính'] },
-                    'Sân trường': { text: 'Sân trường rộng rãi, thoáng đãng, nơi tổ chức các hoạt động thể thao và sự kiện ngoài trời.', media_type: 'image', images: ['/images/SanTruong.jpg'], captions: ['Sân trường'] },
-                    'Căn tin': { text: 'Căn tin của trường sạch sẽ, cung cấp các bữa ăn hợp vệ sinh và đa dạng.', media_type: 'image', images: ['/images/CanTin.jpg'], captions: ['Căn tin'] },
-                    'Thư viện': { text: 'Thư viện có không gian yên tĩnh và nguồn tài liệu phong phú, phục vụ nhu cầu học tập và nghiên cứu của học sinh.', media_type: 'image', images: ['/images/ThuVien.jpg'], captions: ['Thư viện'] }
-                };
-                const data = map[name] ? [map[name]] : [{ text: 'Không có thông tin sẵn có về lựa chọn này.' }];
-                try { renderEntries(data, intoEl); } catch (_) { if (intoEl) intoEl.innerHTML = '<div class="message bot">Không có thông tin sẵn có.</div>'; }
-            }
+            // --- Đã xóa hàm renderLocalFacility(name, intoEl) ---
 
             opts.forEach((opt) => {
                 const btn = document.createElement('button');
                 btn.className = 'choice-btn';
                 btn.textContent = opt.label;
                 btn.dataset.choiceValue = opt.q;
+                // =======================================
+                // ============ SỬA LỖI Ở ĐÂY ============
+                // =======================================
                 btn.onclick = async () => {
-                   renderLocalFacility(opt.q, responseHolder);
-                   addBackButton(responseHolder);
-                   try {
-                       await askAndRender(opt.q, responseHolder, { scroll: false });
-                       addBackButton(responseHolder);
-                   } catch (_) {}
+                    // 1. Render nội dung bằng cách gọi server
+                    await askAndRender(opt.q, responseHolder, { scroll: false });
 
-                   try { responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
+                    // 2. CHỜ ẢNH LOAD XONG
+                    await waitForImages([responseHolder]);
+
+                    // 3. Thêm nút quay lại
+                    addBackButton(responseHolder);
+
+                    // 4. BÂY GIỜ mới scroll
+                    try {
+                        responseHolder.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } catch(_) {}
                 };
+                // =======================================
+                // ============ KẾT THÚC SỬA LỖI ============
+                // =======================================
                 bar.appendChild(btn);
             });
 
@@ -1135,7 +1157,7 @@ errorMessage.className = 'message bot';
                  updateEmptyStateVisibility();
              }
          }
-        try { var askAndRender = window.askAndRender; } catch (_) { /* noop */ }
+
 
         window.sendChoice = async function sendChoice(choiceId, intoEl, opts = { scroll: true }) {
             const chatContainer = document.getElementById('chat-container');
@@ -1309,6 +1331,9 @@ errorMessage.className = 'message bot';
                           const key = 'q:' + cval;
                           if (__IN_FLIGHT.has(key)) return;
                           __IN_FLIGHT.add(key);
+                          /* ======================================= */
+                          /* === LỖI ĐÃ ĐƯỢC SỬA (XÓA CHỮ 'D') === */
+                          /* ======================================= */
                           try {
                               askAndRender(cval, intoEl, { scroll: false }).finally(() => {
                                   __IN_FLIGHT.delete(key);
