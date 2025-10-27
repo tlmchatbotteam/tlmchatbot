@@ -23,6 +23,11 @@ from openai import OpenAI
 # Load environment variables
 load_dotenv()
 
+# --- SỬA LỖI ĐƯỜNG DẪN (DEPLOYMENT) ---
+# Lấy đường dẫn tuyệt đối đến thư mục chứa file hybrid.py
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# --- KẾT THÚC SỬA LỖI ĐƯỜNG DẪN ---
+
 # FIX: Force UTF-8 encoding on Windows console
 if sys.platform == 'win32':
     try:
@@ -72,8 +77,11 @@ except Exception as e:
 @dataclass
 class ChatbotConfig:
     """Centralized configuration"""
-    DATA_PATH: str = os.getenv('DATA_PATH', 'admissions_data.json')
-    IMAGES_DIR: str = os.getenv('IMAGES_DIR', 'images')
+    # --- SỬA LỖI ĐƯỜNG DẪN (DEPLOYMENT) ---
+    # Sử dụng đường dẫn tuyệt đối để đảm bảo server luôn tìm thấy file
+    DATA_PATH: str = os.getenv('DATA_PATH', os.path.join(BASE_DIR, 'admissions_data.json'))
+    IMAGES_DIR: str = os.getenv('IMAGES_DIR', os.path.join(BASE_DIR, 'images'))
+    # --- KẾT THÚC SỬA LỖI ĐƯỜNG DẪN ---
 
     # GPT API settings
     USE_GPT: bool = os.getenv('USE_GPT', 'false').lower() == 'true'
@@ -1536,7 +1544,30 @@ def ask():
                     append_history(session_id, 'user', f"(chose option) {idx}")
                     append_history(session_id, 'bot', ans)
 
-                return jsonify([{"text": ans, "media_type": media_type, "media_content": media_content}]), 200
+                # Đây là một lựa chọn, không cần cache
+                # Nhưng để nhất quán, chúng ta trả về một danh sách (list)
+
+                # --- SỬA LỖI ĐỊNH DẠNG TRẢ VỀ CHO CHOICE_ID ---
+                # Đảm bảo nó trả về đúng định dạng frontend mong đợi
+                result = [{
+                    "text": ans,
+                    "media_type": media_type,
+                    "media_content": None,
+                    "images": [],
+                    "captions": [],
+                    "video_url": None
+                }]
+                if media_type == "video":
+                    result[0]["video_url"] = media_content
+                elif media_type == "image":
+                    images, captions = media_content
+                    result[0]["images"] = [f"/images/{os.path.basename(img)}" for img in images if
+                                           isinstance(img, str) and img.strip()]
+                    result[0]["captions"] = captions if captions else []
+
+                return jsonify(result), 200
+                # --- KẾT THÚC SỬA LỖI ---
+
             except ValueError:
                 return jsonify({"error": "choice_id must be an integer index"}), 400
             except Exception as e:
@@ -1559,6 +1590,7 @@ def ask():
                             append_history(session_id, 'bot', first_text)
                 except Exception:
                     pass
+            # --- SỬA LỖI CACHE: Dữ liệu trong cache đã được định dạng ---
             return jsonify(cached_response), 200
 
         # Process question
@@ -1571,8 +1603,7 @@ def ask():
         # Call the GPT normalization pipeline
         responses = get_answer_with_gpt_normalization(question_for_answer, session_id)
 
-        # Cache response
-        response_cache.set(question, responses)
+        # --- SỬA LỖI CACHE: Dòng cache cũ đã bị xóa khỏi đây ---
 
         # Store bot turn
         try:
@@ -1621,8 +1652,14 @@ def ask():
                     continue
                 seen.add(key)
                 unique.append(r)
+
+            # --- SỬA LỖI CACHE: Cache đối tượng `unique` (đã định dạng) ---
+            response_cache.set(question, unique)
+
             return jsonify(unique), 200
         except Exception:
+            # --- SỬA LỖI CACHE: Cache `result` nếu lọc `unique` thất bại ---
+            response_cache.set(question, result)
             return jsonify(result), 200
     except Exception as e:
         logger.error(f"Error in /ask endpoint: {e}", exc_info=True)
