@@ -14,8 +14,8 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "VM_USER=ubuntu" >> $GITHUB_ENV
-          echo "VM_IP=35.240.138.116" >> $GITHUB_ENV
+          echo "VM_USER=Lalo" >> $GITHUB_ENV
+          echo "VM_IP=34.124.143.147" >> $GITHUB_ENV
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
 
       - name: Set up SSH
@@ -31,7 +31,7 @@ jobs:
 
       - name: Deploy to VM
         env:
-          PROJECT_DIR: /home/ubuntu/test2
+          PROJECT_DIR: /home/Lalo/_/tlmchatbot
           REPO_URL: https://github.com/${{ github.repository }}.git
         run: |
           echo "Deploying to $VM_USER@$VM_IP"
@@ -63,11 +63,11 @@ jobs:
               bash composeup.sh
             else
               echo "Running standard Docker Compose deployment..."
-              docker-compose down || true
-              docker-compose up --build -d
+              docker compose down || true
+              docker compose up --build -d
             fi
             
             # Show recent logs
             echo "Recent application logs:"
-            docker-compose logs --tail=10
+            docker compose logs --tail=10
           EOT
