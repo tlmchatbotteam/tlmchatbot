@@ -5,6 +5,7 @@
 # --- SỬA LỖI (User 29/10/2025):
 # 1. Sửa hàm detect_needs_normalization: len(t) <= 2 (thay vì 3) để tránh false positive
 # 2. Sửa hàm normalize_query_with_gpt_keyword_only: Cho phép GPT trả về "KHÔNG_PHÙ_HỢP"
+# 3. (User 29/10/2025 v2): Cho phép GPT trả về NHIỀU keywords
 
 import json
 import os
@@ -500,35 +501,23 @@ def pre_filter_keywords(question: str, all_keywords: list, top_k: int = 50) -> l
 
 
 @lru_cache(maxsize=500)
-def normalize_query_with_gpt_keyword_only(query: str, keywords_hash: str) -> Optional[str]:
+def normalize_query_with_gpt_keywords(query: str, keywords_hash: str) -> Optional[Tuple[str, ...]]:
     """
-    🆕 GPT CHỈ TRẢ VỀ KEYWORD TỪ DATASET - KHÔNG TỰ DO VIẾT LẠI CÂU
-
-    Đảm bảo 100% keyword thuộc dataset, tránh GPT sáng tạo từ không có sẵn.
+    🆕 GPT CÓ THỂ TRẢ VỀ NHIỀU KEYWORDS TỪ DATASET
 
     Args:
         query: Câu hỏi người dùng (có thể không dấu/viết tắt/lỗi)
         keywords_hash: Hash của danh sách keywords (để cache)
 
     Returns:
-        Keyword từ dataset hoặc None
-
-    Examples:
-        >>> normalize_query_with_gpt_keyword_only("hoc phi truong", "...")
-        "học phí"
-
-        >>> normalize_query_with_gpt_keyword_only("ts lop 10", "...")
-        "tuyển sinh lớp 10"
+        Một tuple các keywords từ dataset hoặc None
     """
     try:
         if not config.USE_GPT_NORMALIZATION or client is None:
-            logger.debug("[GPT Keyword] Disabled or client not available")
+            logger.debug("[GPT Keywords] Disabled or client not available")
             return None
 
-        # Lấy tất cả keywords từ dataset
         all_keywords = list(KEYWORD_TO_ITEM_MAP.keys())
-
-        # Pre-filter để giảm tokens (quan trọng để tiết kiệm cost!)
         candidates = pre_filter_keywords(
             query,
             all_keywords,
@@ -536,97 +525,107 @@ def normalize_query_with_gpt_keyword_only(query: str, keywords_hash: str) -> Opt
         )
 
         if not candidates:
-            logger.warning(f"[GPT Keyword] No candidates found for: {query}")
+            logger.warning(f"[GPT Keywords] No candidates found for: {query}")
             return None
 
-        # SỬA LỖI: PROMPT MỚI: Cho phép GPT từ chối
+        # PROMPT MỚI: Cho phép GPT trả về NHIỀU keywords
         prompt = f"""Bạn là hệ thống matching câu hỏi với dataset keywords.
 
-DANH SÁCH KEYWORDS CÓ SẴN (chọn ĐÚNG 1 phù hợp nhất):
+DANH SÁCH KEYWORDS CÓ SẴN (chọn MỘT hoặc NHIỀU):
 {chr(10).join([f"- {kw}" for kw in candidates])}
 
 CÂU HỎI NGƯỜI DÙNG (có thể không dấu/viết tắt/lỗi chính tả):
 "{query}"
 
 YÊU CẦU:
-1. Phân tích ý định của câu hỏi
-2. Chọn ĐÚNG 1 keyword phù hợp nhất từ danh sách trên
-3. NẾU không có keyword nào phù hợp (ví dụ: câu hỏi về "nhà vệ sinh" nhưng danh sách chỉ có "học phí", "điểm chuẩn"), hãy trả về "KHÔNG_PHÙ_HỢP"
-4. CHỈ trả về keyword đó hoặc "KHÔNG_PHÙ_HỢP", KHÔNG giải thích, KHÔNG thêm bớt gì
+1. Phân tích ý định của câu hỏi.
+2. Chọn MỘT hoặc NHIỀU keywords phù hợp nhất từ danh sách trên.
+3. NẾU không có keyword nào phù hợp, hãy trả về "KHÔNG_PHÙ_HỢP".
+4. CHỈ trả về danh sách keywords (mỗi keyword một dòng) hoặc "KHÔNG_PHÙ_HỢP". KHÔNG giải thích.
 
 VÍ DỤ CHUẨN:
-- Input: "hoc phi truong" → Output: học phí
-- Input: "ts lop 10" → Output: tuyển sinh lớp 10  
-- Input: "diem chuan ntn" → Output: điểm chuẩn
-- Input: "hp vb2" → Output: học phí văn bằng 2
-- Input: "nhà vệ sinh" (và "nhà vệ sinh" không có trong danh sách) → Output: KHÔNG_PHÙ_HỢP
+- Input: "hoc phi truong"
+  Output:
+  học phí
+- Input: "ts lop 10"
+  Output:
+  tuyển sinh lớp 10
+- Input: "hoc phi va hoc bong"
+  Output:
+  học phí
+  học bổng
+- Input: "nhà vệ sinh" (và "nhà vệ sinh" không có trong danh sách)
+  Output:
+  KHÔNG_PHÙ_HỢP
 
-Keyword phù hợp:"""
+Keywords phù hợp (mỗi keyword một dòng):"""
 
         response = client.chat.completions.create(
             model=config.GPT_MODEL,
             messages=[
                 {
                     "role": "system",
-                    "content": "Bạn là chuyên gia matching keyword. LUÔN LUÔN chỉ trả về ĐÚNG 1 keyword có trong danh sách đã cho, hoặc trả về 'KHÔNG_PHÙ_HỢP'."
+                    "content": "Bạn là chuyên gia matching keyword. LUÔN LUÔN chỉ trả về keywords có trong danh sách (mỗi keyword một dòng), hoặc 'KHÔNG_PHÙ_HỢP'."
                 },
                 {"role": "user", "content": prompt}
             ],
-            temperature=config.NORMALIZATION_TEMPERATURE,  # 0 = deterministic
-            max_tokens=config.NORMALIZATION_MAX_TOKENS  # 50 = đủ cho 1 keyword
+            temperature=config.NORMALIZATION_TEMPERATURE,
+            max_tokens=config.NORMALIZATION_MAX_TOKENS * 3  # Tăng max tokens để cho phép nhiều keywords
         )
 
-        keyword = response.choices[0].message.content.strip().lower()
-
-        # Làm sạch output (GPT đôi khi thêm quotes/prefix)
-        keyword = re.sub(r'^["\'\-→•]|["\']$', '', keyword)
-        keyword = keyword.replace('output:', '').replace('→', '').strip()
+        raw_output = response.choices[0].message.content.strip()
 
         # SỬA LỖI: Check nếu GPT trả về "không phù hợp"
-        if "không_phù_hợp" in keyword or "khong_phu_hop" in keyword:
-            logger.info(f"[GPT Keyword] ✗ GPT judged as not suitable: '{query}'")
+        if "không_phù_hợp" in raw_output.lower() or "khong_phu_hop" in raw_output.lower():
+            logger.info(f"[GPT Keywords] ✗ GPT judged as not suitable: '{query}'")
             return None
 
-        # 🔒 VALIDATE: Keyword PHẢI có trong dataset
-        if keyword in all_keywords:
-            logger.info(f"[GPT Keyword] ✓ '{query}' → '{keyword}'")
-            return keyword
+        # Xử lý output có nhiều dòng
+        potential_keywords = raw_output.split('\n')
+        matched_keywords = []
 
-        # Thử normalize và check lại
-        keyword_normalized = normalize_and_unaccent(keyword)
-        if keyword_normalized in all_keywords:
-            logger.info(f"[GPT Keyword] ✓ '{query}' → '{keyword_normalized}' (normalized)")
-            return keyword_normalized
+        for k in potential_keywords:
+            keyword = k.strip().lower()
+            keyword = re.sub(r'^["\'\-→•]|["\']$', '', keyword)
+            keyword = keyword.replace('output:', '').replace('→', '').strip()
 
-        # Thử fuzzy match với candidates (GPT có thể sai chính tả nhẹ)
-        if fuzz and process:
-            match = process.extractOne(
-                keyword,
-                all_keywords,
-                scorer=fuzz.ratio,
-                score_cutoff=85
-            )
-            if match:
-                matched_keyword = match[0]
-                logger.warning(f"[GPT Keyword] ⚠ '{keyword}' fuzzy matched to '{matched_keyword}'")
-                return matched_keyword
+            if not keyword:
+                continue
 
-        # ❌ REJECT: Keyword không hợp lệ
-        logger.warning(f"[GPT Keyword] ✗ Invalid: '{keyword}' not in dataset (query: '{query}')")
-        return None
+            # 🔒 VALIDATE: Keyword PHẢI có trong dataset
+            if keyword in all_keywords:
+                if keyword not in matched_keywords:
+                    matched_keywords.append(keyword)
+            else:
+                # Thử normalize và check lại
+                keyword_normalized = normalize_and_unaccent(keyword)
+                if keyword_normalized in all_keywords:
+                    if keyword_normalized not in matched_keywords:
+                        matched_keywords.append(keyword_normalized)
+                else:
+                    # Ghi log nếu GPT trả về rác, nhưng không dừng lại
+                    logger.warning(f"[GPT Keywords] ✗ Invalid: '{keyword}' not in dataset (query: '{query}')")
+
+        if not matched_keywords:
+            logger.warning(f"[GPT Keywords] ✗ No valid keywords found in output: '{raw_output}'")
+            return None
+
+        logger.info(f"[GPT Keywords] ✓ '{query}' → {matched_keywords}")
+        # Trả về tuple để có thể cache
+        return tuple(matched_keywords)
 
     except Exception as e:
-        logger.error(f"[GPT Keyword] Error: {e}")
+        logger.error(f"[GPT Keywords] Error: {e}")
         return None
 
 
-def normalize_query_with_gpt_keyword_wrapper(query: str) -> Optional[str]:
+def normalize_query_with_gpt_keywords_wrapper(query: str) -> Optional[Tuple[str, ...]]:
     """
-    Wrapper để làm keywords_hash có thể cache được
+    Wrapper để làm keywords_hash có thể cache được (cho hàm mới)
     """
     all_keywords = list(KEYWORD_TO_ITEM_MAP.keys())
     keywords_hash = hashlib.md5(','.join(sorted(all_keywords)).encode()).hexdigest()
-    return normalize_query_with_gpt_keyword_only(query, keywords_hash)
+    return normalize_query_with_gpt_keywords(query, keywords_hash)
 
 
 def strip_leadin_phrases(text: str) -> str:
@@ -1175,69 +1174,102 @@ def make_clarifying_question(user_query: str, candidates: list) -> dict:
         return {"text": "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "media_type": "text", "media_content": None}
 
 
+# --- HÀM TRỢ GIÚP BUILD RESPONSE (ĐÃ DI CHUYỂN RA NGOÀI) ---
+def _build_response_from_item(item):
+    """Xây dựng đối tượng response chuẩn từ một item data"""
+    try:
+        if not item:
+            return {"text": "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "media_type": "text",
+                    "media_content": None}
+
+        ans = item.get('answer', "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.")
+        media_type = "text"
+        media_content = None
+        images = item.get('images')
+        captions = item.get('captions')
+        video_url = item.get('video_url')
+
+        if images and isinstance(images, str):
+            images = [images]
+        if video_url:
+            media_type = "video"
+            media_content = video_url
+        elif images:
+            media_type = "image"
+            media_content = (images, captions)
+
+        return {"text": ans, "media_type": media_type, "media_content": media_content}
+    except Exception as e:
+        logger.error(f"Error in _build_response_from_item: {e}")
+        return {"text": "Xin lỗi, có lỗi xảy ra khi tạo câu trả lời.", "media_type": "text", "media_content": None}
+
+
 # --- 🆕 NEW: GPT KEYWORD-ONLY PIPELINE ---
 def get_answer_with_gpt_normalization(question: str, session_id: Optional[str] = None):
     """
-    🆕 Pipeline mới: GPT chỉ trả về keyword từ dataset
+    🆕 SỬA ĐỔI: Luôn thử chuẩn hóa GPT trước.
+    Nếu GPT thành công (trả về 1 hoặc NHIỀU keywords) -> trả về kết quả.
+    Nếu GPT thất bại -> chuyển sang pipeline 'get_answer' tiêu chuẩn.
 
     Flow:
-    1. Detect nếu câu hỏi cần normalize (không dấu/viết tắt/typo)
-    2. GPT chọn keyword từ dataset → 100% đảm bảo có trong data
-    3. Lấy đáp án trực tiếp từ keyword
-    4. Fallback về pipeline cũ nếu GPT fail
-
-    Args:
-        question: Câu hỏi gốc
-        session_id: Session ID (optional)
-
-    Returns:
-        List of response dictionaries
+    1. Gọi GPT để chọn MỘT hoặc NHIỀU keywords.
+    2. Nếu GPT trả về keywords HỢP LỆ:
+       a. Lặp qua từng keyword.
+       b. Lấy TẤT CẢ các item tương ứng từ `KEYWORD_TO_ITEMS_MAP`.
+       c. Build response cho từng item (dùng hàm _build_response_from_item).
+       d. Lọc trùng lặp và trả về danh sách responses.
+    3. Nếu GPT thất bại -> Chuyển toàn bộ câu hỏi cho hàm get_answer().
     """
     try:
-        # Bước 1: Detect cần normalize?
-        needs_norm = detect_needs_normalization(question)
+        if config.USE_GPT_NORMALIZATION:
+            logger.info(f"[Pipeline] Trying GPT normalization first for: {question[:50]}")
 
-        if needs_norm and config.USE_GPT_NORMALIZATION:
-            logger.info(f"[Pipeline] Query needs normalization: {question[:50]}")
+            # Bước 1: GPT chọn MỘT hoặc NHIỀU keywords
+            matched_keywords_tuple = normalize_query_with_gpt_keywords_wrapper(question)
 
-            # Bước 2: GPT chọn keyword từ dataset
-            matched_keyword = normalize_query_with_gpt_keyword_wrapper(question)
+            if matched_keywords_tuple:
+                matched_keywords = list(matched_keywords_tuple)
+                logger.info(f"[Pipeline] ✓ GPT matched keywords: {matched_keywords}")
 
-            if matched_keyword:
-                logger.info(f"[Pipeline] ✓ GPT matched keyword: '{matched_keyword}'")
+                responses = []
+                seen_item_keys = set()  # Dùng để lọc trùng lặp câu trả lời
 
-                # Bước 3: Lấy đáp án trực tiếp từ keyword
-                if matched_keyword in KEYWORD_TO_ITEM_MAP:
-                    item = KEYWORD_TO_ITEM_MAP[matched_keyword]
+                # Bước 2: Lặp qua TẤT CẢ keywords GPT trả về
+                for keyword in matched_keywords:
 
-                    ans = item.get('answer', "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.")
-                    media_type = "text"
-                    media_content = None
-                    images = item.get('images')
-                    captions = item.get('captions')
-                    video_url = item.get('video_url')
+                    # Dùng KEYWORD_TO_ITEMS_MAP để lấy TẤT CẢ items cho 1 keyword
+                    items_for_keyword = KEYWORD_TO_ITEMS_MAP.get(keyword, [])
 
-                    if images and isinstance(images, str):
-                        images = [images]
-                    if video_url:
-                        media_type = "video"
-                        media_content = video_url
-                    elif images:
-                        media_type = "image"
-                        media_content = (images, captions)
+                    if not items_for_keyword:
+                        logger.warning(f"[Pipeline] GPT keyword '{keyword}' not found in ITEMS map.")
+                        continue
 
-                    logger.info(f"[Pipeline] ✓ Returning answer from GPT-matched keyword")
-                    return [{"text": ans, "media_type": media_type, "media_content": media_content}]
+                    for item in items_for_keyword:
+                        # Dùng nội dung câu trả lời làm key để lọc trùng
+                        item_key = item.get('answer', 'no_answer_key')
+
+                        if item_key not in seen_item_keys:
+                            # Dùng hàm helper đã di chuyển ra ngoài
+                            responses.append(_build_response_from_item(item))
+                            seen_item_keys.add(item_key)
+
+                if responses:
+                    logger.info(f"[Pipeline] ✓ Returning {len(responses)} answers from GPT-matched keywords")
+                    return responses
                 else:
-                    logger.warning(f"[Pipeline] Keyword '{matched_keyword}' not found in map")
-            else:
-                logger.info(f"[Pipeline] GPT didn't return valid keyword — responding with no info.")
-                return [{"text": "Xin lỗi, tôi không có thông tin về câu hỏi của bạn.", "media_type": "text",
-                         "media_content": None}]
+                    logger.warning(f"[Pipeline] GPT keywords {matched_keywords} not found in map. Falling back.")
 
+            else:
+                # GPT trả về None hoặc "KHÔNG_PHÙ_HỢP"
+                logger.info(f"[Pipeline] GPT normalization failed or rejected. Falling back.")
+
+        # --- FALLBACK (Cho cả 2 trường hợp: GPT bị tắt, hoặc GPT thất bại) ---
+        logger.debug(f"[Pipeline] Falling back to standard get_answer pipeline.")
+        return get_answer(question, skip_gpt=False)
 
     except Exception as e:
-        logger.error(f"[Pipeline] Error: {e}")
+        logger.error(f"[Pipeline] Error in GPT normalization: {e}")
+        # Nếu có lỗi, vẫn fallback về pipeline cũ
         return get_answer(question, skip_gpt=False)
 
 
@@ -1245,29 +1277,6 @@ def get_answer_with_gpt_normalization(question: str, session_id: Optional[str] =
 def get_answer(question, skip_gpt: bool = False):
     """Xử lý câu hỏi với pipeline hybrid"""
     try:
-        def _build_response_from_item(item):
-            if not item:
-                return {"text": "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "media_type": "text",
-                        "media_content": None}
-
-            ans = item.get('answer', "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.")
-            media_type = "text"
-            media_content = None
-            images = item.get('images')
-            captions = item.get('captions')
-            video_url = item.get('video_url')
-
-            if images and isinstance(images, str):
-                images = [images]
-            if video_url:
-                media_type = "video"
-                media_content = video_url
-            elif images:
-                media_type = "image"
-                media_content = (images, captions)
-
-            return {"text": ans, "media_type": media_type, "media_content": media_content}
-
         # Step 1: Normalization
         norm_question = normalize_text(question)
         norm_unaccent_question = normalize_and_unaccent(question)
