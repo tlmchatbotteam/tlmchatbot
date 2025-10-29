@@ -2,6 +2,10 @@
 # MAJOR UPDATE: GPT returns ONLY keywords from dataset (no free-form rewriting)
 # This ensures 100% accuracy - GPT can only return existing keywords
 
+# --- SỬA LỖI (User 29/10/2025):
+# 1. Sửa hàm detect_needs_normalization: len(t) <= 2 (thay vì 3) để tránh false positive
+# 2. Sửa hàm normalize_query_with_gpt_keyword_only: Cho phép GPT trả về "KHÔNG_PHÙ_HỢP"
+
 import json
 import os
 import re
@@ -421,7 +425,8 @@ def detect_needs_normalization(text: str) -> bool:
 
         # 2. Check viết tắt (nhiều từ ngắn liên tiếp)
         tokens = norm.split()
-        short_tokens = [t for t in tokens if len(t) <= 3 and t.isalpha()]
+        # SỬA LỖI: Chỉ coi từ <= 2 ký tự là viết tắt (tránh "nhà", "học"...)
+        short_tokens = [t for t in tokens if len(t) <= 2 and t.isalpha()]
         if len(short_tokens) >= 2:
             logger.info(f"[Detector] Abbreviations detected: {text[:50]}")
             return True
@@ -534,7 +539,7 @@ def normalize_query_with_gpt_keyword_only(query: str, keywords_hash: str) -> Opt
             logger.warning(f"[GPT Keyword] No candidates found for: {query}")
             return None
 
-        # 🆕 PROMPT MỚI: BUỘC GPT CHỌN TỪ DANH SÁCH
+        # SỬA LỖI: PROMPT MỚI: Cho phép GPT từ chối
         prompt = f"""Bạn là hệ thống matching câu hỏi với dataset keywords.
 
 DANH SÁCH KEYWORDS CÓ SẴN (chọn ĐÚNG 1 phù hợp nhất):
@@ -546,13 +551,15 @@ CÂU HỎI NGƯỜI DÙNG (có thể không dấu/viết tắt/lỗi chính tả
 YÊU CẦU:
 1. Phân tích ý định của câu hỏi
 2. Chọn ĐÚNG 1 keyword phù hợp nhất từ danh sách trên
-3. CHỈ trả về keyword đó, KHÔNG giải thích, KHÔNG thêm bớt gì
+3. NẾU không có keyword nào phù hợp (ví dụ: câu hỏi về "nhà vệ sinh" nhưng danh sách chỉ có "học phí", "điểm chuẩn"), hãy trả về "KHÔNG_PHÙ_HỢP"
+4. CHỈ trả về keyword đó hoặc "KHÔNG_PHÙ_HỢP", KHÔNG giải thích, KHÔNG thêm bớt gì
 
 VÍ DỤ CHUẨN:
 - Input: "hoc phi truong" → Output: học phí
 - Input: "ts lop 10" → Output: tuyển sinh lớp 10  
 - Input: "diem chuan ntn" → Output: điểm chuẩn
 - Input: "hp vb2" → Output: học phí văn bằng 2
+- Input: "nhà vệ sinh" (và "nhà vệ sinh" không có trong danh sách) → Output: KHÔNG_PHÙ_HỢP
 
 Keyword phù hợp:"""
 
@@ -561,7 +568,7 @@ Keyword phù hợp:"""
             messages=[
                 {
                     "role": "system",
-                    "content": "Bạn là chuyên gia matching keyword. LUÔN LUÔN chỉ trả về ĐÚNG 1 keyword có trong danh sách đã cho, không thêm bớt gì."
+                    "content": "Bạn là chuyên gia matching keyword. LUÔN LUÔN chỉ trả về ĐÚNG 1 keyword có trong danh sách đã cho, hoặc trả về 'KHÔNG_PHÙ_HỢP'."
                 },
                 {"role": "user", "content": prompt}
             ],
@@ -574,6 +581,11 @@ Keyword phù hợp:"""
         # Làm sạch output (GPT đôi khi thêm quotes/prefix)
         keyword = re.sub(r'^["\'\-→•]|["\']$', '', keyword)
         keyword = keyword.replace('output:', '').replace('→', '').strip()
+
+        # SỬA LỖI: Check nếu GPT trả về "không phù hợp"
+        if "không_phù_hợp" in keyword or "khong_phu_hop" in keyword:
+            logger.info(f"[GPT Keyword] ✗ GPT judged as not suitable: '{query}'")
+            return None
 
         # 🔒 VALIDATE: Keyword PHẢI có trong dataset
         if keyword in all_keywords:
@@ -1219,10 +1231,10 @@ def get_answer_with_gpt_normalization(question: str, session_id: Optional[str] =
                 else:
                     logger.warning(f"[Pipeline] Keyword '{matched_keyword}' not found in map")
             else:
-                logger.info(f"[Pipeline] GPT didn't return valid keyword, fallback to regular pipeline")
+                logger.info(f"[Pipeline] GPT didn't return valid keyword — responding with no info.")
+                return [{"text": "Xin lỗi, tôi không có thông tin về câu hỏi của bạn.", "media_type": "text",
+                         "media_content": None}]
 
-        # Bước 4: Fallback về pipeline cũ
-        return get_answer(question, skip_gpt=False)
 
     except Exception as e:
         logger.error(f"[Pipeline] Error: {e}")
