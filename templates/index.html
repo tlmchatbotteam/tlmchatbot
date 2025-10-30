@@ -661,6 +661,64 @@
                 }
 
                 try {
+                    // ===================================================
+                    // === SỬA ĐỔI: Thêm khối này để xử lý Clarification (Sửa cả 2 lỗi) ===
+                    // ===================================================
+                    if (e.action === 'clarification' && Array.isArray(e.options)) {
+
+                        if (target === chatContainer) {
+                            // 1. Thêm tin nhắn (wrap)
+                            target.appendChild(wrap);
+
+                            // 2. Tạo responseHolder (khung chứa câu trả lời)
+                            const responseHolder = document.createElement('div');
+                            responseHolder.className = 'choice-response';
+                            target.appendChild(responseHolder);
+
+                            // 3. Tạo các nút bấm và thêm vào 'wrap' (tin nhắn)
+                            const bar = document.createElement('div');
+                            bar.className = 'choice-bar';
+                            e.options.forEach((opt) => {
+                                const btn = document.createElement('button');
+                                btn.className = 'choice-btn';
+                                // Đọc đúng 'label' từ object
+                                btn.textContent = opt.label || opt.name || opt;
+                                btn.dataset.choiceId = opt.id;
+                                btn.dataset.choiceValue = btn.textContent;
+
+                                // 4. QUAN TRỌNG: onclick trỏ vào responseHolder
+                                btn.onclick = () => sendChoice(opt.id, responseHolder, { scroll: false });
+
+                                bar.appendChild(btn);
+                            });
+                            wrap.appendChild(bar); // Thêm thanh nút bấm vào tin nhắn
+
+                            newElements.push(wrap, responseHolder);
+                            return; // Hoàn thành, thoát khỏi vòng lặp forEach
+
+                        } else {
+                            // Trường hợp hiếm gặp: clarification lồng nhau
+                            const bar = document.createElement('div');
+                            bar.className = 'choice-bar';
+                            e.options.forEach((opt) => {
+                                const btn = document.createElement('button');
+                                btn.className = 'choice-btn';
+                                btn.textContent = opt.label || opt.name || opt;
+                                btn.dataset.choiceId = opt.id;
+                                btn.dataset.choiceValue = btn.textContent;
+
+                                // onclick trỏ vào target (vốn là responseHolder)
+                                btn.onclick = () => sendChoice(opt.id, target, { scroll: false });
+
+                                bar.appendChild(btn);
+                            });
+                            wrap.appendChild(bar);
+                        }
+                    }
+                    // ===================================================
+                    // === Kết thúc sửa đổi                            ===
+                    // ===================================================
+
                     if (e.action === 'hieutruong_choices') {
                         if (target === chatContainer) {
                             target.appendChild(wrap);
@@ -687,17 +745,26 @@
                             bar.appendChild(btn);
                         });
                         wrap.appendChild(bar);
+                    // ===================================================
+                    // === SỬA ĐỔI: Xóa khối 'else if clarification' ở đây ===
+                    // ===================================================
+                    /* KHỐI CODE GỐC GÂY LỖI ĐÃ BỊ XÓA:
+
                     } else if (e.action === 'clarification' && Array.isArray(e.options)) {
                         const bar = document.createElement('div');
                         bar.className = 'choice-bar';
                         e.options.forEach((opt) => {
                             const btn = document.createElement('button');
                             btn.className = 'choice-btn';
-                            btn.textContent = opt;
-                            btn.onclick = () => askAndRender(opt, target === chatContainer ? null : target, { scroll: false });
+                            btn.textContent = opt; // <-- LỖI [object Object]
+                            btn.onclick = () => askAndRender(opt, target === chatContainer ? null : target, { scroll: false }); // <-- LỖI NỐI ĐUÔI
                             bar.appendChild(btn);
                         });
                         wrap.appendChild(bar);
+                    */
+                    // ===================================================
+                    // === Kết thúc xóa                                ===
+                    // ===================================================
                     } else if (Array.isArray(e.options) && e.options.length && typeof e.options[0] === 'object' && e.options[0].id) {
                         const bar = document.createElement('div');
                         bar.className = 'choice-bar';

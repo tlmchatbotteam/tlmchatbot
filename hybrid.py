@@ -1204,23 +1204,34 @@ def _build_response_from_item(item):
         return {"text": "Xin lỗi, có lỗi xảy ra khi tạo câu trả lời.", "media_type": "text", "media_content": None}
 
 
+# (Trong file hybrid.py)
+
 # --- 🆕 NEW: GPT KEYWORD-ONLY PIPELINE ---
 def get_answer_with_gpt_normalization(question: str, session_id: Optional[str] = None):
     """
     🆕 SỬA ĐỔI: Luôn thử chuẩn hóa GPT trước.
-    Nếu GPT thành công (trả về 1 hoặc NHIỀU keywords) -> trả về kết quả.
-    Nếu GPT thất bại -> chuyển sang pipeline 'get_answer' tiêu chuẩn.
+    Nếu GPT thành công -> trả về kết quả.
+    Nếu GPT thất bại (hoặc trả về "KHÔNG_PHÙ_HỢP") -> TRẢ VỀ "KHÔNG BIẾT" (theo yêu cầu)
 
     Flow:
     1. Gọi GPT để chọn MỘT hoặc NHIỀU keywords.
     2. Nếu GPT trả về keywords HỢP LỆ:
        a. Lặp qua từng keyword.
        b. Lấy TẤT CẢ các item tương ứng từ `KEYWORD_TO_ITEMS_MAP`.
-       c. Build response cho từng item (dùng hàm _build_response_from_item).
+       c. Build response cho từng item.
        d. Lọc trùng lặp và trả về danh sách responses.
-    3. Nếu GPT thất bại -> Chuyển toàn bộ câu hỏi cho hàm get_answer().
+    3. Nếu GPT thất bại (hoặc không tìm thấy item) -> Trả về "Xin lỗi, tôi không có thông tin..."
+       (Sẽ KHÔNG fallback về get_answer nếu USE_GPT_NORMALIZATION là true)
     """
     try:
+        # --- THAY ĐỔI: Tạo sẵn câu trả lời "Không biết" ---
+        unknown_response = [{
+            "text": "Xin lỗi, tôi không có thông tin về nội dung này.",
+            "media_type": "text",
+            "media_content": None
+        }]
+        # --- KẾT THÚC THAY ĐỔI ---
+
         if config.USE_GPT_NORMALIZATION:
             logger.info(f"[Pipeline] Trying GPT normalization first for: {question[:50]}")
 
@@ -1257,14 +1268,24 @@ def get_answer_with_gpt_normalization(question: str, session_id: Optional[str] =
                     logger.info(f"[Pipeline] ✓ Returning {len(responses)} answers from GPT-matched keywords")
                     return responses
                 else:
-                    logger.warning(f"[Pipeline] GPT keywords {matched_keywords} not found in map. Falling back.")
+                    # --- THAY ĐỔI 1: Nếu GPT trả về keywords nhưng không
+                    # tìm thấy item nào -> Trả về "Không biết"
+                    logger.warning(f"[Pipeline] GPT keywords {matched_keywords} not found in map. Returning 'Unknown'.")
+                    return unknown_response
 
             else:
-                # GPT trả về None hoặc "KHÔNG_PHÙ_HỢP"
-                logger.info(f"[Pipeline] GPT normalization failed or rejected. Falling back.")
+                # --- THAY ĐỔI 2: GPT trả về None hoặc "KHÔNG_PHÙ_HỢP"
+                # -> Trả về "Không biết"
+                logger.info(f"[Pipeline] GPT normalization failed or rejected. Returning 'Unknown'.")
+                return unknown_response
 
-        # --- FALLBACK (Cho cả 2 trường hợp: GPT bị tắt, hoặc GPT thất bại) ---
-        logger.debug(f"[Pipeline] Falling back to standard get_answer pipeline.")
+        # --- FALLBACK (CHỈ CHẠY KHI TẮT GPT TRONG CONFIG) ---
+        logger.debug(f"[Pipeline] GPT Normalization is OFF. Falling back to standard get_answer pipeline.")
+        return get_answer(question, skip_gpt=False)
+
+    except Exception as e:
+        logger.error(f"[Pipeline] Error in GPT normalization: {e}")
+        # Nếu có lỗi, vẫn fallback về pipeline cũ
         return get_answer(question, skip_gpt=False)
 
     except Exception as e:
