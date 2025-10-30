@@ -1226,7 +1226,7 @@ def get_answer_with_gpt_normalization(question: str, session_id: Optional[str] =
     try:
         # --- THAY ĐỔI: Tạo sẵn câu trả lời "Không biết" ---
         unknown_response = [{
-            "text": "Xin lỗi, tôi không có thông tin về nội dung này.",
+            "text": "Chào bạn!\nThông tin cụ thể về câu hỏi của bạn hiện chưa được cung cấp rõ trong tài liệu mà tôi có.\nTuy nhiên, bạn có thể liên hệ trực tiếp với các đơn vị chức năng để được hỗ trợ:\n\n• Email: c3tenloman.tphochiminh@moet.edu.vn\n• Fanpage: Trường THPT Ten Lơ Man - Quận 1\n• Số điện thoại: 028 3829 9702 – 028 3821 8020\n\nNếu bạn cần tôi hỗ trợ thêm thông tin liên quan khác, vui lòng cho biết nhé!",
             "media_type": "text",
             "media_content": None
         }]
@@ -1390,7 +1390,7 @@ def get_answer(question, skip_gpt: bool = False):
         }
 
         if not contains_dataset_keyword(core_question):
-            final_response["text"] = "Xin lỗi, tôi không có thông tin về nội dung này."
+            final_response["text"] = "Chào bạn!\nThông tin cụ thể về câu hỏi của bạn hiện chưa được cung cấp rõ trong tài liệu mà tôi có.\nTuy nhiên, bạn có thể liên hệ trực tiếp với các đơn vị chức năng để được hỗ trợ:\n\n• Email: c3tenloman.tphochiminh@moet.edu.vn\n• Fanpage: Trường THPT Ten Lơ Man - Quận 1\n• Số điện thoại: 028 3829 9702 – 028 3821 8020\n\nNếu bạn cần tôi hỗ trợ thêm thông tin liên quan khác, vui lòng cho biết nhé!"
 
         return [final_response]
     except Exception as e:
@@ -1440,7 +1440,7 @@ def find_answer_and_media(question):
 
         # 2) Adaptive routing
         if not contains_dataset_keyword(question):
-            return "Xin lỗi, tôi không có thông tin về nội dung này.", "text", None
+            return "Chào bạn!\nThông tin cụ thể về câu hỏi của bạn hiện chưa được cung cấp rõ trong tài liệu mà tôi có.\nTuy nhiên, bạn có thể liên hệ trực tiếp với các đơn vị chức năng để được hỗ trợ:\n\n• Email: c3tenloman.tphochiminh@moet.edu.vn\n• Fanpage: Trường THPT Ten Lơ Man - Quận 1\n• Số điện thoại: 028 3829 9702 – 028 3821 8020\n\nNếu bạn cần tôi hỗ trợ thêm thông tin liên quan khác, vui lòng cho biết nhé!", "text", None
 
         FUZZY_STRONG = config.FUZZY_STRONG
         EMBED_STRONG = config.EMBED_STRONG
