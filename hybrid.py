@@ -78,6 +78,16 @@ except Exception as e:
     process = None
 
 
+# --- SỬA ĐỔI: Thêm hằng số cho tin nhắn ---
+class Messages:
+    """Hằng số cho các tin nhắn lặp lại của bot"""
+    NOT_FOUND = "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp."
+    NO_INFO = "Chào bạn!\nThông tin cụ thể về câu hỏi của bạn hiện chưa được cung cấp rõ trong tài liệu mà tôi có.\nTuy nhiên, bạn có thể liên hệ trực tiếp với các đơn vị chức năng để được hỗ trợ:\n\n• Email: c3tenloman.tphochiminh@moet.edu.vn\n• Fanpage: Trường THPT Ten Lơ Man - Quận 1\n• Số điện thoại: 028 3829 9702 – 028 3821 8020\n\nNếu bạn cần tôi hỗ trợ thêm thông tin liên quan khác, vui lòng cho biết nhé!"
+    ERROR = "Xin lỗi, đã có lỗi xảy ra."
+    ERROR_CREATE_RESPONSE = "Xin lỗi, có lỗi xảy ra khi tạo câu trả lời."
+# --- KẾT THÚC SỬA ĐỔI ---
+
+
 # --- CONFIGURATION ---
 @dataclass
 class ChatbotConfig:
@@ -1102,6 +1112,42 @@ def find_multi_keyword_spans(norm_text: str):
         return []
 
 
+def find_multi_keyword_spans_with_items(norm_text: str) -> List[Tuple[str, List[dict]]]:
+    """
+    Tìm các keyword spans trong text VÀ trả về luôn items tương ứng.
+    Tối ưu hóa N+1 query problem.
+
+    Args:
+        norm_text: Text đã normalize (không dấu)
+
+    Returns:
+        List[Tuple[str, List[dict]]]: [(keyword, [items]), ...]
+    """
+    try:
+        if not HYBRID_MATCHER:
+            return []
+
+        matches = HYBRID_MATCHER.trie.search_all_matches(norm_text)
+
+        results = []
+        seen_phrases = set()
+
+        for phrase, data, phrase_length in matches:
+            if phrase in seen_phrases:
+                continue
+            seen_phrases.add(phrase)
+
+            # ✅ Lấy items ngay tại đây (không cần lookup sau)
+            items = KEYWORD_TO_ITEMS_MAP.get(phrase, [])
+            if items:
+                results.append((phrase, items))
+
+        return results
+
+    except Exception as e:
+        logger.error(f"Error finding keyword spans with items: {e}")
+        return []
+
 def make_clarifying_question(user_query: str, candidates: list) -> dict:
     """Sinh câu hỏi gợi ý khi có nhiều ứng viên"""
     try:
@@ -1124,7 +1170,7 @@ def make_clarifying_question(user_query: str, candidates: list) -> dict:
                 options.append(label)
 
         if not options:
-            return {"text": "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "media_type": "text",
+            return {"text": Messages.NOT_FOUND, "media_type": "text",
                     "media_content": None}
 
         opts_text = " , ".join(options[:5])
@@ -1171,7 +1217,7 @@ def make_clarifying_question(user_query: str, candidates: list) -> dict:
         }
     except Exception as e:
         logger.error(f"Error making clarifying question: {e}")
-        return {"text": "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "media_type": "text", "media_content": None}
+        return {"text": Messages.NOT_FOUND, "media_type": "text", "media_content": None}
 
 
 # --- HÀM TRỢ GIÚP BUILD RESPONSE (ĐÃ DI CHUYỂN RA NGOÀI) ---
@@ -1179,10 +1225,10 @@ def _build_response_from_item(item):
     """Xây dựng đối tượng response chuẩn từ một item data"""
     try:
         if not item:
-            return {"text": "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "media_type": "text",
+            return {"text": Messages.NOT_FOUND, "media_type": "text",
                     "media_content": None}
 
-        ans = item.get('answer', "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.")
+        ans = item.get('answer', Messages.NOT_FOUND)
         media_type = "text"
         media_content = None
         images = item.get('images')
@@ -1201,7 +1247,7 @@ def _build_response_from_item(item):
         return {"text": ans, "media_type": media_type, "media_content": media_content}
     except Exception as e:
         logger.error(f"Error in _build_response_from_item: {e}")
-        return {"text": "Xin lỗi, có lỗi xảy ra khi tạo câu trả lời.", "media_type": "text", "media_content": None}
+        return {"text": Messages.ERROR_CREATE_RESPONSE, "media_type": "text", "media_content": None}
 
 
 # (Trong file hybrid.py)
@@ -1226,7 +1272,7 @@ def get_answer_with_gpt_normalization(question: str, session_id: Optional[str] =
     try:
         # --- THAY ĐỔI: Tạo sẵn câu trả lời "Không biết" ---
         unknown_response = [{
-            "text": "Chào bạn!\nThông tin cụ thể về câu hỏi của bạn hiện chưa được cung cấp rõ trong tài liệu mà tôi có.\nTuy nhiên, bạn có thể liên hệ trực tiếp với các đơn vị chức năng để được hỗ trợ:\n\n• Email: c3tenloman.tphochiminh@moet.edu.vn\n• Fanpage: Trường THPT Ten Lơ Man - Quận 1\n• Số điện thoại: 028 3829 9702 – 028 3821 8020\n\nNếu bạn cần tôi hỗ trợ thêm thông tin liên quan khác, vui lòng cho biết nhé!",
+            "text": Messages.NO_INFO,
             "media_type": "text",
             "media_content": None
         }]
@@ -1288,10 +1334,7 @@ def get_answer_with_gpt_normalization(question: str, session_id: Optional[str] =
         # Nếu có lỗi, vẫn fallback về pipeline cũ
         return get_answer(question, skip_gpt=False)
 
-    except Exception as e:
-        logger.error(f"[Pipeline] Error in GPT normalization: {e}")
-        # Nếu có lỗi, vẫn fallback về pipeline cũ
-        return get_answer(question, skip_gpt=False)
+
 
 
 # --- MAIN ANSWER FUNCTIONS ---
@@ -1326,26 +1369,22 @@ def get_answer(question, skip_gpt: bool = False):
                 if unique_results:
                     return unique_results
 
-        # Step 3: Multi-intent span-based path - SỬ DỤNG TRIE
-        sub_questions = find_multi_keyword_spans(core_question)
-        if len(sub_questions) > 1:
+        # Step 3: Multi-intent span-based path - ✅ OPTIMIZED
+        spans_with_items = find_multi_keyword_spans_with_items(core_question)
+        if len(spans_with_items) > 1:
             results = []
-            for subq in sub_questions:
-                items = KEYWORD_TO_ITEMS_MAP.get(subq, [])
+            seen_keys = set()
+
+            for phrase, items in spans_with_items:
                 for item in items:
                     if item:
-                        results.append(_build_response_from_item(item))
+                        answer_key = item.get('answer', '')
+                        if answer_key and answer_key not in seen_keys:
+                            results.append(_build_response_from_item(item))
+                            seen_keys.add(answer_key)
 
             if results:
-                unique_results = []
-                seen_keys = set()
-                for r in results:
-                    key = r.get("text", "")
-                    if key not in seen_keys:
-                        unique_results.append(r)
-                        seen_keys.add(key)
-                if unique_results:
-                    return unique_results
+                return results
 
         # Step 4: High-confidence fast path
         try:
@@ -1390,12 +1429,12 @@ def get_answer(question, skip_gpt: bool = False):
         }
 
         if not contains_dataset_keyword(core_question):
-            final_response["text"] = "Chào bạn!\nThông tin cụ thể về câu hỏi của bạn hiện chưa được cung cấp rõ trong tài liệu mà tôi có.\nTuy nhiên, bạn có thể liên hệ trực tiếp với các đơn vị chức năng để được hỗ trợ:\n\n• Email: c3tenloman.tphochiminh@moet.edu.vn\n• Fanpage: Trường THPT Ten Lơ Man - Quận 1\n• Số điện thoại: 028 3829 9702 – 028 3821 8020\n\nNếu bạn cần tôi hỗ trợ thêm thông tin liên quan khác, vui lòng cho biết nhé!"
+            final_response["text"] = Messages.NO_INFO
 
         return [final_response]
     except Exception as e:
         logger.error(f"Error in get_answer: {e}", exc_info=True)
-        return [{"text": "Xin lỗi, đã có lỗi xảy ra.", "media_type": "text", "media_content": None}]
+        return [{"text": Messages.ERROR, "media_type": "text", "media_content": None}]
 
 
 def find_answer_and_media(question):
@@ -1410,7 +1449,7 @@ def find_answer_and_media(question):
                 questions = [questions]
             for q in questions:
                 if normalize_and_unaccent(q) == norm_question:
-                    answer = item.get('answer', "Không có câu trả lời.")
+                    answer = item.get('answer', Messages.NOT_FOUND)
                     images = item.get('images')
                     captions = item.get('captions')
                     video_url = item.get('video_url')
@@ -1426,7 +1465,7 @@ def find_answer_and_media(question):
         if HYBRID_MATCHER:
             matched_item = HYBRID_MATCHER.find_match(norm_question)
             if matched_item:
-                answer = matched_item.get('answer', "Không có câu trả lời.")
+                answer = matched_item.get('answer', Messages.NOT_FOUND)
                 images = matched_item.get('images')
                 captions = matched_item.get('captions')
                 video_url = matched_item.get('video_url')
@@ -1440,7 +1479,7 @@ def find_answer_and_media(question):
 
         # 2) Adaptive routing
         if not contains_dataset_keyword(question):
-            return "Chào bạn!\nThông tin cụ thể về câu hỏi của bạn hiện chưa được cung cấp rõ trong tài liệu mà tôi có.\nTuy nhiên, bạn có thể liên hệ trực tiếp với các đơn vị chức năng để được hỗ trợ:\n\n• Email: c3tenloman.tphochiminh@moet.edu.vn\n• Fanpage: Trường THPT Ten Lơ Man - Quận 1\n• Số điện thoại: 028 3829 9702 – 028 3821 8020\n\nNếu bạn cần tôi hỗ trợ thêm thông tin liên quan khác, vui lòng cho biết nhé!", "text", None
+            return Messages.NO_INFO, "text", None
 
         FUZZY_STRONG = config.FUZZY_STRONG
         EMBED_STRONG = config.EMBED_STRONG
@@ -1480,7 +1519,7 @@ def find_answer_and_media(question):
                     chosen_item = best_fuzzy_item
 
         if chosen_item:
-            answer = chosen_item.get('answer', "Không có câu trả lời.")
+            answer = chosen_item.get('answer', Messages.NOT_FOUND)
             images = chosen_item.get('images')
             captions = chosen_item.get('captions')
             video_url = chosen_item.get('video_url')
@@ -1492,10 +1531,10 @@ def find_answer_and_media(question):
                 return answer, "image", (images, captions)
             return answer, "text", None
 
-        return "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "text", None
+        return Messages.NOT_FOUND, "text", None
     except Exception as e:
         logger.error(f"Error in find_answer_and_media: {e}", exc_info=True)
-        return "Xin lỗi, đã có lỗi xảy ra.", "text", None
+        return Messages.ERROR, "text", None
 
 
 def fuzzy_match_question(question, admissions_data, min_ratio=0.6):
@@ -1515,7 +1554,7 @@ def fuzzy_match_question(question, admissions_data, min_ratio=0.6):
                 item = KEYWORD_TO_ITEM_MAP.get(key)
                 if not item:
                     return None
-                answer = item.get('answer', "Không có câu trả lời.")
+                answer = item.get('answer', Messages.NOT_FOUND)
                 images = item.get('images')
                 captions = item.get('captions')
                 return answer, images, captions
@@ -1534,7 +1573,7 @@ def fuzzy_match_question(question, admissions_data, min_ratio=0.6):
             item = KEYWORD_TO_ITEM_MAP.get(best_key)
             if not item:
                 return None
-            answer = item.get('answer', "Không có câu trả lời.")
+            answer = item.get('answer', Messages.NOT_FOUND)
             images = item.get('images')
             captions = item.get('captions')
             return answer, images, captions
@@ -1566,7 +1605,7 @@ def ask():
                     return jsonify({"error": "Invalid choice_id"}), 400
 
                 item = items[idx]
-                ans = item.get('answer', "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.")
+                ans = item.get('answer', Messages.NOT_FOUND)
                 media_type = "text"
                 media_content = None
                 images = item.get('images')
