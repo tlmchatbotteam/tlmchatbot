@@ -112,6 +112,24 @@
         #send-btn { padding: 12px 14px; border: none; border-radius: 999px; cursor: pointer; color: #fff; background: var(--brand); font-size: 0.95rem; }
         #send-btn:hover { background: var(--brand-600); }
 
+        /* ======================================= */
+        /* === THÊM: CSS CHO TRẠNG THÁI DISABLED === */
+        /* ======================================= */
+        #question:disabled {
+            background: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+        #send-btn:disabled {
+            background: #94a3b8;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        /* ======================================= */
+        /* === KẾT THÚC THÊM                   === */
+        /* ======================================= */
+
+
         /* Full-width answers for balance - left aligned like the reference */
         .bot p { max-width: 75ch; margin: 0 0 8px; }
 
@@ -386,6 +404,36 @@
         let USER_QUESTION_COUNT = 0;
         // Simple in-flight guard: prevents sending the same question/choice multiple times
         const __IN_FLIGHT = new Set();
+
+        // =======================================
+        // === THÊM MỚI: HÀM TRỢ GIÚP DISABLE/ENABLE INPUT ===
+        // =======================================
+        function disableInput() {
+            try {
+                document.getElementById('question').disabled = true;
+                document.getElementById('send-btn').disabled = true;
+            } catch (e) {
+                console.warn("Could not disable inputs", e);
+            }
+        }
+
+        function enableInput() {
+            try {
+                const input = document.getElementById('question');
+                input.disabled = false;
+                document.getElementById('send-btn').disabled = false;
+                // Chỉ focus nếu màn hình không quá nhỏ (tránh mở bàn phím ảo khó chịu)
+                if (window.innerWidth > 768) {
+                    input.focus();
+                }
+            } catch (e) {
+                console.warn("Could not enable inputs", e);
+            }
+        }
+        // =======================================
+        // === KẾT THÚC THÊM MỚI                ===
+        // =======================================
+
 
         // Debug UI: show last fetch error details on the page for quick troubleshooting
         (function initDebugUI() {
@@ -812,9 +860,9 @@
             targetContainer.appendChild(backButton);
         }
 
-        // =======================================
-        // ===== HÀM SENDQUESTION ĐÃ SỬA ĐỔI HOÀN TOÀN =====
-        // =======================================
+        // ============================================================
+        // ===== HÀM SENDQUESTION ĐÃ SỬA ĐỔI (THÊM DISABLE/ENABLE) =====
+        // ============================================================
         async function sendQuestion() {
             const questionInput = document.getElementById('question');
             const question = questionInput.value.trim();
@@ -822,6 +870,10 @@
 
             // Xóa nội dung trên thanh câu hỏi ngay sau khi nhấn gửi
             questionInput.value = '';
+
+            // --- THÊM MỚI ---
+            disableInput();
+            // --- KẾT THÚC THÊM MỚI ---
 
             const chatContainer = document.getElementById('chat-container');
             const userMessage = document.createElement('div');
@@ -839,15 +891,25 @@
 
                 if (normalized.includes('cơ sở vật chất') || normalizedNoDiacritics.includes('co so vat chat')) {
                     renderFacilitiesChoices();
+                    // --- THÊM MỚI ---
+                    // Kích hoạt lại input ngay lập tức vì đây là hành động local
+                    enableInput();
+                    // --- KẾT THÚC THÊM MỚI ---
                     return;
                 }
                 if (normalized.includes('hoạt động')) {
                     renderHoatDongChoices();
+                    // --- THÊM MỚI ---
+                    enableInput();
+                    // --- KẾT THÚC THÊM MỚI ---
                     return;
                 }
                 const teacherKeywords = ['giáo viên', 'thầy cô giáo', 'thầy cô'];
                 if (teacherKeywords.some(k => normalized.includes(k))) {
                     renderGiaoVienChoices();
+                    // --- THÊM MỚI ---
+                    enableInput();
+                    // --- KẾT THÚC THÊM MỚI ---
                     return;
                 }
             } catch (_) { /* noop */ }
@@ -902,9 +964,15 @@
                 showDebugError(error);
             } finally {
                 updateEmptyStateVisibility();
+                // --- THÊM MỚI ---
+                enableInput();
+                // --- KẾT THÚC THÊM MỚI ---
             }
         }
 
+        // ============================================================
+        // ===== HÀM SENDINTROVIDEO ĐÃ SỬA ĐỔI (THÊM DISABLE/ENABLE) =====
+        // ============================================================
         async function sendIntroVideo() {
             const chatContainer = document.getElementById('chat-container');
             const userMessage = document.createElement('div');
@@ -912,6 +980,10 @@
             userMessage.textContent = 'Giới thiệu về trường';
             chatContainer.appendChild(userMessage);
             updateEmptyStateVisibility();
+
+            // --- THÊM MỚI ---
+            disableInput();
+            // --- KẾT THÚC THÊM MỚI ---
 
             const typingEl = showTyping();
             try {
@@ -934,6 +1006,9 @@
                 showDebugError(error);
             } finally {
                 updateEmptyStateVisibility();
+                // --- THÊM MỚI ---
+                enableInput();
+                // --- KẾT THÚC THÊM MỚI ---
             }
         }
 
@@ -998,7 +1073,7 @@
                 // ============ SỬA LỖI Ở ĐÂY ============
                 // =======================================
                 btn.onclick = async () => {
-                    // 1. Render nội dung bằng cách gọi server
+                    // 1. Render nội dung bằng cách gọi server (hàm này đã có disable/enable)
                     await askAndRender(opt.q, responseHolder, { scroll: false });
 
                     // 2. CHỜ ẢNH LOAD XONG
@@ -1175,11 +1250,19 @@
             } catch (_) { /* no-op */ }
         }
 
+        // ============================================================
+        // ===== HÀM ASKANDRENDER ĐÃ SỬA ĐỔI (THÊM DISABLE/ENABLE) =====
+        // ============================================================
         window.askAndRender = async function askAndRender(question, intoEl, opts = { scroll: true }) {
              const chatContainer = document.getElementById('chat-container');
              const inflightKey = 'q:' + String(question || '');
              if (__IN_FLIGHT.has(inflightKey)) return;
              __IN_FLIGHT.add(inflightKey);
+
+             // --- THÊM MỚI ---
+             disableInput();
+             // --- KẾT THÚC THÊM MỚI ---
+
              const typingEl = showTyping(intoEl);
              try {
                  const response = await fetch('/ask', {
@@ -1210,8 +1293,7 @@
                  if (intoEl) {
                      if (opts && opts.scroll) {
                          try { intoEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_){ }
-                         const inp = document.getElementById('question');
-                         if (inp) inp.focus();
+                         // Đã chuyển logic focus vào enableInput()
                      }
                  } else {
                      try { chatContainer.scrollTop = chatContainer.scrollHeight; } catch(_){ }
@@ -1220,7 +1302,7 @@
                  console.error('Error in askAndRender:', error);
                  hideTyping(typingEl);
                  const errorMessage = document.createElement('div');
-errorMessage.className = 'message bot';
+                errorMessage.className = 'message bot';
                  const reason = (error && error.message) ? error.message : 'Có lỗi xảy ra.';
                  if (intoEl) { intoEl.innerHTML = ''; intoEl.appendChild(errorMessage); }
                  else chatContainer.appendChild(errorMessage);
@@ -1229,15 +1311,25 @@ errorMessage.className = 'message bot';
              } finally {
                  __IN_FLIGHT.delete(inflightKey);
                  updateEmptyStateVisibility();
+                 // --- THÊM MỚI ---
+                 enableInput();
+                 // --- KẾT THÚC THÊM MỚI ---
              }
          }
 
-
+        // ============================================================
+        // ===== HÀM SENDCHOICE ĐÃ SỬA ĐỔI (THÊM DISABLE/ENABLE) =====
+        // ============================================================
         window.sendChoice = async function sendChoice(choiceId, intoEl, opts = { scroll: true }) {
             const chatContainer = document.getElementById('chat-container');
             const inflightKey = 'choice:' + String(choiceId);
             if (__IN_FLIGHT.has(inflightKey)) return;
             __IN_FLIGHT.add(inflightKey);
+
+            // --- THÊM MỚI ---
+            disableInput();
+            // --- KẾT THÚC THÊM MỚI ---
+
             const typingEl = showTyping(intoEl);
             try {
                 const response = await fetch('/ask', {
@@ -1254,7 +1346,7 @@ errorMessage.className = 'message bot';
                 let data;
                 try { data = await response.json(); }
                 catch (parseErr) {
-                    const raw = await response.clone().text().catch(() => '');
+                     const raw = await response.clone().text().catch(() => '');
                     throw new Error('Invalid JSON from server: ' + (raw ? raw.slice(0,1000) : '<no body>'));
                 }
 
@@ -1264,8 +1356,7 @@ errorMessage.className = 'message bot';
                 if (intoEl) {
                     if (opts && opts.scroll) {
                          try { intoEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_){ }
-                        const inp = document.getElementById('question');
-                        if (inp) inp.focus();
+                         // Đã chuyển logic focus vào enableInput()
                     }
                 } else {
                     try { chatContainer.scrollTop = chatContainer.scrollHeight; } catch(_){ }
@@ -1283,6 +1374,9 @@ errorMessage.className = 'message bot';
             } finally {
                 __IN_FLIGHT.delete(inflightKey);
                  updateEmptyStateVisibility();
+                 // --- THÊM MỚI ---
+                 enableInput();
+                 // --- KẾT THÚC THÊM MỚI ---
             }
         }
         try { var sendChoice = window.sendChoice; } catch (_) { /* noop */ }
@@ -1342,7 +1436,8 @@ errorMessage.className = 'message bot';
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
                           const q = input.value && input.value.trim();
-                          if (q) sendQuestion();
+                          // --- SỬA ĐỔI: Kiểm tra input có bị disabled không ---
+                          if (q && !input.disabled) sendQuestion();
                         }
                     });
                     input.setAttribute('aria-label', 'Câu hỏi');
@@ -1353,7 +1448,10 @@ errorMessage.className = 'message bot';
                 if (sendBtn) {
                     sendBtn.addEventListener('click', (e) => {
                         e.preventDefault();
-                        sendQuestion();
+                        // --- SỬA ĐỔI: Kiểm tra nút có bị disabled không ---
+                        if (!sendBtn.disabled) {
+                            sendQuestion();
+                        }
                     });
                 }
 
