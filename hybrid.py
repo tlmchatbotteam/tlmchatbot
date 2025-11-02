@@ -1648,7 +1648,7 @@ def ask():
                     result[0]["video_url"] = media_content
                 elif media_type == "image":
                     images, captions = media_content
-                    entry["images"] = [f"/images/{os.path.basename(img)}" for img in images if
+                    result[0]["images"] = [f"/images/{os.path.basename(img)}" for img in images if
                                        isinstance(img, str) and img.strip()]
                     result[0]["captions"] = captions if captions else []
 
