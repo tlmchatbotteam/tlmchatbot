@@ -125,6 +125,22 @@ class ChatbotConfig:
 config = ChatbotConfig()
 
 
+# =======================================
+# === THAY ĐỔI: THÊM HẰNG SỐ TIN NHẮN ===
+# =======================================
+class Messages:
+    """Hằng số cho các tin nhắn lặp lại của bot"""
+    NOT_FOUND = "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp."
+    NO_INFO = "Chào bạn!\nThông tin cụ thể về câu hỏi của bạn hiện chưa được cung cấp rõ trong tài liệu mà tôi có.\nTuy nhiên, bạn có thể liên hệ trực tiếp với các đơn vị chức năng để được hỗ trợ:\n\n• Email: c3tenloman.tphochiminh@moet.edu.vn\n• Fanpage: Trường THPT Ten Lơ Man - Quận 1\n• Số điện thoại: 028 3829 9702 – 028 3821 8020\n\nNếu bạn cần tôi hỗ trợ thêm thông tin liên quan khác, vui lòng cho biết nhé!"
+    ERROR = "Xin lỗi, đã có lỗi xảy ra."
+    ERROR_CREATE_RESPONSE = "Xin lỗi, có lỗi xảy ra khi tạo câu trả lời."
+
+
+# =======================================
+# === KẾT THÚC THAY ĐỔI               ===
+# =======================================
+
+
 # --- TRIE DATA STRUCTURE FOR OPTIMIZED MATCHING ---
 class TrieNode:
     """Node của cây Trie"""
@@ -1124,8 +1140,10 @@ def make_clarifying_question(user_query: str, candidates: list) -> dict:
                 options.append(label)
 
         if not options:
-            return {"text": "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "media_type": "text",
-                    "media_content": None}
+            # =======================================
+            # === THAY ĐỔI: SỬ DỤNG HẰNG SỐ       ===
+            # =======================================
+            return {"text": Messages.NOT_FOUND, "media_type": "text", "media_content": None}
 
         opts_text = " , ".join(options[:5])
         question = f"Bạn muốn hỏi cụ thể về: {opts_text}?"
@@ -1171,7 +1189,10 @@ def make_clarifying_question(user_query: str, candidates: list) -> dict:
         }
     except Exception as e:
         logger.error(f"Error making clarifying question: {e}")
-        return {"text": "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "media_type": "text", "media_content": None}
+        # =======================================
+        # === THAY ĐỔI: SỬ DỤNG HẰNG SỐ       ===
+        # =======================================
+        return {"text": Messages.NOT_FOUND, "media_type": "text", "media_content": None}
 
 
 # --- HÀM TRỢ GIÚP BUILD RESPONSE (ĐÃ DI CHUYỂN RA NGOÀI) ---
@@ -1179,10 +1200,12 @@ def _build_response_from_item(item):
     """Xây dựng đối tượng response chuẩn từ một item data"""
     try:
         if not item:
-            return {"text": "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "media_type": "text",
-                    "media_content": None}
+            # =======================================
+            # === THAY ĐỔI: SỬ DỤNG HẰNG SỐ       ===
+            # =======================================
+            return {"text": Messages.NOT_FOUND, "media_type": "text", "media_content": None}
 
-        ans = item.get('answer', "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.")
+        ans = item.get('answer', Messages.NOT_FOUND)
         media_type = "text"
         media_content = None
         images = item.get('images')
@@ -1201,7 +1224,10 @@ def _build_response_from_item(item):
         return {"text": ans, "media_type": media_type, "media_content": media_content}
     except Exception as e:
         logger.error(f"Error in _build_response_from_item: {e}")
-        return {"text": "Xin lỗi, có lỗi xảy ra khi tạo câu trả lời.", "media_type": "text", "media_content": None}
+        # =======================================
+        # === THAY ĐỔI: SỬ DỤNG HẰNG SỐ       ===
+        # =======================================
+        return {"text": Messages.ERROR_CREATE_RESPONSE, "media_type": "text", "media_content": None}
 
 
 # (Trong file hybrid.py)
@@ -1224,13 +1250,17 @@ def get_answer_with_gpt_normalization(question: str, session_id: Optional[str] =
        (Sẽ KHÔNG fallback về get_answer nếu USE_GPT_NORMALIZATION là true)
     """
     try:
-        # --- THAY ĐỔI: Tạo sẵn câu trả lời "Không biết" ---
+        # =======================================
+        # === THAY ĐỔI: SỬ DỤNG HẰNG SỐ       ===
+        # =======================================
         unknown_response = [{
-            "text": "Chào bạn!\nThông tin cụ thể về câu hỏi của bạn hiện chưa được cung cấp rõ trong tài liệu mà tôi có.\nTuy nhiên, bạn có thể liên hệ trực tiếp với các đơn vị chức năng để được hỗ trợ:\n\n• Email: c3tenloman.tphochiminh@moet.edu.vn\n• Fanpage: Trường THPT Ten Lơ Man - Quận 1\n• Số điện thoại: 028 3829 9702 – 028 3821 8020\n\nNếu bạn cần tôi hỗ trợ thêm thông tin liên quan khác, vui lòng cho biết nhé!",
+            "text": Messages.NO_INFO,
             "media_type": "text",
             "media_content": None
         }]
-        # --- KẾT THÚC THAY ĐỔI ---
+        # =======================================
+        # === KẾT THÚC THAY ĐỔI               ===
+        # =======================================
 
         if config.USE_GPT_NORMALIZATION:
             logger.info(f"[Pipeline] Trying GPT normalization first for: {question[:50]}")
@@ -1390,12 +1420,18 @@ def get_answer(question, skip_gpt: bool = False):
         }
 
         if not contains_dataset_keyword(core_question):
-            final_response["text"] = "Chào bạn!\nThông tin cụ thể về câu hỏi của bạn hiện chưa được cung cấp rõ trong tài liệu mà tôi có.\nTuy nhiên, bạn có thể liên hệ trực tiếp với các đơn vị chức năng để được hỗ trợ:\n\n• Email: c3tenloman.tphochiminh@moet.edu.vn\n• Fanpage: Trường THPT Ten Lơ Man - Quận 1\n• Số điện thoại: 028 3829 9702 – 028 3821 8020\n\nNếu bạn cần tôi hỗ trợ thêm thông tin liên quan khác, vui lòng cho biết nhé!"
+            # =======================================
+            # === THAY ĐỔI: SỬ DỤNG HẰNG SỐ       ===
+            # =======================================
+            final_response["text"] = Messages.NO_INFO
 
         return [final_response]
     except Exception as e:
         logger.error(f"Error in get_answer: {e}", exc_info=True)
-        return [{"text": "Xin lỗi, đã có lỗi xảy ra.", "media_type": "text", "media_content": None}]
+        # =======================================
+        # === THAY ĐỔI: SỬ DỤNG HẰNG SỐ       ===
+        # =======================================
+        return [{"text": Messages.ERROR, "media_type": "text", "media_content": None}]
 
 
 def find_answer_and_media(question):
@@ -1410,7 +1446,7 @@ def find_answer_and_media(question):
                 questions = [questions]
             for q in questions:
                 if normalize_and_unaccent(q) == norm_question:
-                    answer = item.get('answer', "Không có câu trả lời.")
+                    answer = item.get('answer', Messages.NOT_FOUND)
                     images = item.get('images')
                     captions = item.get('captions')
                     video_url = item.get('video_url')
@@ -1426,7 +1462,7 @@ def find_answer_and_media(question):
         if HYBRID_MATCHER:
             matched_item = HYBRID_MATCHER.find_match(norm_question)
             if matched_item:
-                answer = matched_item.get('answer', "Không có câu trả lời.")
+                answer = matched_item.get('answer', Messages.NOT_FOUND)
                 images = matched_item.get('images')
                 captions = matched_item.get('captions')
                 video_url = matched_item.get('video_url')
@@ -1440,7 +1476,10 @@ def find_answer_and_media(question):
 
         # 2) Adaptive routing
         if not contains_dataset_keyword(question):
-            return "Chào bạn!\nThông tin cụ thể về câu hỏi của bạn hiện chưa được cung cấp rõ trong tài liệu mà tôi có.\nTuy nhiên, bạn có thể liên hệ trực tiếp với các đơn vị chức năng để được hỗ trợ:\n\n• Email: c3tenloman.tphochiminh@moet.edu.vn\n• Fanpage: Trường THPT Ten Lơ Man - Quận 1\n• Số điện thoại: 028 3829 9702 – 028 3821 8020\n\nNếu bạn cần tôi hỗ trợ thêm thông tin liên quan khác, vui lòng cho biết nhé!", "text", None
+            # =======================================
+            # === THAY ĐỔI: SỬ DỤNG HẰNG SỐ       ===
+            # =======================================
+            return Messages.NO_INFO, "text", None
 
         FUZZY_STRONG = config.FUZZY_STRONG
         EMBED_STRONG = config.EMBED_STRONG
@@ -1480,7 +1519,7 @@ def find_answer_and_media(question):
                     chosen_item = best_fuzzy_item
 
         if chosen_item:
-            answer = chosen_item.get('answer', "Không có câu trả lời.")
+            answer = chosen_item.get('answer', Messages.NOT_FOUND)
             images = chosen_item.get('images')
             captions = chosen_item.get('captions')
             video_url = chosen_item.get('video_url')
@@ -1492,10 +1531,16 @@ def find_answer_and_media(question):
                 return answer, "image", (images, captions)
             return answer, "text", None
 
-        return "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.", "text", None
+        # =======================================
+        # === THAY ĐỔI: SỬ DỤNG HẰNG SỐ       ===
+        # =======================================
+        return Messages.NOT_FOUND, "text", None
     except Exception as e:
         logger.error(f"Error in find_answer_and_media: {e}", exc_info=True)
-        return "Xin lỗi, đã có lỗi xảy ra.", "text", None
+        # =======================================
+        # === THAY ĐỔI: SỬ DỤNG HẰNG SỐ       ===
+        # =======================================
+        return Messages.ERROR, "text", None
 
 
 def fuzzy_match_question(question, admissions_data, min_ratio=0.6):
@@ -1515,7 +1560,7 @@ def fuzzy_match_question(question, admissions_data, min_ratio=0.6):
                 item = KEYWORD_TO_ITEM_MAP.get(key)
                 if not item:
                     return None
-                answer = item.get('answer', "Không có câu trả lời.")
+                answer = item.get('answer', Messages.NOT_FOUND)
                 images = item.get('images')
                 captions = item.get('captions')
                 return answer, images, captions
@@ -1534,7 +1579,7 @@ def fuzzy_match_question(question, admissions_data, min_ratio=0.6):
             item = KEYWORD_TO_ITEM_MAP.get(best_key)
             if not item:
                 return None
-            answer = item.get('answer', "Không có câu trả lời.")
+            answer = item.get('answer', Messages.NOT_FOUND)
             images = item.get('images')
             captions = item.get('captions')
             return answer, images, captions
@@ -1566,7 +1611,7 @@ def ask():
                     return jsonify({"error": "Invalid choice_id"}), 400
 
                 item = items[idx]
-                ans = item.get('answer', "Xin lỗi, tôi chưa tìm thấy thông tin phù hợp.")
+                ans = item.get('answer', Messages.NOT_FOUND)
                 media_type = "text"
                 media_content = None
                 images = item.get('images')
@@ -1603,8 +1648,8 @@ def ask():
                     result[0]["video_url"] = media_content
                 elif media_type == "image":
                     images, captions = media_content
-                    result[0]["images"] = [f"/images/{os.path.basename(img)}" for img in images if
-                                           isinstance(img, str) and img.strip()]
+                    entry["images"] = [f"/images/{os.path.basename(img)}" for img in images if
+                                       isinstance(img, str) and img.strip()]
                     result[0]["captions"] = captions if captions else []
 
                 return jsonify(result), 200
