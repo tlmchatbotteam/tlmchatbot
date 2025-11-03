@@ -1318,11 +1318,7 @@ def get_answer_with_gpt_normalization(question: str, session_id: Optional[str] =
         # Nếu có lỗi, vẫn fallback về pipeline cũ
         return get_answer(question, skip_gpt=False)
 
-    except Exception as e:
-        logger.error(f"[Pipeline] Error in GPT normalization: {e}")
-        # Nếu có lỗi, vẫn fallback về pipeline cũ
-        return get_answer(question, skip_gpt=False)
-
+  
 
 # --- MAIN ANSWER FUNCTIONS ---
 def get_answer(question, skip_gpt: bool = False):
