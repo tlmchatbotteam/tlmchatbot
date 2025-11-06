@@ -536,7 +536,8 @@ def normalize_query_with_gpt_keywords(query: str, keywords_hash: str) -> Optiona
             logger.warning(f"[GPT Keywords] No candidates found for: {query}")
             return None
 
-        # PROMPT MỚI: Cho phép GPT trả về NHIỀU keywords
+        # --- 💡 BẮT ĐẦU THAY ĐỔI PROMPT ---
+        # PROMPT MỚI: Yêu cầu GPT bỏ qua nhiễu và tập trung vào chủ đề
         prompt = f"""Bạn là hệ thống matching câu hỏi với dataset keywords.
 
 DANH SÁCH KEYWORDS CÓ SẴN (chọn MỘT hoặc NHIỀU):
@@ -547,9 +548,11 @@ CÂU HỎI NGƯỜI DÙNG (có thể không dấu/viết tắt/lỗi chính tả
 
 YÊU CẦU:
 1. Phân tích ý định của câu hỏi.
-2. Chọn MỘT hoặc NHIỀU keywords phù hợp nhất từ danh sách trên.
-3. NẾU không có keyword nào phù hợp, hãy trả về "KHÔNG_PHÙ_HỢP".
-4. CHỈ trả về danh sách keywords (mỗi keyword một dòng) hoặc "KHÔNG_PHÙ_HỢP". KHÔNG giải thích.
+2. BỎ QUA các từ chỉ hành động (như 'cho tôi xem', 'tôi muốn biết') hoặc loại media ('hình ảnh', 'video').
+3. TẬP TRUNG vào CHỦ ĐỀ CHÍNH của câu hỏi (ví dụ: "căn tin", "học phí").
+4. Chọn MỘT hoặc NHIỀU keywords phù hợp nhất từ danh sách trên dựa trên chủ đề chính.
+5. NẾU không có keyword nào phù hợp, hãy trả về "KHÔNG_PHÙ_HỢP".
+6. CHỈ trả về danh sách keywords (mỗi keyword một dòng) hoặc "KHÔNG_PHÙ_HỢP". KHÔNG giải thích.
 
 VÍ DỤ CHUẨN:
 - Input: "hoc phi truong"
@@ -562,11 +565,15 @@ VÍ DỤ CHUẨN:
   Output:
   học phí
   học bổng
+- Input: "cho tôi xem hình ảnh căn tin" (và "căn tin" có trong danh sách)
+  Output:
+  căn tin
 - Input: "nhà vệ sinh" (và "nhà vệ sinh" không có trong danh sách)
   Output:
   KHÔNG_PHÙ_HỢP
 
 Keywords phù hợp (mỗi keyword một dòng):"""
+        # --- 💡 KẾT THÚC THAY ĐỔI PROMPT ---
 
         response = client.chat.completions.create(
             model=config.GPT_MODEL,
