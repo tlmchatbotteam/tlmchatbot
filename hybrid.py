@@ -1,11 +1,3 @@
-# Optimized Rule-Based Chatbot with GPT Keyword-Only Integration
-# MAJOR UPDATE: GPT returns ONLY keywords from dataset (no free-form rewriting)
-# This ensures 100% accuracy - GPT can only return existing keywords
-
-# --- SỬA LỖI (User 29/10/2025):
-# 1. Sửa hàm detect_needs_normalization: len(t) <= 2 (thay vì 3) để tránh false positive
-# 2. Sửa hàm normalize_query_with_gpt_keyword_only: Cho phép GPT trả về "KHÔNG_PHÙ_HỢP"
-# 3. (User 29/10/2025 v2): Cho phép GPT trả về NHIỀU keywords
 
 import json
 import os
@@ -1318,7 +1310,7 @@ def get_answer_with_gpt_normalization(question: str, session_id: Optional[str] =
         # Nếu có lỗi, vẫn fallback về pipeline cũ
         return get_answer(question, skip_gpt=False)
 
-  
+
 
 # --- MAIN ANSWER FUNCTIONS ---
 def get_answer(question, skip_gpt: bool = False):
