@@ -536,42 +536,37 @@ def normalize_query_with_gpt_keywords(query: str, keywords_hash: str) -> Optiona
             logger.warning(f"[GPT Keywords] No candidates found for: {query}")
             return None
 
-        prompt = f"""Bạn là hệ thống matching câu hỏi người dùng với danh sách keywords có sẵn.
+        # PROMPT MỚI: Cho phép GPT trả về NHIỀU keywords
+        prompt = f"""Bạn là hệ thống matching câu hỏi với dataset keywords.
 
-        DANH SÁCH KEYWORDS CÓ SẴN (chọn MỘT hoặc NHIỀU):
-        {chr(10).join([f"- {kw}" for kw in candidates])}
+DANH SÁCH KEYWORDS CÓ SẴN (chọn MỘT hoặc NHIỀU):
+{chr(10).join([f"- {kw}" for kw in candidates])}
 
-        CÂU HỎI NGƯỜI DÙNG (có thể chứa yêu cầu xem hình ảnh, mô tả, hoặc lỗi chính tả):
-        "{query}"
+CÂU HỎI NGƯỜI DÙNG (có thể không dấu/viết tắt/lỗi chính tả):
+"{query}"
 
-        YÊU CẦU:
-        1. Bỏ qua các cụm dẫn nhập như "cho tôi xem", "xem hình", "hình ảnh của", "cho biết", "cho tôi biết về", v.v...
-           → Chỉ tập trung vào danh từ chính (ví dụ: “căn tin”, “thư viện”, “sân trường”, “hiệu trưởng”).
-        2. Chọn MỘT hoặc NHIỀU keywords phù hợp nhất từ danh sách trên.
-        3. Nếu người dùng yêu cầu "xem hình ảnh" hoặc "xem ảnh" của một đối tượng có trong danh sách, 
-           bạn vẫn phải chọn keyword tương ứng với đối tượng đó (VD: “căn tin”, “thư viện”).
-        4. Nếu không có keyword nào phù hợp, trả về "KHÔNG_PHÙ_HỢP".
-        5. CHỈ trả về danh sách keywords (mỗi keyword một dòng), KHÔNG giải thích, KHÔNG thêm ký hiệu.
+YÊU CẦU:
+1. Phân tích ý định của câu hỏi.
+2. Chọn MỘT hoặc NHIỀU keywords phù hợp nhất từ danh sách trên.
+3. NẾU không có keyword nào phù hợp, hãy trả về "KHÔNG_PHÙ_HỢP".
+4. CHỈ trả về danh sách keywords (mỗi keyword một dòng) hoặc "KHÔNG_PHÙ_HỢP". KHÔNG giải thích.
 
-        VÍ DỤ CHUẨN:
-        - Input: "cho tôi xem hình ảnh căn tin"
-          Output:
-          căn tin
-        - Input: "xem ảnh sân trường"
-          Output:
-          sân trường
-        - Input: "thông tin về học phí và học bổng"
-          Output:
-          học phí
-          học bổng
-        - Input: "hình ảnh hiệu trưởng"
-          Output:
-          hiệu trưởng
-        - Input: "nhà vệ sinh" (và từ này không có trong danh sách)
-          Output:
-          KHÔNG_PHÙ_HỢP
+VÍ DỤ CHUẨN:
+- Input: "hoc phi truong"
+  Output:
+  học phí
+- Input: "ts lop 10"
+  Output:
+  tuyển sinh lớp 10
+- Input: "hoc phi va hoc bong"
+  Output:
+  học phí
+  học bổng
+- Input: "nhà vệ sinh" (và "nhà vệ sinh" không có trong danh sách)
+  Output:
+  KHÔNG_PHÙ_HỢP
 
-        Keywords phù hợp (mỗi keyword một dòng):"""
+Keywords phù hợp (mỗi keyword một dòng):"""
 
         response = client.chat.completions.create(
             model=config.GPT_MODEL,
